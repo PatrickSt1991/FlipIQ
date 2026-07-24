@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +60,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun ScanScreen(
     onBarcodeScanned: (String) -> Unit,
     onOpenCollection: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
 
@@ -69,6 +71,9 @@ fun ScanScreen(
                 actions = {
                     IconButton(onClick = onOpenCollection) {
                         Icon(Icons.Default.Inventory2, contentDescription = "Collection")
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Tune, contentDescription = "Profit Mode settings")
                     }
                 },
             )

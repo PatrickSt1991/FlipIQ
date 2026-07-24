@@ -84,6 +84,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
 
+    // Settings persistence
+    implementation(libs.androidx.datastore.preferences)
+
     // Images
     implementation(libs.coil.compose)
 
