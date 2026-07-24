@@ -37,6 +37,11 @@ android {
         // Demo mode fills the engine with realistic mock data (eBay/PriceCharting) for exploration.
         // Off by default (honest: only real sources feed the engine); the debug build turns it on.
         buildConfigField("boolean", "DEMO_MODE", "false")
+
+        // eBay Browse API credentials (optional). Set ebay.clientId / ebay.clientSecret in
+        // local.properties (or EBAY_CLIENT_ID / EBAY_CLIENT_SECRET env). Blank → eBay links out.
+        buildConfigField("String", "EBAY_CLIENT_ID", "\"${secret("ebay.clientId", "EBAY_CLIENT_ID")}\"")
+        buildConfigField("String", "EBAY_CLIENT_SECRET", "\"${secret("ebay.clientSecret", "EBAY_CLIENT_SECRET")}\"")
     }
 
     // Release signing is configured only when a keystore is supplied (via local.properties or CI

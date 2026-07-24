@@ -17,6 +17,9 @@ import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
 import nl.madebypatrick.flipiq.data.source.cex.CexApi
 import nl.madebypatrick.flipiq.data.source.cex.CexSource
+import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
+import nl.madebypatrick.flipiq.data.source.ebay.EbayAuthenticator
+import nl.madebypatrick.flipiq.data.source.ebay.EbaySource
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
@@ -54,6 +57,7 @@ object AppModule {
     fun provideSources(
         priceChartingApi: PriceChartingApi,
         cexApi: CexApi,
+        ebayApi: EbayApi,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
@@ -64,8 +68,13 @@ object AppModule {
             settingsRepository.priceChartingToken.first().ifBlank { BuildConfig.PRICECHARTING_TOKEN }
         }
 
-        val ebay: MarketplaceSource =
-            if (demo) EbaySoldSource() else ShortcutOnlySource("ebay", "eBay Sold", MarketplaceUrls::ebaySold)
+        // eBay: mock in demo; live Browse API when credentials are set; otherwise a search link.
+        val ebayAuth = EbayAuthenticator(ebayApi, BuildConfig.EBAY_CLIENT_ID, BuildConfig.EBAY_CLIENT_SECRET)
+        val ebay: MarketplaceSource = when {
+            demo -> EbaySoldSource()
+            ebayAuth.hasCredentials -> EbaySource(ebayApi, ebayAuth)
+            else -> ShortcutOnlySource("ebay", "eBay Sold", MarketplaceUrls::ebaySold)
+        }
         val priceCharting: MarketplaceSource =
             if (demo) PriceChartingSource() else LivePriceChartingSource(priceChartingApi, tokenProvider, currencyConverter)
 
