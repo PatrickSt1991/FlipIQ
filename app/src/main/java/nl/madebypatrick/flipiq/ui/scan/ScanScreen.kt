@@ -117,7 +117,7 @@ fun ScanScreen(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Point the camera at a barcode",
+                    "Point at a barcode and we'll do the math ✨",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             } else {
@@ -147,7 +147,7 @@ private fun CameraPermissionPrompt(onRequest: () -> Unit) {
                 modifier = Modifier.height(48.dp),
             )
             Text(
-                "Camera access lets you scan barcodes instantly.",
+                "Turn on the camera and start scanning in a tap.",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge,
             )

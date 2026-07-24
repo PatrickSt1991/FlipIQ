@@ -33,6 +33,25 @@ val DealTier.color: Color
         DealTier.SKIP -> ScoreRed
     }
 
+/** Friendly, human headline for the verdict card. */
+val DealTier.headline: String
+    get() = when (this) {
+        DealTier.BUY_IMMEDIATELY -> "Grab it!"
+        DealTier.GREAT_DEAL -> "Great find"
+        DealTier.FAIR_PRICE -> "Fair enough"
+        DealTier.LOW_PROFIT -> "A bit tight"
+        DealTier.SKIP -> "Maybe skip this one"
+    }
+
+val DealTier.emoji: String
+    get() = when (this) {
+        DealTier.BUY_IMMEDIATELY -> "🤩"
+        DealTier.GREAT_DEAL -> "😄"
+        DealTier.FAIR_PRICE -> "🙂"
+        DealTier.LOW_PROFIT -> "😐"
+        DealTier.SKIP -> "🙅"
+    }
+
 val SellSpeed.label: String
     get() = when (this) {
         SellSpeed.VERY_FAST -> "Very Fast"

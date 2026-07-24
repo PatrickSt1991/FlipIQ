@@ -176,7 +176,7 @@ private fun LoadingState() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CircularProgressIndicator()
         Spacer(Modifier.height(16.dp))
-        Text("Comparing marketplaces…", style = MaterialTheme.typography.bodyMedium)
+        Text("Checking the marketplaces… 🔍", style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -262,6 +262,7 @@ private fun PriceInputDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun VerdictCard(rec: FlipRecommendation) {
     val tierColor = rec.dealScore.tier.color
@@ -272,33 +273,35 @@ private fun VerdictCard(rec: FlipRecommendation) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            Text(rec.dealScore.tier.emoji, fontSize = 44.sp)
             Text(
-                "${rec.dealScore.value}",
-                fontSize = 56.sp,
+                rec.dealScore.tier.headline,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = tierColor,
             )
-            Text("Deal Score · out of 100", style = MaterialTheme.typography.labelMedium)
             Text(
-                rec.dealScore.tier.label,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = tierColor,
+                "Deal Score ${rec.dealScore.value}/100",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
             )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(Modifier.height(12.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 AssistChip(onClick = {}, label = { Text("${rec.sellSpeed.emoji} ${rec.sellSpeed.label}") })
-                AssistChip(onClick = {}, label = { Text("Confidence ${rec.confidence}%") })
+                AssistChip(onClick = {}, label = { Text("👍 ${rec.confidence}% sure") })
                 AssistChip(onClick = {}, label = { Text(rec.trend.label) })
             }
             if (!rec.viable) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    "Doesn't meet your Profit Mode targets",
+                    "Heads up — doesn't meet your Profit Mode targets",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.error,
                 )
