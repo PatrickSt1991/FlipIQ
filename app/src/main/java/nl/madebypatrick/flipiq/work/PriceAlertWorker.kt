@@ -6,9 +6,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import nl.madebypatrick.flipiq.data.repository.AlertRepository
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
+import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.domain.PriceAlertEvaluator
+import nl.madebypatrick.flipiq.domain.model.ProfitSettings
 import nl.madebypatrick.flipiq.notifications.AlertNotifier
 
 /**
@@ -22,16 +25,19 @@ class PriceAlertWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val alertRepository: AlertRepository,
     private val priceRepository: PriceRepository,
+    private val settingsRepository: SettingsRepository,
     private val notifier: AlertNotifier,
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
         val alerts = runCatching { alertRepository.activeAlertsOnce() }.getOrElse { return Result.retry() }
         val now = System.currentTimeMillis()
+        // Re-check against the user's own Profit Mode settings, not defaults.
+        val settings = runCatching { settingsRepository.settings.first() }.getOrDefault(ProfitSettings.DEFAULT)
 
         for (alert in alerts) {
             runCatching {
-                val analysis = priceRepository.analyze(alert.barcode)
+                val analysis = priceRepository.analyze(alert.barcode, settings = settings)
                 if (PriceAlertEvaluator.shouldNotify(alert, analysis.recommendation, now)) {
                     val best = analysis.recommendation.bestBuyPrice ?: return@runCatching
                     notifier.notifyPriceHit(alert.id, alert.title, alert.targetPrice, best)
