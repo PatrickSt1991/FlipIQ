@@ -1,17 +1,40 @@
+<!-- Adaptive-icon foreground: the mark's content (no tile) scaled into the 108dp safe zone.
+     The green tile is supplied by the adaptive-icon background layer. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Simplified barcode glyph centred in the adaptive-icon safe zone. -->
-    <group android:translateX="30" android:translateY="38">
-        <path android:fillColor="#FFFFFF" android:pathData="M0,0 h4 v32 h-4 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M8,0 h2 v32 h-2 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M13,0 h5 v32 h-5 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M21,0 h2 v32 h-2 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M26,0 h3 v32 h-3 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M32,0 h2 v32 h-2 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M37,0 h4 v32 h-4 z" />
-        <path android:fillColor="#FFFFFF" android:pathData="M44,0 h2 v32 h-2 z" />
+
+    <!-- Map the mark's 200-space content (x/y 50..150) into the 108dp safe zone (18..90). -->
+    <group
+        android:scaleX="0.72"
+        android:scaleY="0.72"
+        android:translateX="-18"
+        android:translateY="-18">
+
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M74,50 H59 Q50,50 50,59 V74 M126,50 H141 Q150,50 150,59 V74 M50,126 V141 Q50,150 59,150 H74 M126,150 H141 Q150,150 150,141 V126" />
+
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M66,74 h7 v58 h-7 z M78,74 h4 v58 h-4 z M88,74 h10 v58 h-10 z M104,74 h5 v58 h-5 z M115,74 h8 v58 h-8 z M129,74 h4 v58 h-4 z M139,74 h7 v58 h-7 z" />
+
+        <path
+            android:strokeColor="#0F5132"
+            android:strokeWidth="13"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M65,130 L88,112 L106,121 L136,88 M123,88 H136 V101" />
+        <path
+            android:strokeColor="#F9A825"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M65,130 L88,112 L106,121 L136,88 M123,88 H136 V101" />
     </group>
 </vector>

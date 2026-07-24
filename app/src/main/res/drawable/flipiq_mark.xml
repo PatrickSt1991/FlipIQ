@@ -1,0 +1,39 @@
+<!-- FlipIQ app mark: dark-green scanner tile with white barcode + amber rising arrow.
+     Converted from art/FlipIQ-mark.svg. Self-contained, so it reads on any background. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <path
+        android:fillColor="#0F5132"
+        android:pathData="M58,20 L142,20 A38,38 0 0 1 180,58 L180,142 A38,38 0 0 1 142,180 L58,180 A38,38 0 0 1 20,142 L20,58 A38,38 0 0 1 58,20 Z" />
+
+    <!-- Scanner corners -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M74,50 H59 Q50,50 50,59 V74 M126,50 H141 Q150,50 150,59 V74 M50,126 V141 Q50,150 59,150 H74 M126,150 H141 Q150,150 150,141 V126" />
+
+    <!-- Barcode -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M66,74 h7 v58 h-7 z M78,74 h4 v58 h-4 z M88,74 h10 v58 h-10 z M104,74 h5 v58 h-5 z M115,74 h8 v58 h-8 z M129,74 h4 v58 h-4 z M139,74 h7 v58 h-7 z" />
+
+    <!-- Rising deal/value arrow (green outline under amber) -->
+    <path
+        android:strokeColor="#0F5132"
+        android:strokeWidth="13"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M65,130 L88,112 L106,121 L136,88 M123,88 H136 V101" />
+    <path
+        android:strokeColor="#F9A825"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M65,130 L88,112 L106,121 L136,88 M123,88 H136 V101" />
+</vector>

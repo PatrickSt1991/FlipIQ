@@ -1,13 +1,18 @@
-# FlipIQ
+<p align="center">
+  <img src="art/FlipIQ-logo.svg" alt="FlipIQ" width="380">
+</p>
 
-> 📦 Free and open-source barcode scanner and buying assistant for resellers.
->
-> Instantly estimate the value of games, consoles, DVDs, Blu-rays, LEGO, books, collectibles and electronics by comparing multiple marketplaces.
+<p align="center">
+  📦 Free and open-source barcode scanner and buying assistant for resellers.<br>
+  Instantly estimate the value of games, consoles, DVDs, Blu-rays, LEGO, books, collectibles and electronics by comparing multiple marketplaces.
+</p>
 
-![License](https://img.shields.io/badge/license-MIT-green)
-![Platform](https://img.shields.io/badge/platform-Android-brightgreen)
-![Kotlin](https://img.shields.io/badge/Kotlin-100%25-purple)
-![Status](https://img.shields.io/badge/status-Planning-orange)
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/platform-Android-brightgreen" alt="Platform">
+  <img src="https://img.shields.io/badge/Kotlin-100%25-purple" alt="Kotlin">
+  <img src="https://img.shields.io/badge/status-alpha-orange" alt="Status">
+</p>
 
 ---
 

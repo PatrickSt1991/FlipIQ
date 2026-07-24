@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">FlipIQ app mark</title>
+  <desc id="desc">A dark green scanner mark with white barcode bars and an amber rising arrow.</desc>
+  <rect x="20" y="20" width="160" height="160" rx="38" fill="#0F5132"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M74 50H59Q50 50 50 59V74"/>
+    <path d="M126 50H141Q150 50 150 59V74"/>
+    <path d="M50 126V141Q50 150 59 150H74"/>
+    <path d="M126 150H141Q150 150 150 141V126"/>
+  </g>
+  <g fill="#FFFFFF">
+    <rect x="66" y="74" width="7" height="58" rx="1.5"/>
+    <rect x="78" y="74" width="4" height="58" rx="1"/>
+    <rect x="88" y="74" width="10" height="58" rx="1.5"/>
+    <rect x="104" y="74" width="5" height="58" rx="1"/>
+    <rect x="115" y="74" width="8" height="58" rx="1.5"/>
+    <rect x="129" y="74" width="4" height="58" rx="1"/>
+    <rect x="139" y="74" width="7" height="58" rx="1.5"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M65 130L88 112L106 121L136 88M123 88H136V101" stroke="#0F5132" stroke-width="13"/>
+    <path d="M65 130L88 112L106 121L136 88M123 88H136V101" stroke="#F9A825" stroke-width="6"/>
+  </g>
+</svg>
