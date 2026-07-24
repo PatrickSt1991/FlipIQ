@@ -60,8 +60,8 @@ android {
 
     buildTypes {
         debug {
-            // Debug builds are for exploring the app, so demo data is on.
-            buildConfigField("boolean", "DEMO_MODE", "true")
+            // Mock data disabled — debug builds use the real sources too.
+            buildConfigField("boolean", "DEMO_MODE", "false")
         }
         release {
             isMinifyEnabled = true
