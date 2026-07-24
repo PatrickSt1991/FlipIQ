@@ -19,7 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,11 +31,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.FlipRecommendation
+import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +66,16 @@ fun ResultScreen(
     viewModel: ResultViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
     val title = (state as? ResultUiState.Success)?.analysis?.product?.title ?: "Analyzing…"
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(message) {
+        message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.messageShown()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -68,6 +88,7 @@ fun ResultScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Box(
             modifier = Modifier
@@ -82,6 +103,7 @@ fun ResultScreen(
                     analysis = s.analysis,
                     onConditionChange = viewModel::setCondition,
                     onCompletenessChange = viewModel::setCompleteness,
+                    onMarkBought = viewModel::markAsBought,
                 )
             }
         }
@@ -102,8 +124,11 @@ private fun AnalysisContent(
     analysis: ScanAnalysis,
     onConditionChange: (Condition) -> Unit,
     onCompletenessChange: (Completeness) -> Unit,
+    onMarkBought: (Money?) -> Unit,
 ) {
     val rec = analysis.recommendation
+    var showBuyDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,6 +137,10 @@ private fun AnalysisContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         VerdictCard(rec)
+        Button(
+            onClick = { showBuyDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("I bought this") }
         ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
         PriceSummaryCard(rec)
         EstimateCard(rec)
@@ -120,6 +149,52 @@ private fun AnalysisContent(
         MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }
+
+    if (showBuyDialog) {
+        BuyPriceDialog(
+            suggested = rec.recommendedBuyPrice,
+            onConfirm = { price ->
+                showBuyDialog = false
+                onMarkBought(price)
+            },
+            onDismiss = { showBuyDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun BuyPriceDialog(
+    suggested: Money,
+    onConfirm: (Money?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember { mutableStateOf("%.2f".format(suggested.euros)) }
+    val parsed = text.replace(',', '.').toDoubleOrNull()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add to inventory") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("What did you pay for it?")
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Buy price (€)") },
+                    singleLine = true,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(parsed?.let { Money.ofEuros(it) }) },
+                enabled = parsed != null,
+            ) { Text("Add") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
 }
 
 @Composable
