@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import nl.madebypatrick.flipiq.data.db.FlipIQDatabase
 import nl.madebypatrick.flipiq.data.db.InventoryDao
+import nl.madebypatrick.flipiq.data.db.SavedItemDao
 import nl.madebypatrick.flipiq.data.db.ScanDao
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import javax.inject.Singleton
@@ -31,9 +32,13 @@ object DatabaseModule {
     fun provideInventoryDao(db: FlipIQDatabase): InventoryDao = db.inventoryDao()
 
     @Provides
+    fun provideSavedItemDao(db: FlipIQDatabase): SavedItemDao = db.savedItemDao()
+
+    @Provides
     @Singleton
     fun provideCollectionRepository(
         scanDao: ScanDao,
         inventoryDao: InventoryDao,
-    ): CollectionRepository = CollectionRepository(scanDao, inventoryDao)
+        savedItemDao: SavedItemDao,
+    ): CollectionRepository = CollectionRepository(scanDao, inventoryDao, savedItemDao)
 }

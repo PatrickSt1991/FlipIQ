@@ -3,6 +3,18 @@ package nl.madebypatrick.flipiq.domain.model
 /** Where an inventory item is in its flip lifecycle. */
 enum class InventoryStatus { IN_STOCK, LISTED, SOLD }
 
+/** The two saved-item lists from the README's Collection: things you like, and things you want. */
+enum class SavedList { FAVORITE, WISHLIST }
+
+/** An item the user saved to their Favorites or Wishlist. */
+data class SavedItem(
+    val id: Long = 0,
+    val barcode: String,
+    val title: String,
+    val list: SavedList,
+    val savedAt: Long,
+)
+
 /** A single past scan, kept as history. */
 data class ScanRecord(
     val id: Long = 0,

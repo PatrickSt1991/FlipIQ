@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,8 +20,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -39,6 +40,8 @@ import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.SavedItem
+import nl.madebypatrick.flipiq.domain.model.SavedList
 import nl.madebypatrick.flipiq.domain.model.ScanRecord
 import nl.madebypatrick.flipiq.ui.result.color
 import nl.madebypatrick.flipiq.ui.result.label
@@ -52,9 +55,12 @@ fun CollectionScreen(
     val history by viewModel.history.collectAsStateWithLifecycle()
     val inventory by viewModel.inventory.collectAsStateWithLifecycle()
     val summary by viewModel.summary.collectAsStateWithLifecycle()
+    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
+    val wishlist by viewModel.wishlist.collectAsStateWithLifecycle()
 
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
+    val tabs = listOf("Inventory", "Favorites", "Wishlist", "History")
 
     Scaffold(
         topBar = {
@@ -70,12 +76,19 @@ fun CollectionScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             ProfitSummaryCard(summary)
-            TabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("Inventory") })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("History") })
+            ScrollableTabRow(selectedTabIndex = tab, edgePadding = 0.dp) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(selected = tab == index, onClick = { tab = index }, text = { Text(title) })
+                }
             }
             when (tab) {
                 0 -> InventoryList(inventory, onSellClick = { sellTarget = it })
+                1 -> SavedItemsList(favorites, "No favorites yet.\nTap the heart on a result to save one.") {
+                    viewModel.removeSaved(it.barcode, SavedList.FAVORITE)
+                }
+                2 -> SavedItemsList(wishlist, "Your wishlist is empty.\nTap the bookmark on a result to add one.") {
+                    viewModel.removeSaved(it.barcode, SavedList.WISHLIST)
+                }
                 else -> HistoryList(history)
             }
         }
@@ -147,6 +160,38 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { onSellClick(item) }) { Text("Mark sold") }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SavedItemsList(
+    items: List<SavedItem>,
+    emptyMessage: String,
+    onRemove: (SavedItem) -> Unit,
+) {
+    if (items.isEmpty()) {
+        EmptyState(emptyMessage)
+        return
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(items, key = { it.id }) { item ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(item.title, fontWeight = FontWeight.Medium, maxLines = 1)
+                    IconButton(onClick = { onRemove(item) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Remove")
                     }
                 }
             }

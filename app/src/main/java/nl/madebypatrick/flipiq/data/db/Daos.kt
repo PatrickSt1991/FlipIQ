@@ -19,6 +19,21 @@ interface ScanDao {
 }
 
 @Dao
+interface SavedItemDao {
+    @Insert
+    suspend fun insert(item: SavedItemEntity): Long
+
+    @Query("SELECT * FROM saved_items WHERE list = :list ORDER BY savedAt DESC")
+    fun byList(list: String): Flow<List<SavedItemEntity>>
+
+    @Query("SELECT COUNT(*) > 0 FROM saved_items WHERE barcode = :barcode AND list = :list")
+    fun isSaved(barcode: String, list: String): Flow<Boolean>
+
+    @Query("DELETE FROM saved_items WHERE barcode = :barcode AND list = :list")
+    suspend fun remove(barcode: String, list: String)
+}
+
+@Dao
 interface InventoryDao {
     @Insert
     suspend fun insert(item: InventoryEntity): Long

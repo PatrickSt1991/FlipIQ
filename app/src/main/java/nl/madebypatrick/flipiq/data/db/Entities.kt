@@ -22,6 +22,15 @@ data class ScanEntity(
     val scannedAt: Long,
 )
 
+@Entity(tableName = "saved_items")
+data class SavedItemEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val barcode: String,
+    val title: String,
+    val list: String,
+    val savedAt: Long,
+)
+
 @Entity(tableName = "inventory")
 data class InventoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
