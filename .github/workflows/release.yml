@@ -3,10 +3,16 @@ name: Release APK
 # ─────────────────────────────────────────────────────────────────────────────
 # DISABLED FOR NOW.
 #
-# This workflow only has a manual (`workflow_dispatch`) trigger, so it never runs
-# on its own. To enable automatic releases on version tags later, uncomment the
-# `push: tags` block below. It can also be turned off entirely in the repo's
-# Actions tab (⋯ → "Disable workflow").
+# Manual trigger only (`workflow_dispatch`), so it never runs on its own. Uncomment
+# the `push: tags` block to auto-release on version tags, or disable it entirely
+# from the Actions tab.
+#
+# Signing: if the repo secrets below are set, the release APK + AAB are signed with
+# your upload key; otherwise an unsigned release APK is produced. Required secrets:
+#   KEYSTORE_BASE64     base64 of your .jks  (base64 -w0 upload.jks)
+#   KEYSTORE_PASSWORD   keystore password
+#   KEY_ALIAS           key alias
+#   KEY_PASSWORD        key password
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -27,6 +33,8 @@ permissions:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,21 +51,41 @@ jobs:
       - name: Install SDK packages
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Decode keystore
+        if: env.KEYSTORE_BASE64 != ''
+        run: echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
 
-      - name: Stage APK
+      - name: Build signed release (APK + AAB)
+        if: env.KEYSTORE_BASE64 != ''
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease :app:bundleRelease --no-daemon
+
+      - name: Build unsigned release APK (no keystore secret)
+        if: env.KEYSTORE_BASE64 == ''
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Stage artifacts
         id: stage
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk "dist/flipiq-${TAG}.apk"
+          for f in app/build/outputs/apk/release/*.apk; do
+            [ -e "$f" ] && cp "$f" "dist/flipiq-${TAG}.apk"
+          done
+          for f in app/build/outputs/bundle/release/*.aab; do
+            [ -e "$f" ] && cp "$f" "dist/flipiq-${TAG}.aab"
+          done
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          ls -l dist
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.stage.outputs.tag }}
           name: FlipIQ ${{ steps.stage.outputs.tag }}
-          files: dist/*.apk
+          files: dist/*
           generate_release_notes: true

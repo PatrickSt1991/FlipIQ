@@ -36,6 +36,20 @@ android {
         buildConfigField("String", "PRICECHARTING_TOKEN", "\"${secret("pricecharting.token", "PRICECHARTING_TOKEN")}\"")
     }
 
+    // Release signing is configured only when a keystore is supplied (via local.properties or CI
+    // env/secrets); otherwise release builds stay unsigned so a keyless `assembleRelease` still runs.
+    val releaseKeystore = secret("keystore.file", "KEYSTORE_FILE")
+    signingConfigs {
+        create("release") {
+            if (releaseKeystore.isNotBlank()) {
+                storeFile = file(releaseKeystore)
+                storePassword = secret("keystore.password", "KEYSTORE_PASSWORD")
+                keyAlias = secret("key.alias", "KEY_ALIAS")
+                keyPassword = secret("key.password", "KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -43,6 +57,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = if (releaseKeystore.isNotBlank()) {
+                signingConfigs.getByName("release")
+            } else {
+                null
+            }
         }
     }
 
