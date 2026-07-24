@@ -1,7 +1,11 @@
 package nl.madebypatrick.flipiq.ui.result
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +27,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -73,6 +79,7 @@ fun ResultScreen(
     val message by viewModel.message.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val isWishlisted by viewModel.isWishlisted.collectAsStateWithLifecycle()
+    val hasAlert by viewModel.hasAlert.collectAsStateWithLifecycle()
     val title = (state as? ResultUiState.Success)?.analysis?.product?.title ?: "Analyzing…"
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,6 +88,18 @@ fun ResultScreen(
             snackbarHostState.showSnackbar(it)
             viewModel.messageShown()
         }
+    }
+
+    var showAlertDialog by remember { mutableStateOf(false) }
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { /* Alert is stored regardless; notifications simply stay silent until granted. */ }
+
+    fun openAlertDialog() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        showAlertDialog = true
     }
 
     Scaffold(
@@ -93,6 +112,12 @@ fun ResultScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { openAlertDialog() }) {
+                        Icon(
+                            if (hasAlert) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
+                            contentDescription = if (hasAlert) "Price alert set" else "Set price alert",
+                        )
+                    }
                     IconButton(onClick = viewModel::toggleWishlist) {
                         Icon(
                             if (isWishlisted) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
@@ -127,6 +152,22 @@ fun ResultScreen(
                 )
             }
         }
+    }
+
+    if (showAlertDialog) {
+        val rec = (state as? ResultUiState.Success)?.analysis?.recommendation
+        val suggested = rec?.bestBuyPrice ?: rec?.recommendedBuyPrice ?: Money.ofEuros(10.0)
+        PriceInputDialog(
+            titleText = "Alert me when it drops to",
+            label = "Target price (€)",
+            confirmText = "Set alert",
+            suggested = suggested,
+            onConfirm = { price ->
+                showAlertDialog = false
+                price?.let { viewModel.setPriceAlert(it) }
+            },
+            onDismiss = { showAlertDialog = false },
+        )
     }
 }
 
@@ -171,7 +212,10 @@ private fun AnalysisContent(
     }
 
     if (showBuyDialog) {
-        BuyPriceDialog(
+        PriceInputDialog(
+            titleText = "Add to inventory",
+            label = "Buy price (€)",
+            confirmText = "Add",
             suggested = rec.recommendedBuyPrice,
             onConfirm = { price ->
                 showBuyDialog = false
@@ -182,8 +226,12 @@ private fun AnalysisContent(
     }
 }
 
+/** Reusable "enter a euro price" dialog, pre-filled with a suggestion. */
 @Composable
-private fun BuyPriceDialog(
+private fun PriceInputDialog(
+    titleText: String,
+    label: String,
+    confirmText: String,
     suggested: Money,
     onConfirm: (Money?) -> Unit,
     onDismiss: () -> Unit,
@@ -193,23 +241,20 @@ private fun BuyPriceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add to inventory") },
+        title = { Text(titleText) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("What did you pay for it?")
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("Buy price (€)") },
-                    singleLine = true,
-                )
-            }
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(label) },
+                singleLine = true,
+            )
         },
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(parsed?.let { Money.ofEuros(it) }) },
                 enabled = parsed != null,
-            ) { Text("Add") }
+            ) { Text(confirmText) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }

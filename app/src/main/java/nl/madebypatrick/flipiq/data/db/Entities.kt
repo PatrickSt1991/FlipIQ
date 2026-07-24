@@ -31,6 +31,17 @@ data class SavedItemEntity(
     val savedAt: Long,
 )
 
+@Entity(tableName = "price_alerts")
+data class PriceAlertEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val barcode: String,
+    val title: String,
+    val targetPriceCents: Long,
+    val active: Boolean,
+    val createdAt: Long,
+    val lastNotifiedAt: Long?,
+)
+
 @Entity(tableName = "inventory")
 data class InventoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

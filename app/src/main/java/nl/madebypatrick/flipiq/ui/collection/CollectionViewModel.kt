@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.repository.AlertRepository
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.domain.export.CsvFormatter
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
     private val collection: CollectionRepository,
+    private val alertRepository: AlertRepository,
 ) : ViewModel() {
 
     val history = collection.scanHistory
@@ -33,12 +35,19 @@ class CollectionViewModel @Inject constructor(
     val wishlist = collection.savedItems(SavedList.WISHLIST)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val alerts = alertRepository.alerts
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun markSold(id: Long, soldPrice: Money) {
         viewModelScope.launch { runCatching { collection.markSold(id, soldPrice) } }
     }
 
     fun removeSaved(barcode: String, list: SavedList) {
         viewModelScope.launch { runCatching { collection.setSaved(barcode, "", list, saved = false) } }
+    }
+
+    fun removeAlert(id: Long) {
+        viewModelScope.launch { runCatching { alertRepository.delete(id) } }
     }
 
     fun inventoryCsv(): String = CsvFormatter.inventoryCsv(inventory.value)

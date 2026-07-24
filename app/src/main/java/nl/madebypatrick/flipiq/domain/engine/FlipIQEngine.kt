@@ -69,6 +69,7 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
             stats = stats,
             estimatedResale = estimatedResale,
             netResale = netResale,
+            bestBuyPrice = lowestActive,
             recommendedBuyPrice = recommendedBuy,
             expectedProfit = expectedProfit,
             roi = roi,
