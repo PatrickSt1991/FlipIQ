@@ -6,7 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
-import nl.madebypatrick.flipiq.data.source.mock.CexSource
+import nl.madebypatrick.flipiq.data.source.cex.CexApi
+import nl.madebypatrick.flipiq.data.source.cex.CexSource
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.MarktplaatsSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
@@ -33,15 +34,16 @@ object AppModule {
     fun provideCurrencyConverter(): CurrencyConverter = StaticCurrencyConverter()
 
     /**
-     * The active set of marketplace sources. PriceCharting is the live one when a token is
-     * configured, otherwise its mock stands in; the rest are still mock-backed. Adding another real
-     * source later is just a swap in this list — nothing downstream changes.
+     * The active set of marketplace sources. CeX is live (keyless). PriceCharting is live when a
+     * token is configured, otherwise its mock stands in; the rest are still mock-backed. Adding
+     * another real source later is just a swap in this list — nothing downstream changes.
      */
     @Provides
     @Singleton
     fun provideSources(
         priceChartingApi: PriceChartingApi,
         @Named(NetworkModule.PRICECHARTING_TOKEN) priceChartingToken: String,
+        cexApi: CexApi,
         currencyConverter: CurrencyConverter,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
         val priceCharting: MarketplaceSource =
@@ -53,7 +55,7 @@ object AppModule {
         return listOf(
             EbaySoldSource(),
             priceCharting,
-            CexSource(),
+            CexSource(cexApi, currencyConverter),
             VintedSource(),
             MarktplaatsSource(),
         )
