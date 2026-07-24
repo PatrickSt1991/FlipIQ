@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
+import nl.madebypatrick.flipiq.data.settings.ThemeRepository
 import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "profit_mode")
@@ -27,4 +28,9 @@ object SettingsModule {
     @Singleton
     fun provideSettingsRepository(dataStore: DataStore<Preferences>): SettingsRepository =
         SettingsRepository(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideThemeRepository(dataStore: DataStore<Preferences>): ThemeRepository =
+        ThemeRepository(dataStore)
 }

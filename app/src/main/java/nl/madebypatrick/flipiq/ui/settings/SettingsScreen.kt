@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
+import nl.madebypatrick.flipiq.domain.model.ThemeMode
 
 /**
  * Profit Mode configuration screen. Edits a local working copy of [ProfitSettings] and persists it
@@ -52,6 +56,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val saved by viewModel.settings.collectAsStateWithLifecycle()
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
 
@@ -97,6 +102,13 @@ fun SettingsScreen(
                 ToggleRow("Ignore incomplete items", edited.ignoreIncomplete) { edited = edited.copy(ignoreIncomplete = it) }
                 ToggleRow("Ignore damaged items", edited.ignoreDamaged) { edited = edited.copy(ignoreDamaged = it) }
                 ToggleRow("Prefer fast sellers", edited.preferFastSellers) { edited = edited.copy(preferFastSellers = it) }
+            }
+
+            // Appearance is applied immediately (no Save needed).
+            SettingsSection("Appearance") {
+                Text("Theme", style = MaterialTheme.typography.labelLarge)
+                ThemeModeSelector(theme.mode, viewModel::setThemeMode)
+                ToggleRow("Material You colours", theme.dynamicColor, viewModel::setDynamicColor)
             }
 
             Button(
@@ -170,6 +182,25 @@ private fun IntField(label: String, value: Int, onChange: (Int) -> Unit) {
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun ThemeModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
+    val labels = mapOf(
+        ThemeMode.SYSTEM to "System",
+        ThemeMode.LIGHT to "Light",
+        ThemeMode.DARK to "Dark",
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ThemeMode.entries.forEach { mode ->
+            FilterChip(
+                selected = mode == selected,
+                onClick = { onSelect(mode) },
+                label = { Text(labels.getValue(mode)) },
+            )
+        }
+    }
 }
 
 @Composable
