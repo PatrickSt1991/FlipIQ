@@ -7,14 +7,13 @@ import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.SourceResult
 
 /**
- * Mock marketplace sources backed by [MockCatalog]. Each mimics the character of the real
- * marketplace it stands in for. Swapping any one for a real API/scraper is a drop-in replacement —
- * nothing downstream cares where the listings came from.
+ * Mock marketplace sources backed by [MockCatalog], used **only in demo mode** (debug builds) so the
+ * app is explorable with realistic data. Release builds feed the engine from real sources only.
  *
  * The small [delay] on each simulates network latency so loading states are visible while developing.
  */
 
-/** eBay — the deepest source of *sold* comps. */
+/** eBay — the deepest source of *sold* comps, plus a couple of active "buy it now" listings. */
 class EbaySoldSource : MarketplaceSource {
     override val id = "ebay"
     override val displayName = "eBay Sold"
@@ -23,7 +22,8 @@ class EbaySoldSource : MarketplaceSource {
         val product = MockCatalog.productFor(query.barcode)
         return SourceResult(
             sourceId = id,
-            listings = MockCatalog.soldListings(product, id, max = 20),
+            listings = MockCatalog.soldListings(product, id, max = 20) +
+                MockCatalog.activeListings(product, id, count = 2, discount = 0.25),
             productTitle = product.title,
             category = product.category,
             imageUrl = product.imageUrl,
@@ -47,54 +47,6 @@ class PriceChartingSource : MarketplaceSource {
             category = product.category,
             available = relevant,
             shortcutUrl = MarketplaceUrls.priceCharting(product.title),
-        )
-    }
-}
-
-/** CeX — a guaranteed buy price (their cage price), modelled as one active/buyable listing. */
-class CexSource : MarketplaceSource {
-    override val id = "cex"
-    override val displayName = "CeX"
-    override suspend fun lookup(query: ProductQuery): SourceResult {
-        delay(150)
-        val product = MockCatalog.productFor(query.barcode)
-        return SourceResult(
-            sourceId = id,
-            listings = MockCatalog.activeListings(product, id, count = 1, discount = 0.10),
-            productTitle = product.title,
-            shortcutUrl = MarketplaceUrls.cex(product.title),
-        )
-    }
-}
-
-/** Vinted — active peer listings, often the cheapest buy opportunities. */
-class VintedSource : MarketplaceSource {
-    override val id = "vinted"
-    override val displayName = "Vinted"
-    override suspend fun lookup(query: ProductQuery): SourceResult {
-        delay(200)
-        val product = MockCatalog.productFor(query.barcode)
-        return SourceResult(
-            sourceId = id,
-            listings = MockCatalog.activeListings(product, id, count = 3, discount = 0.30),
-            productTitle = product.title,
-            shortcutUrl = MarketplaceUrls.vinted(product.title),
-        )
-    }
-}
-
-/** Marktplaats — active local listings. */
-class MarktplaatsSource : MarketplaceSource {
-    override val id = "marktplaats"
-    override val displayName = "Marktplaats"
-    override suspend fun lookup(query: ProductQuery): SourceResult {
-        delay(200)
-        val product = MockCatalog.productFor(query.barcode)
-        return SourceResult(
-            sourceId = id,
-            listings = MockCatalog.activeListings(product, id, count = 2, discount = 0.25),
-            productTitle = product.title,
-            shortcutUrl = MarketplaceUrls.marktplaats(product.title),
         )
     }
 }

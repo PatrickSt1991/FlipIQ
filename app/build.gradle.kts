@@ -31,9 +31,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        // Empty by default → PriceCharting falls back to mock data. Set `pricecharting.token`
-        // in local.properties (or the PRICECHARTING_TOKEN env var) to enable the live source.
+        // Build-time PriceCharting token (optional). Users can also set one at runtime in Settings.
         buildConfigField("String", "PRICECHARTING_TOKEN", "\"${secret("pricecharting.token", "PRICECHARTING_TOKEN")}\"")
+
+        // Demo mode fills the engine with realistic mock data (eBay/PriceCharting) for exploration.
+        // Off by default (honest: only real sources feed the engine); the debug build turns it on.
+        buildConfigField("boolean", "DEMO_MODE", "false")
     }
 
     // Release signing is configured only when a keystore is supplied (via local.properties or CI
@@ -51,6 +54,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Debug builds are for exploring the app, so demo data is on.
+            buildConfigField("boolean", "DEMO_MODE", "true")
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(

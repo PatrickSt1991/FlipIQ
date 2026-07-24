@@ -5,6 +5,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
+import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
 import nl.madebypatrick.flipiq.data.source.SourceResult
 import nl.madebypatrick.flipiq.domain.engine.FlipIQEngine
 import nl.madebypatrick.flipiq.domain.model.Completeness
@@ -45,12 +46,16 @@ class PriceRepository(
             .awaitAll()
             .filterNotNull()
 
+        val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle }
         val product = ProductInfo(
             barcode = barcode,
-            title = results.firstNotNullOfOrNull { it.productTitle } ?: "Unknown item",
+            title = resolvedTitle ?: "Unknown item",
             category = results.firstNotNullOfOrNull { it.category },
             imageUrl = results.firstNotNullOfOrNull { it.imageUrl },
         )
+
+        // Search term for shortcut links: the resolved product name if we have one, else the barcode.
+        val shortcutQuery = resolvedTitle ?: barcode
 
         // Preserve configured source order for stable UI, regardless of which finished first.
         val outcomeById = results.associateBy { it.sourceId }
@@ -61,7 +66,8 @@ class PriceRepository(
                 displayName = source.displayName,
                 listingCount = r?.listings?.size ?: 0,
                 available = r?.available ?: false,
-                shortcutUrl = r?.shortcutUrl,
+                // Shortcut-only marketplaces get a title-based search link built here.
+                shortcutUrl = if (source is ShortcutOnlySource) source.shortcutFor(shortcutQuery) else r?.shortcutUrl,
             )
         }
 

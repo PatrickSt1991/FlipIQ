@@ -25,8 +25,15 @@ class SettingsViewModel @Inject constructor(
     val theme = themeRepository.preferences
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemePreferences.DEFAULT)
 
+    val priceChartingToken = settingsRepository.priceChartingToken
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
     fun save(settings: ProfitSettings) {
         viewModelScope.launch { runCatching { settingsRepository.update(settings) } }
+    }
+
+    fun setPriceChartingToken(token: String) {
+        viewModelScope.launch { runCatching { settingsRepository.setPriceChartingToken(token) } }
     }
 
     fun setThemeMode(mode: ThemeMode) {
