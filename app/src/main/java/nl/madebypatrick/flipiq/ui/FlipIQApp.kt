@@ -6,12 +6,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import nl.madebypatrick.flipiq.ui.collection.CollectionScreen
 import nl.madebypatrick.flipiq.ui.result.ResultScreen
 import nl.madebypatrick.flipiq.ui.scan.ScanScreen
 
 object Routes {
     const val SCAN = "scan"
     const val RESULT = "result"
+    const val COLLECTION = "collection"
     const val ARG_BARCODE = "barcode"
     fun result(barcode: String) = "$RESULT/$barcode"
 }
@@ -26,7 +28,11 @@ fun FlipIQApp() {
                 onBarcodeScanned = { barcode ->
                     navController.navigate(Routes.result(barcode))
                 },
+                onOpenCollection = { navController.navigate(Routes.COLLECTION) },
             )
+        }
+        composable(Routes.COLLECTION) {
+            CollectionScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = "${Routes.RESULT}/{${Routes.ARG_BARCODE}}",

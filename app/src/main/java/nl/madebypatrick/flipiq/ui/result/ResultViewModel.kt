@@ -7,10 +7,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.data.repository.FetchedMarket
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
 import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
+import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.ui.Routes
 import javax.inject.Inject
@@ -24,6 +26,7 @@ sealed interface ResultUiState {
 @HiltViewModel
 class ResultViewModel @Inject constructor(
     private val repository: PriceRepository,
+    private val collection: CollectionRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -32,9 +35,14 @@ class ResultViewModel @Inject constructor(
     private var market: FetchedMarket? = null
     private var condition: Condition = Condition.GOOD
     private var completeness: Completeness = Completeness.COMPLETE
+    private var recorded = false
 
     private val _state = MutableStateFlow<ResultUiState>(ResultUiState.Loading)
     val state = _state.asStateFlow()
+
+    /** One-shot user-facing messages (e.g. "Added to inventory"); cleared once shown. */
+    private val _message = MutableStateFlow<String?>(null)
+    val message = _message.asStateFlow()
 
     init {
         load()
@@ -44,9 +52,38 @@ class ResultViewModel @Inject constructor(
         _state.value = ResultUiState.Loading
         viewModelScope.launch {
             runCatching { repository.fetch(barcode) }
-                .onSuccess { market = it; recompute() }
+                .onSuccess { market = it; recompute(); recordOnce() }
                 .onFailure { _state.value = ResultUiState.Error(it.message ?: "Something went wrong.") }
         }
+    }
+
+    /** Save this scan to history exactly once per screen. */
+    private fun recordOnce() {
+        if (recorded) return
+        val analysis = (_state.value as? ResultUiState.Success)?.analysis ?: return
+        recorded = true
+        viewModelScope.launch { runCatching { collection.recordScan(analysis) } }
+    }
+
+    /** Add the scanned item to inventory at the given buy price (defaults to the recommended max). */
+    fun markAsBought(buyPrice: Money? = null) {
+        val analysis = (_state.value as? ResultUiState.Success)?.analysis ?: return
+        val rec = analysis.recommendation
+        viewModelScope.launch {
+            runCatching {
+                collection.addToInventory(
+                    barcode = analysis.product.barcode,
+                    title = analysis.product.title,
+                    buyPrice = buyPrice ?: rec.recommendedBuyPrice,
+                    estimatedResale = rec.estimatedResale,
+                )
+            }.onSuccess { _message.value = "Added to inventory" }
+                .onFailure { _message.value = "Couldn't add to inventory" }
+        }
+    }
+
+    fun messageShown() {
+        _message.value = null
     }
 
     fun setCondition(value: Condition) {

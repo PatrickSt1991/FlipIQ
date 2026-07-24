@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -54,11 +56,23 @@ import com.google.accompanist.permissions.rememberPermissionState
  */
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ScanScreen(onBarcodeScanned: (String) -> Unit) {
+fun ScanScreen(
+    onBarcodeScanned: (String) -> Unit,
+    onOpenCollection: () -> Unit,
+) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("FlipIQ") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("FlipIQ") },
+                actions = {
+                    IconButton(onClick = onOpenCollection) {
+                        Icon(Icons.Default.Inventory2, contentDescription = "Collection")
+                    }
+                },
+            )
+        },
     ) { padding ->
         Column(
             modifier = Modifier
