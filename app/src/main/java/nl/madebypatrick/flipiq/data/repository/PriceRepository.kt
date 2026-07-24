@@ -40,18 +40,24 @@ class PriceRepository(
     private val barcodeResolver: BarcodeResolver,
 ) {
 
-    suspend fun fetch(barcode: String): FetchedMarket = coroutineScope {
+    /** Search by a free-text title (e.g. from OCR of the product's front) instead of a barcode. */
+    suspend fun fetchByTitle(title: String): FetchedMarket =
+        fetchInternal(barcode = "", query = ProductQuery(barcode = "", title = title))
+
+    suspend fun fetch(barcode: String): FetchedMarket {
         // Resolve a product name first so name-based sources (CeX, shortcuts) can match on it.
         val lookedUpTitle = runCatching { barcodeResolver.resolveTitle(barcode) }.getOrNull()
-        val query = ProductQuery(barcode, title = lookedUpTitle)
+        return fetchInternal(barcode, ProductQuery(barcode, title = lookedUpTitle))
+    }
 
+    private suspend fun fetchInternal(barcode: String, query: ProductQuery): FetchedMarket = coroutineScope {
         val results: List<SourceResult> = sources
             .map { source -> async { runCatching { source.lookup(query) }.getOrNull() } }
             .awaitAll()
             .filterNotNull()
 
-        // Prefer a title a data source returned; otherwise the barcode-lookup result.
-        val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle } ?: lookedUpTitle
+        // Prefer a title a data source returned; otherwise the query title (barcode-lookup or OCR).
+        val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle } ?: query.title
         val product = ProductInfo(
             barcode = barcode,
             title = resolvedTitle ?: "Unknown item",
