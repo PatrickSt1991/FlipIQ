@@ -21,4 +21,7 @@ object MarketplaceUrls {
 
     fun priceCharting(title: String) =
         "https://www.pricecharting.com/search-products?q=${q(title)}&type=prices"
+
+    fun tweakers(title: String) =
+        "https://tweakers.net/pricewatch/zoeken/?keyword=${q(title)}"
 }

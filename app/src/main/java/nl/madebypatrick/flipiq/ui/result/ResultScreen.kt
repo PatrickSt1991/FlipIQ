@@ -189,6 +189,8 @@ private fun AnalysisContent(
 ) {
     val rec = analysis.recommendation
     var showBuyDialog by remember { mutableStateOf(false) }
+    // No sold data and nothing currently for sale → we can't score it; guide to the links instead.
+    val hasData = rec.stats.hasData || rec.bestBuyPrice != null
 
     Column(
         modifier = Modifier
@@ -197,16 +199,20 @@ private fun AnalysisContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        VerdictCard(rec)
-        Button(
-            onClick = { showBuyDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("I bought this") }
-        ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
-        PriceSummaryCard(rec)
-        EstimateCard(rec)
-        BuyLadderCard(rec)
-        if (rec.notes.isNotEmpty()) NotesCard(rec)
+        if (hasData) {
+            VerdictCard(rec)
+            Button(
+                onClick = { showBuyDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("I bought this") }
+            ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
+            PriceSummaryCard(rec)
+            EstimateCard(rec)
+            BuyLadderCard(rec)
+            if (rec.notes.isNotEmpty()) NotesCard(rec)
+        } else {
+            NoDataCard(analysis.product.title)
+        }
         MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }
@@ -260,6 +266,39 @@ private fun PriceInputDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         },
     )
+}
+
+@Composable
+private fun NoDataCard(title: String) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("🕵️", fontSize = 40.sp)
+            Text(
+                "No price data yet",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                if (title == "Unknown item") {
+                    "We couldn't identify this barcode. Try one of the marketplaces below."
+                } else {
+                    "We couldn't find prices for “$title”. Check the marketplaces below — it might be listed there."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Text(
+                "Tip: adding a PriceCharting or EAN-Search token in Settings improves coverage.",
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

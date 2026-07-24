@@ -8,7 +8,12 @@ import kotlinx.coroutines.flow.first
 import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
 import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.CompositeBarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
+import nl.madebypatrick.flipiq.data.resolver.EanSearchResolver
 import nl.madebypatrick.flipiq.data.resolver.NoopBarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
+import nl.madebypatrick.flipiq.data.resolver.OpenLibraryResolver
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
@@ -84,14 +89,32 @@ object AppModule {
             CexSource(cexApi, currencyConverter),
             ShortcutOnlySource("vinted", "Vinted", MarketplaceUrls::vinted),
             ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
+            ShortcutOnlySource("tweakers", "Tweakers", MarketplaceUrls::tweakers),
         )
     }
 
-    /** Real barcode→title lookup in release; a no-op in demo (mock sources already supply titles). */
+    /**
+     * Barcode→title resolution. In release, prefer EAN-Search (token, strong EU/EAN coverage) and
+     * fall back to keyless UPCitemdb. In demo, a no-op (mock sources already supply titles).
+     */
     @Provides
     @Singleton
-    fun provideBarcodeResolver(upcItemDbApi: UpcItemDbApi): BarcodeResolver =
-        if (BuildConfig.DEMO_MODE) NoopBarcodeResolver() else UpcItemDbResolver(upcItemDbApi)
+    fun provideBarcodeResolver(
+        upcItemDbApi: UpcItemDbApi,
+        eanSearchApi: EanSearchApi,
+        openLibraryApi: OpenLibraryApi,
+        settingsRepository: SettingsRepository,
+    ): BarcodeResolver {
+        if (BuildConfig.DEMO_MODE) return NoopBarcodeResolver()
+        val eanToken: suspend () -> String = { settingsRepository.eanSearchToken.first() }
+        return CompositeBarcodeResolver(
+            listOf(
+                OpenLibraryResolver(openLibraryApi),          // books (ISBN), keyless
+                EanSearchResolver(eanSearchApi, eanToken),    // broad EU/EAN, needs token
+                UpcItemDbResolver(upcItemDbApi),              // keyless fallback
+            ),
+        )
+    }
 
     @Provides
     @Singleton
