@@ -13,6 +13,8 @@ import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.mock.VintedSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingSource as LivePriceChartingSource
+import nl.madebypatrick.flipiq.domain.CurrencyConverter
+import nl.madebypatrick.flipiq.domain.StaticCurrencyConverter
 import nl.madebypatrick.flipiq.domain.engine.EngineConfig
 import nl.madebypatrick.flipiq.domain.engine.FlipIQEngine
 import javax.inject.Named
@@ -26,6 +28,10 @@ object AppModule {
     @Singleton
     fun provideEngine(): FlipIQEngine = FlipIQEngine(EngineConfig.DEFAULT)
 
+    @Provides
+    @Singleton
+    fun provideCurrencyConverter(): CurrencyConverter = StaticCurrencyConverter()
+
     /**
      * The active set of marketplace sources. PriceCharting is the live one when a token is
      * configured, otherwise its mock stands in; the rest are still mock-backed. Adding another real
@@ -36,10 +42,11 @@ object AppModule {
     fun provideSources(
         priceChartingApi: PriceChartingApi,
         @Named(NetworkModule.PRICECHARTING_TOKEN) priceChartingToken: String,
+        currencyConverter: CurrencyConverter,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
         val priceCharting: MarketplaceSource =
             if (priceChartingToken.isNotBlank()) {
-                LivePriceChartingSource(priceChartingApi, priceChartingToken)
+                LivePriceChartingSource(priceChartingApi, priceChartingToken, currencyConverter)
             } else {
                 PriceChartingSource()
             }

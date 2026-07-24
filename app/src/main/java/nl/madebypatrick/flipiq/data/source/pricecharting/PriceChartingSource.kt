@@ -4,7 +4,9 @@ import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.SourceResult
+import nl.madebypatrick.flipiq.domain.CurrencyConverter
 import nl.madebypatrick.flipiq.domain.model.Condition
+import nl.madebypatrick.flipiq.domain.model.Currency
 import nl.madebypatrick.flipiq.domain.model.ListingType
 import nl.madebypatrick.flipiq.domain.model.MarketListing
 import nl.madebypatrick.flipiq.domain.model.Money
@@ -24,6 +26,7 @@ import nl.madebypatrick.flipiq.domain.model.Money
 class PriceChartingSource(
     private val api: PriceChartingApi,
     private val token: String,
+    private val currencyConverter: CurrencyConverter,
 ) : MarketplaceSource {
 
     override val id = SOURCE_ID
@@ -31,8 +34,11 @@ class PriceChartingSource(
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
         if (token.isBlank()) return unavailable()
-        return runCatching { api.productByUpc(token, query.barcode).toSourceResult() }
-            .getOrElse { unavailable() }
+        return runCatching {
+            api.productByUpc(token, query.barcode)
+                .toSourceResult()
+                .toEur(currencyConverter) // PriceCharting is USD → normalise to the EUR base.
+        }.getOrElse { unavailable() }
     }
 
     private fun unavailable() =
@@ -77,3 +83,7 @@ private fun listing(title: String, cents: Long, condition: Condition) = MarketLi
     type = ListingType.SOLD,
     condition = condition,
 )
+
+/** Convert every listing price in this result from USD into the EUR base. */
+fun SourceResult.toEur(converter: CurrencyConverter): SourceResult =
+    copy(listings = listings.map { it.copy(price = converter.toEur(it.price, Currency.USD)) })
