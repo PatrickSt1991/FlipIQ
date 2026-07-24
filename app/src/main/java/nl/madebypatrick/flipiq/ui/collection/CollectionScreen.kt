@@ -12,8 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,10 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import nl.madebypatrick.flipiq.ui.util.shareCsv
 import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
@@ -60,7 +65,9 @@ fun CollectionScreen(
 
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
+    var exportMenu by remember { mutableStateOf(false) }
     val tabs = listOf("Inventory", "Favorites", "Wishlist", "History")
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -69,6 +76,27 @@ fun CollectionScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { exportMenu = true }) {
+                        Icon(Icons.Default.IosShare, contentDescription = "Export CSV")
+                    }
+                    DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Export inventory (CSV)") },
+                            onClick = {
+                                exportMenu = false
+                                shareCsv(context, "flipiq-inventory.csv", viewModel.inventoryCsv())
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Export history (CSV)") },
+                            onClick = {
+                                exportMenu = false
+                                shareCsv(context, "flipiq-history.csv", viewModel.historyCsv())
+                            },
+                        )
                     }
                 },
             )
