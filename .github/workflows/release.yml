@@ -1,0 +1,63 @@
+name: Release APK
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DISABLED FOR NOW.
+#
+# This workflow only has a manual (`workflow_dispatch`) trigger, so it never runs
+# on its own. To enable automatic releases on version tags later, uncomment the
+# `push: tags` block below. It can also be turned off entirely in the repo's
+# Actions tab (⋯ → "Disable workflow").
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish under (e.g. v0.1.0)"
+        required: true
+        default: "v0.0.0-dev"
+  # Uncomment to auto-release whenever a v* tag is pushed:
+  # push:
+  #   tags:
+  #     - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Stage APK
+        id: stage
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/flipiq-${TAG}.apk"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.stage.outputs.tag }}
+          name: FlipIQ ${{ steps.stage.outputs.tag }}
+          files: dist/*.apk
+          generate_release_notes: true
