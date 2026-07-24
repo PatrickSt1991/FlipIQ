@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Tune
@@ -61,6 +62,7 @@ fun ScanScreen(
     onBarcodeScanned: (String) -> Unit,
     onOpenCollection: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenStats: () -> Unit,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
 
@@ -69,6 +71,9 @@ fun ScanScreen(
             TopAppBar(
                 title = { Text("FlipIQ") },
                 actions = {
+                    IconButton(onClick = onOpenStats) {
+                        Icon(Icons.Default.BarChart, contentDescription = "Statistics")
+                    }
                     IconButton(onClick = onOpenCollection) {
                         Icon(Icons.Default.Inventory2, contentDescription = "Collection")
                     }

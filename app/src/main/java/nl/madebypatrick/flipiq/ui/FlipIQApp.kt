@@ -10,12 +10,14 @@ import nl.madebypatrick.flipiq.ui.collection.CollectionScreen
 import nl.madebypatrick.flipiq.ui.result.ResultScreen
 import nl.madebypatrick.flipiq.ui.scan.ScanScreen
 import nl.madebypatrick.flipiq.ui.settings.SettingsScreen
+import nl.madebypatrick.flipiq.ui.stats.StatsScreen
 
 object Routes {
     const val SCAN = "scan"
     const val RESULT = "result"
     const val COLLECTION = "collection"
     const val SETTINGS = "settings"
+    const val STATS = "stats"
     const val ARG_BARCODE = "barcode"
     fun result(barcode: String) = "$RESULT/$barcode"
 }
@@ -32,6 +34,7 @@ fun FlipIQApp() {
                 },
                 onOpenCollection = { navController.navigate(Routes.COLLECTION) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onOpenStats = { navController.navigate(Routes.STATS) },
             )
         }
         composable(Routes.COLLECTION) {
@@ -39,6 +42,9 @@ fun FlipIQApp() {
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.STATS) {
+            StatsScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = "${Routes.RESULT}/{${Routes.ARG_BARCODE}}",
