@@ -121,6 +121,11 @@ dependencies {
     // Settings persistence
     implementation(libs.androidx.datastore.preferences)
 
+    // Background price-alert checks
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
     // Images
     implementation(libs.coil.compose)
 

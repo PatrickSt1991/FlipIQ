@@ -22,6 +22,8 @@ data class FlipRecommendation(
     val estimatedResale: Money,
     /** What the seller actually nets after fees and shipping are removed. */
     val netResale: Money,
+    /** Cheapest currently-buyable (active) listing across sources; null if none are for sale now. */
+    val bestBuyPrice: Money?,
     /** Highest price you can pay and still hit the profit + ROI targets. */
     val recommendedBuyPrice: Money,
     /** Expected profit when buying at [recommendedBuyPrice]. */

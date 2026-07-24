@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.repository.AlertRepository
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.data.repository.FetchedMarket
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
@@ -34,6 +35,7 @@ class ResultViewModel @Inject constructor(
     private val repository: PriceRepository,
     private val collection: CollectionRepository,
     private val settingsRepository: SettingsRepository,
+    private val alertRepository: AlertRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -56,9 +58,19 @@ class ResultViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     val isWishlisted = collection.isSaved(barcode, SavedList.WISHLIST)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val hasAlert = alertRepository.hasActiveAlert(barcode)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     init {
         load()
+    }
+
+    fun setPriceAlert(target: Money) {
+        viewModelScope.launch {
+            runCatching { alertRepository.create(barcode, currentTitle(), target) }
+                .onSuccess { _message.value = "Price alert set for $target" }
+                .onFailure { _message.value = "Couldn't set the alert" }
+        }
     }
 
     private fun currentTitle(): String =

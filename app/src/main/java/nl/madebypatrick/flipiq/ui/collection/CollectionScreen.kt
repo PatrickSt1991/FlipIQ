@@ -45,6 +45,7 @@ import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.PriceAlert
 import nl.madebypatrick.flipiq.domain.model.SavedItem
 import nl.madebypatrick.flipiq.domain.model.SavedList
 import nl.madebypatrick.flipiq.domain.model.ScanRecord
@@ -62,11 +63,12 @@ fun CollectionScreen(
     val summary by viewModel.summary.collectAsStateWithLifecycle()
     val favorites by viewModel.favorites.collectAsStateWithLifecycle()
     val wishlist by viewModel.wishlist.collectAsStateWithLifecycle()
+    val alerts by viewModel.alerts.collectAsStateWithLifecycle()
 
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
     var exportMenu by remember { mutableStateOf(false) }
-    val tabs = listOf("Inventory", "Favorites", "Wishlist", "History")
+    val tabs = listOf("Inventory", "Favorites", "Wishlist", "Alerts", "History")
     val context = LocalContext.current
 
     Scaffold(
@@ -117,6 +119,7 @@ fun CollectionScreen(
                 2 -> SavedItemsList(wishlist, "Your wishlist is empty.\nTap the bookmark on a result to add one.") {
                     viewModel.removeSaved(it.barcode, SavedList.WISHLIST)
                 }
+                3 -> AlertsList(alerts) { viewModel.removeAlert(it.id) }
                 else -> HistoryList(history)
             }
         }
@@ -220,6 +223,40 @@ private fun SavedItemsList(
                     Text(item.title, fontWeight = FontWeight.Medium, maxLines = 1)
                     IconButton(onClick = { onRemove(item) }) {
                         Icon(Icons.Default.Close, contentDescription = "Remove")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlertsList(alerts: List<PriceAlert>, onRemove: (PriceAlert) -> Unit) {
+    if (alerts.isEmpty()) {
+        EmptyState("No price alerts yet.\nTap the bell on a result to watch an item.")
+        return
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(alerts, key = { it.id }) { alert ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.padding(vertical = 12.dp)) {
+                        Text(alert.title, fontWeight = FontWeight.Medium, maxLines = 1)
+                        Text(
+                            "Notify at ≤ ${alert.targetPrice}",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                    IconButton(onClick = { onRemove(alert) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Remove alert")
                     }
                 }
             }

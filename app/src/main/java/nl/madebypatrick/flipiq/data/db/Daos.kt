@@ -34,6 +34,27 @@ interface SavedItemDao {
 }
 
 @Dao
+interface PriceAlertDao {
+    @Insert
+    suspend fun insert(alert: PriceAlertEntity): Long
+
+    @Update
+    suspend fun update(alert: PriceAlertEntity)
+
+    @Query("SELECT * FROM price_alerts ORDER BY createdAt DESC")
+    fun all(): Flow<List<PriceAlertEntity>>
+
+    @Query("SELECT * FROM price_alerts WHERE active = 1")
+    suspend fun activeAlerts(): List<PriceAlertEntity>
+
+    @Query("SELECT COUNT(*) > 0 FROM price_alerts WHERE barcode = :barcode AND active = 1")
+    fun hasActiveAlert(barcode: String): Flow<Boolean>
+
+    @Query("DELETE FROM price_alerts WHERE id = :id")
+    suspend fun delete(id: Long)
+}
+
+@Dao
 interface InventoryDao {
     @Insert
     suspend fun insert(item: InventoryEntity): Long
