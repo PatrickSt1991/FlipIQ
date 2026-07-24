@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import nl.madebypatrick.flipiq.BuildConfig
+import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
+import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.source.cex.CexApi
 import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
@@ -72,6 +74,24 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(UpcItemDbApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEanSearchApi(client: OkHttpClient, json: Json): EanSearchApi = Retrofit.Builder()
+        .baseUrl("https://api.ean-search.org/")
+        .client(client)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+        .create(EanSearchApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOpenLibraryApi(client: OkHttpClient, json: Json): OpenLibraryApi = Retrofit.Builder()
+        .baseUrl("https://openlibrary.org/")
+        .client(client)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+        .create(OpenLibraryApi::class.java)
 
     @Provides
     @Singleton

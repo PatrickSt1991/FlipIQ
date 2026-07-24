@@ -39,7 +39,9 @@ class ResultViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val barcode: String = checkNotNull(savedStateHandle[Routes.ARG_BARCODE])
+    // Either a barcode scan (ARG_BARCODE) or an OCR/title search (ARG_TITLE).
+    private val barcode: String = savedStateHandle.get<String>(Routes.ARG_BARCODE) ?: ""
+    private val titleQuery: String? = savedStateHandle.get<String>(Routes.ARG_TITLE)
 
     private var market: FetchedMarket? = null
     private var condition: Condition = Condition.GOOD
@@ -94,7 +96,7 @@ class ResultViewModel @Inject constructor(
         _state.value = ResultUiState.Loading
         viewModelScope.launch {
             settings = runCatching { settingsRepository.settings.first() }.getOrDefault(ProfitSettings.DEFAULT)
-            runCatching { repository.fetch(barcode) }
+            runCatching { titleQuery?.let { repository.fetchByTitle(it) } ?: repository.fetch(barcode) }
                 .onSuccess { market = it; recompute(); recordOnce() }
                 .onFailure { _state.value = ResultUiState.Error(it.message ?: "Something went wrong.") }
         }

@@ -58,6 +58,7 @@ fun SettingsScreen(
     val saved by viewModel.settings.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
     val pcToken by viewModel.priceChartingToken.collectAsStateWithLifecycle()
+    val eanToken0 by viewModel.eanSearchToken.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
 
@@ -119,6 +120,21 @@ fun SettingsScreen(
                         viewModel.setPriceChartingToken(it)
                     },
                     label = { Text("PriceCharting token") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    "EAN-Search API token — improves barcode→product matching (esp. EU/NL items).",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                var eanToken by remember(eanToken0) { mutableStateOf(eanToken0) }
+                OutlinedTextField(
+                    value = eanToken,
+                    onValueChange = {
+                        eanToken = it
+                        viewModel.setEanSearchToken(it)
+                    },
+                    label = { Text("EAN-Search token") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

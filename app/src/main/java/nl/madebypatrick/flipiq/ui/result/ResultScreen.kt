@@ -73,6 +73,7 @@ import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 @Composable
 fun ResultScreen(
     onBack: () -> Unit,
+    onScanFront: () -> Unit = {},
     viewModel: ResultViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -149,6 +150,7 @@ fun ResultScreen(
                     onConditionChange = viewModel::setCondition,
                     onCompletenessChange = viewModel::setCompleteness,
                     onMarkBought = viewModel::markAsBought,
+                    onScanFront = onScanFront,
                 )
             }
         }
@@ -186,9 +188,12 @@ private fun AnalysisContent(
     onConditionChange: (Condition) -> Unit,
     onCompletenessChange: (Completeness) -> Unit,
     onMarkBought: (Money?) -> Unit,
+    onScanFront: () -> Unit,
 ) {
     val rec = analysis.recommendation
     var showBuyDialog by remember { mutableStateOf(false) }
+    // No sold data and nothing currently for sale → we can't score it; guide to the links instead.
+    val hasData = rec.stats.hasData || rec.bestBuyPrice != null
 
     Column(
         modifier = Modifier
@@ -197,16 +202,20 @@ private fun AnalysisContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        VerdictCard(rec)
-        Button(
-            onClick = { showBuyDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("I bought this") }
-        ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
-        PriceSummaryCard(rec)
-        EstimateCard(rec)
-        BuyLadderCard(rec)
-        if (rec.notes.isNotEmpty()) NotesCard(rec)
+        if (hasData) {
+            VerdictCard(rec)
+            Button(
+                onClick = { showBuyDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("I bought this") }
+            ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
+            PriceSummaryCard(rec)
+            EstimateCard(rec)
+            BuyLadderCard(rec)
+            if (rec.notes.isNotEmpty()) NotesCard(rec)
+        } else {
+            NoDataCard(analysis.product.title, onScanFront = onScanFront)
+        }
         MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }
@@ -260,6 +269,43 @@ private fun PriceInputDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         },
     )
+}
+
+@Composable
+private fun NoDataCard(title: String, onScanFront: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("🕵️", fontSize = 40.sp)
+            Text(
+                "No price data yet",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                if (title == "Unknown item") {
+                    "We couldn't identify this barcode. Scan the front of the item, or try the marketplaces below."
+                } else {
+                    "We couldn't find prices for “$title”. Check the marketplaces below — it might be listed there."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Spacer(Modifier.height(4.dp))
+            Button(onClick = onScanFront, modifier = Modifier.fillMaxWidth()) {
+                Text("📸  Scan the front instead")
+            }
+            Text(
+                "Tip: adding a PriceCharting or EAN-Search token in Settings improves coverage.",
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
