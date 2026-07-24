@@ -1,0 +1,8 @@
+name = "flipiq-ebay-token"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# Secrets are NOT stored here — set them with:
+#   wrangler secret put EBAY_CLIENT_ID
+#   wrangler secret put EBAY_CLIENT_SECRET
+#   wrangler secret put APP_KEY        # optional

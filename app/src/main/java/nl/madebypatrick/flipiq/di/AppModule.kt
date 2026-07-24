@@ -73,11 +73,11 @@ object AppModule {
             settingsRepository.priceChartingToken.first().ifBlank { BuildConfig.PRICECHARTING_TOKEN }
         }
 
-        // eBay: mock in demo; live Browse API when credentials are set; otherwise a search link.
-        val ebayAuth = EbayAuthenticator(ebayApi, BuildConfig.EBAY_CLIENT_ID, BuildConfig.EBAY_CLIENT_SECRET)
+        // eBay: mock in demo; live Browse API when the token proxy is configured; otherwise a link.
+        val ebayAuth = EbayAuthenticator(ebayApi, BuildConfig.EBAY_PROXY_URL, BuildConfig.EBAY_PROXY_KEY)
         val ebay: MarketplaceSource = when {
             demo -> EbaySoldSource()
-            ebayAuth.hasCredentials -> EbaySource(ebayApi, ebayAuth)
+            ebayAuth.isConfigured -> EbaySource(ebayApi, ebayAuth)
             else -> ShortcutOnlySource("ebay", "eBay Sold", MarketplaceUrls::ebaySold)
         }
         val priceCharting: MarketplaceSource =

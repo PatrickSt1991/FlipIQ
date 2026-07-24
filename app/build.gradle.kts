@@ -38,10 +38,11 @@ android {
         // Off by default (honest: only real sources feed the engine); the debug build turns it on.
         buildConfigField("boolean", "DEMO_MODE", "false")
 
-        // eBay Browse API credentials (optional). Set ebay.clientId / ebay.clientSecret in
-        // local.properties (or EBAY_CLIENT_ID / EBAY_CLIENT_SECRET env). Blank → eBay links out.
-        buildConfigField("String", "EBAY_CLIENT_ID", "\"${secret("ebay.clientId", "EBAY_CLIENT_ID")}\"")
-        buildConfigField("String", "EBAY_CLIENT_SECRET", "\"${secret("ebay.clientSecret", "EBAY_CLIENT_SECRET")}\"")
+        // eBay token proxy (Cloudflare Worker). The secret lives in the Worker, never in the app.
+        // Set ebay.proxyUrl / ebay.proxyKey in local.properties (or EBAY_PROXY_URL / EBAY_PROXY_KEY
+        // env). Blank proxy URL → eBay just links out.
+        buildConfigField("String", "EBAY_PROXY_URL", "\"${secret("ebay.proxyUrl", "EBAY_PROXY_URL")}\"")
+        buildConfigField("String", "EBAY_PROXY_KEY", "\"${secret("ebay.proxyKey", "EBAY_PROXY_KEY")}\"")
     }
 
     // Release signing is configured only when a keystore is supplied (via local.properties or CI
