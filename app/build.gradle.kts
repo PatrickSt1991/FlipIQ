@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+// API keys are read from local.properties (gitignored) or an env var — never committed.
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+fun secret(key: String, env: String): String =
+    localProperties.getProperty(key) ?: System.getenv(env) ?: ""
 
 android {
     namespace = "nl.madebypatrick.flipiq"
@@ -20,6 +30,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
+        // Empty by default → PriceCharting falls back to mock data. Set `pricecharting.token`
+        // in local.properties (or the PRICECHARTING_TOKEN env var) to enable the live source.
+        buildConfigField("String", "PRICECHARTING_TOKEN", "\"${secret("pricecharting.token", "PRICECHARTING_TOKEN")}\"")
     }
 
     buildTypes {
@@ -41,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
