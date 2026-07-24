@@ -6,13 +6,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.data.repository.FetchedMarket
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
+import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.ProfitSettings
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.ui.Routes
 import javax.inject.Inject
@@ -27,6 +30,7 @@ sealed interface ResultUiState {
 class ResultViewModel @Inject constructor(
     private val repository: PriceRepository,
     private val collection: CollectionRepository,
+    private val settingsRepository: SettingsRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -35,6 +39,7 @@ class ResultViewModel @Inject constructor(
     private var market: FetchedMarket? = null
     private var condition: Condition = Condition.GOOD
     private var completeness: Completeness = Completeness.COMPLETE
+    private var settings: ProfitSettings = ProfitSettings.DEFAULT
     private var recorded = false
 
     private val _state = MutableStateFlow<ResultUiState>(ResultUiState.Loading)
@@ -51,6 +56,7 @@ class ResultViewModel @Inject constructor(
     fun load() {
         _state.value = ResultUiState.Loading
         viewModelScope.launch {
+            settings = runCatching { settingsRepository.settings.first() }.getOrDefault(ProfitSettings.DEFAULT)
             runCatching { repository.fetch(barcode) }
                 .onSuccess { market = it; recompute(); recordOnce() }
                 .onFailure { _state.value = ResultUiState.Error(it.message ?: "Something went wrong.") }
@@ -99,7 +105,7 @@ class ResultViewModel @Inject constructor(
     private fun recompute() {
         val current = market ?: return
         _state.value = ResultUiState.Success(
-            repository.evaluate(current, condition = condition, completeness = completeness),
+            repository.evaluate(current, condition = condition, completeness = completeness, settings = settings),
         )
     }
 }
