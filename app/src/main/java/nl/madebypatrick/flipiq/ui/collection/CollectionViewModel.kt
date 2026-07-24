@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
+import nl.madebypatrick.flipiq.domain.export.CsvFormatter
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.SavedList
@@ -39,4 +40,8 @@ class CollectionViewModel @Inject constructor(
     fun removeSaved(barcode: String, list: SavedList) {
         viewModelScope.launch { runCatching { collection.setSaved(barcode, "", list, saved = false) } }
     }
+
+    fun inventoryCsv(): String = CsvFormatter.inventoryCsv(inventory.value)
+
+    fun historyCsv(): String = CsvFormatter.historyCsv(history.value)
 }
