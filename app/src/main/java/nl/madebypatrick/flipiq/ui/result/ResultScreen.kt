@@ -19,6 +19,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -67,6 +71,8 @@ fun ResultScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
+    val isWishlisted by viewModel.isWishlisted.collectAsStateWithLifecycle()
     val title = (state as? ResultUiState.Success)?.analysis?.product?.title ?: "Analyzing…"
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -84,6 +90,20 @@ fun ResultScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = viewModel::toggleWishlist) {
+                        Icon(
+                            if (isWishlisted) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = if (isWishlisted) "Remove from wishlist" else "Add to wishlist",
+                        )
+                    }
+                    IconButton(onClick = viewModel::toggleFavorite) {
+                        Icon(
+                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        )
                     }
                 },
             )

@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.SavedList
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +26,17 @@ class CollectionViewModel @Inject constructor(
     val summary = collection.inventorySummary
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InventorySummary.from(emptyList()))
 
+    val favorites = collection.savedItems(SavedList.FAVORITE)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val wishlist = collection.savedItems(SavedList.WISHLIST)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun markSold(id: Long, soldPrice: Money) {
         viewModelScope.launch { runCatching { collection.markSold(id, soldPrice) } }
+    }
+
+    fun removeSaved(barcode: String, list: SavedList) {
+        viewModelScope.launch { runCatching { collection.setSaved(barcode, "", list, saved = false) } }
     }
 }

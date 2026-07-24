@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.madebypatrick.flipiq.data.db.InventoryDao
 import nl.madebypatrick.flipiq.data.db.InventoryEntity
+import nl.madebypatrick.flipiq.data.db.SavedItemDao
+import nl.madebypatrick.flipiq.data.db.SavedItemEntity
 import nl.madebypatrick.flipiq.data.db.ScanDao
 import nl.madebypatrick.flipiq.data.db.ScanEntity
 import nl.madebypatrick.flipiq.domain.model.DealTier
@@ -11,6 +13,8 @@ import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.SavedItem
+import nl.madebypatrick.flipiq.domain.model.SavedList
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.domain.model.ScanRecord
 import nl.madebypatrick.flipiq.domain.model.SellSpeed
@@ -24,8 +28,25 @@ import nl.madebypatrick.flipiq.domain.model.SellSpeed
 class CollectionRepository(
     private val scanDao: ScanDao,
     private val inventoryDao: InventoryDao,
+    private val savedItemDao: SavedItemDao,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
+
+    fun savedItems(list: SavedList): Flow<List<SavedItem>> =
+        savedItemDao.byList(list.name).map { rows -> rows.map { it.toDomain() } }
+
+    fun isSaved(barcode: String, list: SavedList): Flow<Boolean> =
+        savedItemDao.isSaved(barcode, list.name)
+
+    suspend fun setSaved(barcode: String, title: String, list: SavedList, saved: Boolean) {
+        if (saved) {
+            savedItemDao.insert(
+                SavedItemEntity(barcode = barcode, title = title, list = list.name, savedAt = now()),
+            )
+        } else {
+            savedItemDao.remove(barcode, list.name)
+        }
+    }
 
     val scanHistory: Flow<List<ScanRecord>> =
         scanDao.recent().map { list -> list.map { it.toDomain() } }
@@ -95,6 +116,14 @@ private fun ScanEntity.toDomain() = ScanRecord(
     recommendedBuy = Money(recommendedBuyCents),
     sellSpeed = runCatching { SellSpeed.valueOf(sellSpeed) }.getOrDefault(SellSpeed.MEDIUM),
     scannedAt = scannedAt,
+)
+
+private fun SavedItemEntity.toDomain() = SavedItem(
+    id = id,
+    barcode = barcode,
+    title = title,
+    list = runCatching { SavedList.valueOf(list) }.getOrDefault(SavedList.FAVORITE),
+    savedAt = savedAt,
 )
 
 private fun InventoryEntity.toDomain() = InventoryItem(

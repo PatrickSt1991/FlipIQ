@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.data.repository.CollectionRepository
 import nl.madebypatrick.flipiq.data.repository.FetchedMarket
@@ -16,6 +18,7 @@ import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
+import nl.madebypatrick.flipiq.domain.model.SavedList
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.ui.Routes
 import javax.inject.Inject
@@ -49,8 +52,30 @@ class ResultViewModel @Inject constructor(
     private val _message = MutableStateFlow<String?>(null)
     val message = _message.asStateFlow()
 
+    val isFavorite = collection.isSaved(barcode, SavedList.FAVORITE)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val isWishlisted = collection.isSaved(barcode, SavedList.WISHLIST)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
     init {
         load()
+    }
+
+    private fun currentTitle(): String =
+        (_state.value as? ResultUiState.Success)?.analysis?.product?.title ?: barcode
+
+    fun toggleFavorite() {
+        val target = !isFavorite.value
+        viewModelScope.launch {
+            runCatching { collection.setSaved(barcode, currentTitle(), SavedList.FAVORITE, target) }
+        }
+    }
+
+    fun toggleWishlist() {
+        val target = !isWishlisted.value
+        viewModelScope.launch {
+            runCatching { collection.setSaved(barcode, currentTitle(), SavedList.WISHLIST, target) }
+        }
     }
 
     fun load() {
