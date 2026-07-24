@@ -2,28 +2,25 @@ package nl.madebypatrick.flipiq.data.source.ebay
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.POST
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 /**
- * eBay OAuth (client-credentials) + Browse API.
+ * eBay Browse API + a token fetched from our own **proxy** (a Cloudflare Worker that holds the
+ * client id/secret server-side). The app never ships the eBay secret.
  *
- * Note: the Browse API returns **active** listings, not sold comps — sold prices live behind eBay's
- * gated Marketplace Insights API. So this contributes buy opportunities, not sold history.
- * Uses the EBAY_NL marketplace, so prices come back in EUR (no conversion needed).
+ * Note: Browse returns **active** listings, not sold comps (sold prices need eBay's gated
+ * Marketplace Insights API). Uses the EBAY_NL marketplace, so prices come back in EUR.
  */
 interface EbayApi {
 
-    @FormUrlEncoded
-    @POST("identity/v1/oauth2/token")
-    suspend fun token(
-        @Header("Authorization") basicAuth: String,
-        @Field("grant_type") grantType: String = "client_credentials",
-        @Field("scope") scope: String = "https://api.ebay.com/oauth/api_scope",
+    /** Fetch a short-lived application token from the proxy (full URL via @Url). */
+    @GET
+    suspend fun proxyToken(
+        @Url proxyUrl: String,
+        @Header("X-App-Key") appKey: String,
     ): EbayTokenResponse
 
     @GET("buy/browse/v1/item_summary/search")

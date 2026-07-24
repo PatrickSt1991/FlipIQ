@@ -1,6 +1,5 @@
 package nl.madebypatrick.flipiq.data.source.ebay
 
-import android.util.Base64
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
@@ -11,30 +10,28 @@ import nl.madebypatrick.flipiq.domain.model.MarketListing
 import nl.madebypatrick.flipiq.domain.model.Money
 
 /**
- * Caches an eBay OAuth token (client-credentials) until shortly before it expires, refreshing on
- * demand. Thread-safe via a mutex.
+ * Fetches an eBay application token from our proxy (a Cloudflare Worker holding the secret) and
+ * caches it until shortly before it expires. The app never sees the eBay client secret. Thread-safe.
  */
 class EbayAuthenticator(
     private val api: EbayApi,
-    private val clientId: String,
-    private val clientSecret: String,
+    private val proxyUrl: String,
+    private val appKey: String,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     private val mutex = Mutex()
     private var cachedToken: String? = null
     private var expiresAtMs: Long = 0
 
-    val hasCredentials: Boolean get() = clientId.isNotBlank() && clientSecret.isNotBlank()
+    /** eBay is enabled only when a proxy URL is configured. */
+    val isConfigured: Boolean get() = proxyUrl.isNotBlank()
 
-    /** Returns a valid bearer token, or null if credentials are missing / the token call fails. */
+    /** Returns a valid bearer token, or null if the proxy isn't set / the call fails. */
     suspend fun bearer(): String? {
-        if (!hasCredentials) return null
+        if (!isConfigured) return null
         mutex.withLock {
             if (cachedToken != null && now() < expiresAtMs) return "Bearer $cachedToken"
-            val basic = "Basic " + Base64.encodeToString(
-                "$clientId:$clientSecret".toByteArray(), Base64.NO_WRAP,
-            )
-            val resp = runCatching { api.token(basic) }.getOrNull() ?: return null
+            val resp = runCatching { api.proxyToken(proxyUrl, appKey) }.getOrNull() ?: return null
             val token = resp.accessToken ?: return null
             cachedToken = token
             // Refresh a minute early to avoid edge-of-expiry failures.
@@ -57,7 +54,7 @@ class EbaySource(
     override val displayName = "eBay"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
-        if (!authenticator.hasCredentials) return unavailable()
+        if (!authenticator.isConfigured) return unavailable()
         val bearer = authenticator.bearer() ?: return unavailable()
         val term = query.title ?: query.barcode
         return runCatching { api.search(bearer, term).toSourceResult() }.getOrElse { unavailable() }
