@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.madebypatrick.flipiq.domain.model.Money
@@ -31,9 +32,17 @@ class SettingsRepository(
         val INCLUDE_FEES = booleanPreferencesKey("include_fees")
         val MARKETPLACE_FEE = doublePreferencesKey("marketplace_fee")
         val SHIPPING_CENTS = longPreferencesKey("shipping_cents")
+        val PRICECHARTING_TOKEN = stringPreferencesKey("pricecharting_token")
     }
 
     val settings: Flow<ProfitSettings> = dataStore.data.map { it.toSettings() }
+
+    /** User-entered PriceCharting API token (empty when unset). */
+    val priceChartingToken: Flow<String> = dataStore.data.map { it[Keys.PRICECHARTING_TOKEN] ?: "" }
+
+    suspend fun setPriceChartingToken(token: String) {
+        dataStore.edit { it[Keys.PRICECHARTING_TOKEN] = token.trim() }
+    }
 
     suspend fun update(settings: ProfitSettings) {
         dataStore.edit { p ->

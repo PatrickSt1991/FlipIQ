@@ -57,6 +57,7 @@ fun SettingsScreen(
 ) {
     val saved by viewModel.settings.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val pcToken by viewModel.priceChartingToken.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
 
@@ -104,7 +105,25 @@ fun SettingsScreen(
                 ToggleRow("Prefer fast sellers", edited.preferFastSellers) { edited = edited.copy(preferFastSellers = it) }
             }
 
-            // Appearance is applied immediately (no Save needed).
+            // Data sources & appearance are applied immediately (no Save needed).
+            SettingsSection("Data sources") {
+                Text(
+                    "PriceCharting API token — enables live PriceCharting prices. Leave blank to skip it.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                var token by remember(pcToken) { mutableStateOf(pcToken) }
+                OutlinedTextField(
+                    value = token,
+                    onValueChange = {
+                        token = it
+                        viewModel.setPriceChartingToken(it)
+                    },
+                    label = { Text("PriceCharting token") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
             SettingsSection("Appearance") {
                 Text("Theme", style = MaterialTheme.typography.labelLarge)
                 ThemeModeSelector(theme.mode, viewModel::setThemeMode)

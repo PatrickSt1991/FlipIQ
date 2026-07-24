@@ -25,7 +25,8 @@ import nl.madebypatrick.flipiq.domain.model.Money
  */
 class PriceChartingSource(
     private val api: PriceChartingApi,
-    private val token: String,
+    /** Resolves the current token (runtime setting, falling back to the build-time value). */
+    private val tokenProvider: suspend () -> String,
     private val currencyConverter: CurrencyConverter,
 ) : MarketplaceSource {
 
@@ -33,6 +34,7 @@ class PriceChartingSource(
     override val displayName = "PriceCharting"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
+        val token = runCatching { tokenProvider() }.getOrDefault("")
         if (token.isBlank()) return unavailable()
         return runCatching {
             api.productByUpc(token, query.barcode)
