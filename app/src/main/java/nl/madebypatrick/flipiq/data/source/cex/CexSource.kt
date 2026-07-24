@@ -24,8 +24,10 @@ class CexSource(
     override val displayName = "CeX"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
+        // CeX search is name-based; use the resolved title when we have one, else the barcode.
+        val term = query.title ?: query.barcode
         return runCatching {
-            api.search(query.barcode)
+            api.search(term)
                 .toSourceResult()
                 .toEurFromGbp(currencyConverter)
         }.getOrElse {

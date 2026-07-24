@@ -3,6 +3,7 @@ package nl.madebypatrick.flipiq.data.repository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
@@ -36,17 +37,21 @@ data class FetchedMarket(
 class PriceRepository(
     private val sources: List<MarketplaceSource>,
     private val engine: FlipIQEngine,
+    private val barcodeResolver: BarcodeResolver,
 ) {
 
     suspend fun fetch(barcode: String): FetchedMarket = coroutineScope {
-        val query = ProductQuery(barcode)
+        // Resolve a product name first so name-based sources (CeX, shortcuts) can match on it.
+        val lookedUpTitle = runCatching { barcodeResolver.resolveTitle(barcode) }.getOrNull()
+        val query = ProductQuery(barcode, title = lookedUpTitle)
 
         val results: List<SourceResult> = sources
             .map { source -> async { runCatching { source.lookup(query) }.getOrNull() } }
             .awaitAll()
             .filterNotNull()
 
-        val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle }
+        // Prefer a title a data source returned; otherwise the barcode-lookup result.
+        val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle } ?: lookedUpTitle
         val product = ProductInfo(
             barcode = barcode,
             title = resolvedTitle ?: "Unknown item",

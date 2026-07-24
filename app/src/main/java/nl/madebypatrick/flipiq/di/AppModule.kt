@@ -7,6 +7,10 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
 import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
+import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.NoopBarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
+import nl.madebypatrick.flipiq.data.resolver.UpcItemDbResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
@@ -74,10 +78,17 @@ object AppModule {
         )
     }
 
+    /** Real barcode→title lookup in release; a no-op in demo (mock sources already supply titles). */
+    @Provides
+    @Singleton
+    fun provideBarcodeResolver(upcItemDbApi: UpcItemDbApi): BarcodeResolver =
+        if (BuildConfig.DEMO_MODE) NoopBarcodeResolver() else UpcItemDbResolver(upcItemDbApi)
+
     @Provides
     @Singleton
     fun providePriceRepository(
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
-    ): PriceRepository = PriceRepository(sources, engine)
+        barcodeResolver: BarcodeResolver,
+    ): PriceRepository = PriceRepository(sources, engine, barcodeResolver)
 }
