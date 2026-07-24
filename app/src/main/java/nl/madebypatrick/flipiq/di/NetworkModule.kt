@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.source.cex.CexApi
+import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -71,6 +72,15 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(UpcItemDbApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEbayApi(client: OkHttpClient, json: Json): EbayApi = Retrofit.Builder()
+        .baseUrl("https://api.ebay.com/")
+        .client(client)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+        .create(EbayApi::class.java)
 
     @Provides
     @Named(PRICECHARTING_TOKEN)
