@@ -1,7 +1,6 @@
 package nl.madebypatrick.flipiq.data.source.engine
 
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
-import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.SourceResult
 import nl.madebypatrick.flipiq.domain.model.ListingType
@@ -9,9 +8,10 @@ import nl.madebypatrick.flipiq.domain.model.MarketListing
 import nl.madebypatrick.flipiq.domain.model.Money
 
 /**
- * Marktplaats as a real data source, via the FlipIQ Engine Worker. Falls back to just a search link
- * if the engine isn't configured or fails. Currently the engine only serves Marktplaats, so this is
- * presented as the Marktplaats source; when the engine grows more providers we can split it out.
+ * The FlipIQ Engine as a single data source. It calls the engine Worker's `/prices`, which aggregates
+ * multiple marketplaces (Marktplaats, eBay, …) server-side, and feeds all returned listings — each
+ * tagged with its real marketplace — into the scoring engine. The per-marketplace "open search" chips
+ * are separate shortcut sources.
  */
 class EngineSource(
     private val api: EngineApi,
@@ -19,40 +19,39 @@ class EngineSource(
     private val appKey: String,
 ) : MarketplaceSource {
 
-    override val id = "marktplaats"
-    override val displayName = "Marktplaats"
-
-    val isConfigured: Boolean get() = engineUrl.isNotBlank()
+    override val id = "engine"
+    override val displayName = "FlipIQ Engine"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
         val term = query.title ?: query.barcode
-        val shortcut = MarketplaceUrls.marktplaats(term)
-        if (!isConfigured) return SourceResult(id, emptyList(), available = false, shortcutUrl = shortcut)
-
+        if (term.isBlank()) return unavailable()
         val endpoint = engineUrl.trimEnd('/') + "/prices"
         return runCatching { api.prices(endpoint, appKey, term, query.barcode.ifBlank { null }) }
-            .map { it.toSourceResult(shortcut) }
-            .getOrElse { SourceResult(id, emptyList(), available = false, shortcutUrl = shortcut) }
+            .map { it.toSourceResult() }
+            .getOrElse { unavailable() }
     }
+
+    private fun unavailable() =
+        SourceResult(sourceId = id, listings = emptyList(), available = false, shortcutUrl = null)
 }
 
-/** Map the engine response into Marktplaats listings (ASKING → active buy opportunities). */
-fun EngineResponse.toSourceResult(shortcut: String): SourceResult {
-    val listings = listings.mapNotNull { l ->
+/** Map the engine response into listings, each tagged with the marketplace it came from. */
+fun EngineResponse.toSourceResult(): SourceResult {
+    val mapped = listings.mapNotNull { l ->
         val cents = l.priceCents ?: return@mapNotNull null
         if (cents <= 0) return@mapNotNull null
         MarketListing(
-            sourceId = "marktplaats",
-            title = l.title ?: "Marktplaats item",
+            sourceId = l.source ?: "engine",
+            title = l.title ?: "item",
             price = Money.ofCents(cents),
             type = if (l.type == "SOLD") ListingType.SOLD else ListingType.ACTIVE,
             url = l.url,
         )
     }
     return SourceResult(
-        sourceId = "marktplaats",
-        listings = listings,
-        available = listings.isNotEmpty(),
-        shortcutUrl = shortcut,
+        sourceId = "engine",
+        listings = mapped,
+        available = mapped.isNotEmpty(),
+        shortcutUrl = null,
     )
 }

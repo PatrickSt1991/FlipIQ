@@ -38,13 +38,8 @@ android {
         // Off by default (honest: only real sources feed the engine); the debug build turns it on.
         buildConfigField("boolean", "DEMO_MODE", "false")
 
-        // eBay token proxy (Cloudflare Worker). The secret lives in the Worker, never in the app.
-        // Set ebay.proxyUrl / ebay.proxyKey in local.properties (or EBAY_PROXY_URL / EBAY_PROXY_KEY
-        // env). Blank proxy URL → eBay just links out.
-        buildConfigField("String", "EBAY_PROXY_URL", "\"${secret("ebay.proxyUrl", "EBAY_PROXY_URL")}\"")
-        buildConfigField("String", "EBAY_PROXY_KEY", "\"${secret("ebay.proxyKey", "EBAY_PROXY_KEY")}\"")
-
-        // FlipIQ Engine (Cloudflare Worker) — real Marktplaats data. Blank → Marktplaats links out.
+        // FlipIQ Engine (Cloudflare Worker) — real Marktplaats + eBay data. Blank → those link out.
+        // eBay creds now live in the engine Worker, not the app.
         buildConfigField("String", "ENGINE_URL", "\"${secret("engine.url", "ENGINE_URL")}\"")
         buildConfigField("String", "ENGINE_KEY", "\"${secret("engine.key", "ENGINE_KEY")}\"")
     }
