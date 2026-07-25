@@ -12,6 +12,7 @@ import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.source.cex.CexApi
 import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
+import nl.madebypatrick.flipiq.data.source.engine.EngineApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -101,6 +102,16 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(EbayApi::class.java)
+
+    // Base is a placeholder — EngineApi.prices() uses @Url with the configured engine endpoint.
+    @Provides
+    @Singleton
+    fun provideEngineApi(client: OkHttpClient, json: Json): EngineApi = Retrofit.Builder()
+        .baseUrl("https://flipiq-engine.invalid/")
+        .client(client)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+        .create(EngineApi::class.java)
 
     @Provides
     @Named(PRICECHARTING_TOKEN)
