@@ -10,7 +10,6 @@ import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
 import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
-import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import okhttp3.MediaType.Companion.toMediaType
@@ -83,15 +82,6 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(OpenLibraryApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideEbayApi(client: OkHttpClient, json: Json): EbayApi = Retrofit.Builder()
-        .baseUrl("https://api.ebay.com/")
-        .client(client)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-        .create(EbayApi::class.java)
 
     // Base is a placeholder — EngineApi.prices() uses @Url with the configured engine endpoint.
     @Provides

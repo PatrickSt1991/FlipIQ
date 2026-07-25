@@ -17,38 +17,40 @@ class EngineMapperTest {
               "query": "lego jurassic world",
               "listings": [
                 {"source":"marktplaats","title":"LEGO Jurassic World","price_cents":1500,"currency":"EUR","type":"ASKING","url":"https://www.marktplaats.nl/v/x"},
-                {"source":"marktplaats","title":"No price","price_cents":0,"type":"ASKING"}
+                {"source":"ebay","title":"LEGO JW eBay","price_cents":1299,"currency":"EUR","type":"ASKING"}
               ],
-              "providers": [{"provider":"marktplaats","available":true,"count":2}]
+              "providers": [{"provider":"marktplaats","available":true,"count":1},{"provider":"ebay","available":true,"count":1}]
             }
         """.trimIndent()
         val dto = json.decodeFromString<EngineResponse>(payload)
         assertThat(dto.listings).hasSize(2)
-        assertThat(dto.providers.first().provider).isEqualTo("marktplaats")
+        assertThat(dto.providers.map { it.provider }).containsExactly("marktplaats", "ebay")
     }
 
     @Test
-    fun `maps asking listings to active and drops zero prices`() {
+    fun `tags each listing with its marketplace and drops zero prices`() {
         val resp = EngineResponse(
             listings = listOf(
                 EngineListing(source = "marktplaats", title = "A", priceCents = 1500, type = "ASKING", url = "u"),
-                EngineListing(source = "marktplaats", title = "Sold", priceCents = 900, type = "SOLD"),
+                EngineListing(source = "ebay", title = "B", priceCents = 1299, type = "ASKING"),
                 EngineListing(source = "marktplaats", title = "Zero", priceCents = 0, type = "ASKING"),
             ),
         )
-        val result = resp.toSourceResult(shortcut = "https://marktplaats/search")
+        val result = resp.toSourceResult()
 
         assertThat(result.available).isTrue()
+        assertThat(result.sourceId).isEqualTo("engine")
+        assertThat(result.shortcutUrl).isNull()
         assertThat(result.listings).hasSize(2) // zero dropped
         val byTitle = result.listings.associateBy { it.title }
+        assertThat(byTitle["A"]?.sourceId).isEqualTo("marktplaats")
         assertThat(byTitle["A"]?.type).isEqualTo(ListingType.ACTIVE)
         assertThat(byTitle["A"]?.price).isEqualTo(Money.ofCents(1500))
-        assertThat(byTitle["Sold"]?.type).isEqualTo(ListingType.SOLD)
-        assertThat(result.shortcutUrl).isEqualTo("https://marktplaats/search")
+        assertThat(byTitle["B"]?.sourceId).isEqualTo("ebay")
     }
 
     @Test
     fun `empty listings are unavailable`() {
-        assertThat(EngineResponse().toSourceResult("s").available).isFalse()
+        assertThat(EngineResponse().toSourceResult().available).isFalse()
     }
 }

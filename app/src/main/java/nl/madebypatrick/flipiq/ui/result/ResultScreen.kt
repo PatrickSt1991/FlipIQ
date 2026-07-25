@@ -449,7 +449,10 @@ private fun MarketplaceShortcutsCard(analysis: ScanAnalysis) {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(source.shortcutUrl)))
                         }
                     },
-                    label = { Text("${source.displayName} (${source.listingCount})") },
+                    label = {
+                        val n = source.listingCount
+                        Text(if (n > 0) "${source.displayName} ($n)" else source.displayName)
+                    },
                     trailingIcon = {
                         Icon(
                             Icons.AutoMirrored.Filled.OpenInNew,

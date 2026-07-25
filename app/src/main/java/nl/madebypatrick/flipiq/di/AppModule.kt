@@ -20,9 +20,6 @@ import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
-import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
-import nl.madebypatrick.flipiq.data.source.ebay.EbayAuthenticator
-import nl.madebypatrick.flipiq.data.source.ebay.EbaySource
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
 import nl.madebypatrick.flipiq.data.source.engine.EngineSource
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
@@ -50,18 +47,16 @@ object AppModule {
     /**
      * The active set of marketplace sources.
      *
-     * Live price data: **CeX** (keyless) and **PriceCharting** (needs a token, from Settings or the
-     * build). **Vinted** and **Marktplaats** are shortcut-only (no API, no scraping) — they link to
-     * the site's search but never feed prices to the engine.
+     * **Real price data** comes from the FlipIQ Engine (Marktplaats + eBay, aggregated server-side)
+     * and, when a token is set, PriceCharting. Everything else is a shortcut-only "open search" link
+     * (CeX/Vinted/Tweakers, and eBay/Marktplaats links to complement the engine data).
      *
-     * In **demo mode** (debug builds) eBay and PriceCharting are backed by realistic mock data so the
-     * app is explorable; a release build only feeds the engine real numbers and links out for the rest.
+     * In demo mode (unused by default) eBay/PriceCharting fall back to mock data.
      */
     @Provides
     @Singleton
     fun provideSources(
         priceChartingApi: PriceChartingApi,
-        ebayApi: EbayApi,
         engineApi: EngineApi,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,
@@ -72,32 +67,28 @@ object AppModule {
         val tokenProvider: suspend () -> String = {
             settingsRepository.priceChartingToken.first().ifBlank { BuildConfig.PRICECHARTING_TOKEN }
         }
-
-        // eBay: mock in demo; live Browse API when the token proxy is configured; otherwise a link.
-        val ebayAuth = EbayAuthenticator(ebayApi, BuildConfig.EBAY_PROXY_URL, BuildConfig.EBAY_PROXY_KEY)
-        val ebay: MarketplaceSource = when {
-            demo -> EbaySoldSource()
-            ebayAuth.isConfigured -> EbaySource(ebayApi, ebayAuth)
-            else -> ShortcutOnlySource("ebay", "eBay Sold", MarketplaceUrls::ebaySold)
-        }
         val priceCharting: MarketplaceSource =
             if (demo) PriceChartingSource() else LivePriceChartingSource(priceChartingApi, tokenProvider, currencyConverter)
 
-        // Marktplaats: real data via the FlipIQ Engine when configured, else a search link.
-        val marktplaats: MarketplaceSource =
+        // FlipIQ Engine — aggregated Marktplaats + eBay data when configured.
+        val engine: MarketplaceSource? =
             if (BuildConfig.ENGINE_URL.isNotBlank()) {
                 EngineSource(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+            } else if (demo) {
+                EbaySoldSource() // demo fallback so there's some data
             } else {
-                ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats)
+                null
             }
 
-        return listOf(
-            ebay,
+        return listOfNotNull(
+            engine,
             priceCharting,
+            // Shortcut-only "open search" links.
+            ShortcutOnlySource("ebay", "eBay", MarketplaceUrls::ebaySold),
+            ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
             // CeX's API is behind Cloudflare bot protection (403), so it's a search link for now.
             ShortcutOnlySource("cex", "CeX", MarketplaceUrls::cex),
             ShortcutOnlySource("vinted", "Vinted", MarketplaceUrls::vinted),
-            marktplaats,
             ShortcutOnlySource("tweakers", "Tweakers", MarketplaceUrls::tweakers),
         )
     }
