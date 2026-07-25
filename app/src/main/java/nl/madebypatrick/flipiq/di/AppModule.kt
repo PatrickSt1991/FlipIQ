@@ -25,6 +25,8 @@ import nl.madebypatrick.flipiq.data.source.cex.CexSource
 import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
 import nl.madebypatrick.flipiq.data.source.ebay.EbayAuthenticator
 import nl.madebypatrick.flipiq.data.source.ebay.EbaySource
+import nl.madebypatrick.flipiq.data.source.engine.EngineApi
+import nl.madebypatrick.flipiq.data.source.engine.EngineSource
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
@@ -63,6 +65,7 @@ object AppModule {
         priceChartingApi: PriceChartingApi,
         cexApi: CexApi,
         ebayApi: EbayApi,
+        engineApi: EngineApi,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
@@ -83,12 +86,20 @@ object AppModule {
         val priceCharting: MarketplaceSource =
             if (demo) PriceChartingSource() else LivePriceChartingSource(priceChartingApi, tokenProvider, currencyConverter)
 
+        // Marktplaats: real data via the FlipIQ Engine when configured, else a search link.
+        val marktplaats: MarketplaceSource =
+            if (BuildConfig.ENGINE_URL.isNotBlank()) {
+                EngineSource(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+            } else {
+                ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats)
+            }
+
         return listOf(
             ebay,
             priceCharting,
             CexSource(cexApi, currencyConverter),
             ShortcutOnlySource("vinted", "Vinted", MarketplaceUrls::vinted),
-            ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
+            marktplaats,
             ShortcutOnlySource("tweakers", "Tweakers", MarketplaceUrls::tweakers),
         )
     }

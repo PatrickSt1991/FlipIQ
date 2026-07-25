@@ -43,6 +43,10 @@ android {
         // env). Blank proxy URL → eBay just links out.
         buildConfigField("String", "EBAY_PROXY_URL", "\"${secret("ebay.proxyUrl", "EBAY_PROXY_URL")}\"")
         buildConfigField("String", "EBAY_PROXY_KEY", "\"${secret("ebay.proxyKey", "EBAY_PROXY_KEY")}\"")
+
+        // FlipIQ Engine (Cloudflare Worker) — real Marktplaats data. Blank → Marktplaats links out.
+        buildConfigField("String", "ENGINE_URL", "\"${secret("engine.url", "ENGINE_URL")}\"")
+        buildConfigField("String", "ENGINE_KEY", "\"${secret("engine.key", "ENGINE_KEY")}\"")
     }
 
     // Release signing is configured only when a keystore is supplied (via local.properties or CI
