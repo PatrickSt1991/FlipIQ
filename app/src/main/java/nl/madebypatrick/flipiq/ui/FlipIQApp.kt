@@ -36,7 +36,7 @@ fun FlipIQApp() {
         composable(Routes.SCAN) {
             ScanScreen(
                 onBarcodeScanned = { barcode -> navController.navigate(Routes.result(barcode)) },
-                onScanFront = { navController.navigate(Routes.TEXT_SCAN) },
+                onSearchTitle = { title -> navController.navigate(Routes.search(title)) },
                 onOpenCollection = { navController.navigate(Routes.COLLECTION) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenStats = { navController.navigate(Routes.STATS) },

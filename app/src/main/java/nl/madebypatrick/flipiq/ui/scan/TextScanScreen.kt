@@ -47,24 +47,15 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 /**
- * OCR fallback with a **snapshot** flow (fixes the "never stops scanning" problem):
- * aim at the product's front → tap **Capture** → the recognised text freezes into an editable field
- * → trim it → **Search**. The camera reads only while aiming; nothing churns.
+ * OCR fallback screen — wraps [FrontScanPane] in a Scaffold with a back button (used from the
+ * result screen's no-data card).
  */
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextScanScreen(
     onBack: () -> Unit,
     onSearch: (String) -> Unit,
 ) {
-    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
-
-    // Latest recognised text from the live camera — NOT shown while aiming (so it doesn't flicker);
-    // only read when the user taps Capture.
-    var latest by remember { mutableStateOf("") }
-    // Null while aiming; a snapshot string once captured (switches to the review/edit state).
-    var captured by remember { mutableStateOf<String?>(null) }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,47 +68,60 @@ fun TextScanScreen(
             )
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            when {
-                !cameraPermission.status.isGranted -> ManualFallback(
-                    onEnableCamera = { cameraPermission.launchPermissionRequest() },
-                    onSearch = onSearch,
-                )
+        FrontScanPane(
+            onSearch = onSearch,
+            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+        )
+    }
+}
 
-                captured == null -> {
-                    // Aiming: live camera, no text shown, single Capture action.
-                    TextCamera(
-                        onText = { latest = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(3f / 4f)
-                            .clip(RoundedCornerShape(16.dp)),
-                    )
-                    Text(
-                        "Aim at the product name, then capture.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Button(
-                        onClick = { captured = firstMeaningfulLine(latest) },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null)
-                        Text("  Capture")
-                    }
+/**
+ * The reusable OCR **snapshot** pane (no Scaffold), used both as the standalone screen and inline in
+ * the scan screen's "Front" mode. Aim → tap **Capture** → the recognised text freezes into an
+ * editable field → trim → **Search**. The camera reads only while aiming; nothing churns.
+ */
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun FrontScanPane(
+    onSearch: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+    // Latest recognised text — NOT shown while aiming (so it doesn't flicker); read on Capture.
+    var latest by remember { mutableStateOf("") }
+    // Null while aiming; a snapshot string once captured (switches to the review/edit state).
+    var captured by remember { mutableStateOf<String?>(null) }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        when {
+            !cameraPermission.status.isGranted -> ManualFallback(
+                onEnableCamera = { cameraPermission.launchPermissionRequest() },
+                onSearch = onSearch,
+            )
+
+            captured == null -> {
+                TextCamera(
+                    onText = { latest = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(3f / 4f)
+                        .clip(RoundedCornerShape(16.dp)),
+                )
+                Text("Aim at the product name, then capture.", style = MaterialTheme.typography.bodyMedium)
+                Button(
+                    onClick = { captured = firstMeaningfulLine(latest) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                    Text("  Capture")
                 }
-
-                else -> CapturedReview(
-                    initial = captured.orEmpty(),
-                    onRescan = { captured = null },
-                    onSearch = onSearch,
-                )
             }
+
+            else -> CapturedReview(
+                initial = captured.orEmpty(),
+                onRescan = { captured = null },
+                onSearch = onSearch,
+            )
         }
     }
 }
