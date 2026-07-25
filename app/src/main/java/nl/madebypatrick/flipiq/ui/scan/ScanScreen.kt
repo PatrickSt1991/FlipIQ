@@ -35,6 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -66,11 +69,15 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun ScanScreen(
     onBarcodeScanned: (String) -> Unit,
+    onSearchTitle: (String) -> Unit,
     onOpenCollection: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+    // Front (OCR the box) is the default: without a complete EAN database, a barcode often can't be
+    // resolved to a title, and the real sources (eBay, Marktplaats) search by title anyway.
+    var mode by remember { mutableStateOf(ScanMode.FRONT) }
 
     Scaffold(
         topBar = {
@@ -107,26 +114,56 @@ fun ScanScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (cameraPermission.status.isGranted) {
-                CameraScanner(
-                    onBarcode = onBarcodeScanned,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(3f / 4f)
-                        .clip(RoundedCornerShape(16.dp)),
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "Point at a barcode and we'll do the math ✨",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            } else {
-                CameraPermissionPrompt(onRequest = { cameraPermission.launchPermissionRequest() })
-            }
+            ModeToggle(mode = mode, onModeChange = { mode = it })
+            Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(24.dp))
-            ManualEntry(onSubmit = onBarcodeScanned)
+            when (mode) {
+                ScanMode.FRONT -> FrontScanPane(
+                    onSearch = onSearchTitle,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                ScanMode.BARCODE -> {
+                    if (cameraPermission.status.isGranted) {
+                        CameraScanner(
+                            onBarcode = onBarcodeScanned,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(3f / 4f)
+                                .clip(RoundedCornerShape(16.dp)),
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "Point at a barcode and we'll do the math ✨",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    } else {
+                        CameraPermissionPrompt(onRequest = { cameraPermission.launchPermissionRequest() })
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    ManualEntry(onSubmit = onBarcodeScanned)
+                }
+            }
         }
+    }
+}
+
+private enum class ScanMode { FRONT, BARCODE }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModeToggle(mode: ScanMode, onModeChange: (ScanMode) -> Unit) {
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        SegmentedButton(
+            selected = mode == ScanMode.FRONT,
+            onClick = { onModeChange(ScanMode.FRONT) },
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+        ) { Text("📸 Front") }
+        SegmentedButton(
+            selected = mode == ScanMode.BARCODE,
+            onClick = { onModeChange(ScanMode.BARCODE) },
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+        ) { Text("⁞⁞ Barcode") }
     }
 }
 
