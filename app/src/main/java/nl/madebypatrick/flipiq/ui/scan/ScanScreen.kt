@@ -66,6 +66,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun ScanScreen(
     onBarcodeScanned: (String) -> Unit,
+    onScanFront: () -> Unit,
     onOpenCollection: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
@@ -123,6 +124,12 @@ fun ScanScreen(
             } else {
                 CameraPermissionPrompt(onRequest = { cameraPermission.launchPermissionRequest() })
             }
+
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onScanFront,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("📸  No barcode? Snap the front") }
 
             Spacer(Modifier.height(24.dp))
             ManualEntry(onSubmit = onBarcodeScanned)
