@@ -20,8 +20,6 @@ import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
-import nl.madebypatrick.flipiq.data.source.cex.CexApi
-import nl.madebypatrick.flipiq.data.source.cex.CexSource
 import nl.madebypatrick.flipiq.data.source.ebay.EbayApi
 import nl.madebypatrick.flipiq.data.source.ebay.EbayAuthenticator
 import nl.madebypatrick.flipiq.data.source.ebay.EbaySource
@@ -63,7 +61,6 @@ object AppModule {
     @Singleton
     fun provideSources(
         priceChartingApi: PriceChartingApi,
-        cexApi: CexApi,
         ebayApi: EbayApi,
         engineApi: EngineApi,
         currencyConverter: CurrencyConverter,
@@ -97,7 +94,8 @@ object AppModule {
         return listOf(
             ebay,
             priceCharting,
-            CexSource(cexApi, currencyConverter),
+            // CeX's API is behind Cloudflare bot protection (403), so it's a search link for now.
+            ShortcutOnlySource("cex", "CeX", MarketplaceUrls::cex),
             ShortcutOnlySource("vinted", "Vinted", MarketplaceUrls::vinted),
             marktplaats,
             ShortcutOnlySource("tweakers", "Tweakers", MarketplaceUrls::tweakers),
