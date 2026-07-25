@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -45,8 +47,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 /**
- * OCR fallback: point the camera at the product's front, read the text, and search by that title.
- * The recognised text is editable so the user can trim it to the actual product name before searching.
+ * OCR fallback with a **snapshot** flow (fixes the "never stops scanning" problem):
+ * aim at the product's front → tap **Capture** → the recognised text freezes into an editable field
+ * → trim it → **Search**. The camera reads only while aiming; nothing churns.
  */
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -55,8 +58,12 @@ fun TextScanScreen(
     onSearch: (String) -> Unit,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
-    var detected by remember { mutableStateOf("") }
-    var query by remember { mutableStateOf("") }
+
+    // Latest recognised text from the live camera — NOT shown while aiming (so it doesn't flicker);
+    // only read when the user taps Capture.
+    var latest by remember { mutableStateOf("") }
+    // Null while aiming; a snapshot string once captured (switches to the review/edit state).
+    var captured by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -77,55 +84,94 @@ fun TextScanScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (cameraPermission.status.isGranted) {
-                TextCamera(
-                    onText = { detected = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(4f / 3f)
-                        .clip(RoundedCornerShape(16.dp)),
+            when {
+                !cameraPermission.status.isGranted -> ManualFallback(
+                    onEnableCamera = { cameraPermission.launchPermissionRequest() },
+                    onSearch = onSearch,
                 )
-                if (detected.isNotBlank()) {
-                    Text("Detected", style = MaterialTheme.typography.labelLarge)
-                    Text(
-                        detected.take(160),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
+
+                captured == null -> {
+                    // Aiming: live camera, no text shown, single Capture action.
+                    TextCamera(
+                        onText = { latest = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(3f / 4f)
+                            .clip(RoundedCornerShape(16.dp)),
                     )
-                    OutlinedButton(
-                        onClick = { query = detected.lines().firstOrNull { it.isNotBlank() }?.trim() ?: detected.trim() },
+                    Text(
+                        "Aim at the product name, then capture.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(
+                        onClick = { captured = firstMeaningfulLine(latest) },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Use detected text") }
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null)
+                        Text("  Capture")
+                    }
                 }
-            } else {
-                Button(
-                    onClick = { cameraPermission.launchPermissionRequest() },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("Enable camera") }
-                Text(
-                    "Or just type the product name below.",
-                    style = MaterialTheme.typography.bodyMedium,
+
+                else -> CapturedReview(
+                    initial = captured.orEmpty(),
+                    onRescan = { captured = null },
+                    onSearch = onSearch,
                 )
             }
-
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                label = { Text("Search text") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = {
-                    val term = query.trim().ifBlank { detected.lines().firstOrNull { it.isNotBlank() }?.trim().orEmpty() }
-                    if (term.isNotBlank()) onSearch(term)
-                },
-                enabled = query.isNotBlank() || detected.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Search this") }
         }
     }
 }
+
+/** Editable review of the captured text, with Search / Rescan. */
+@Composable
+private fun CapturedReview(
+    initial: String,
+    onRescan: () -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    var query by remember { mutableStateOf(initial) }
+    Text("Captured — tidy it up if needed", style = MaterialTheme.typography.titleMedium)
+    OutlinedTextField(
+        value = query,
+        onValueChange = { query = it },
+        label = { Text("Search text") },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Button(
+        onClick = { if (query.isNotBlank()) onSearch(query.trim()) },
+        enabled = query.isNotBlank(),
+        modifier = Modifier.fillMaxWidth(),
+    ) { Text("Search this") }
+    OutlinedButton(onClick = onRescan, modifier = Modifier.fillMaxWidth()) { Text("Rescan") }
+}
+
+@Composable
+private fun ManualFallback(onEnableCamera: () -> Unit, onSearch: (String) -> Unit) {
+    var query by remember { mutableStateOf("") }
+    Button(onClick = onEnableCamera, modifier = Modifier.fillMaxWidth()) { Text("Enable camera") }
+    Text(
+        "Or type the product name below.",
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+    )
+    OutlinedTextField(
+        value = query,
+        onValueChange = { query = it },
+        label = { Text("Search text") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Button(
+        onClick = { if (query.isNotBlank()) onSearch(query.trim()) },
+        enabled = query.isNotBlank(),
+        modifier = Modifier.fillMaxWidth(),
+    ) { Text("Search this") }
+}
+
+/** Product names are usually the largest text; the longest recognised line is a good first guess. */
+private fun firstMeaningfulLine(text: String): String =
+    text.lines().map { it.trim() }.filter { it.isNotBlank() }.maxByOrNull { it.length }?.take(80)
+        ?: text.trim()
 
 @Composable
 private fun TextCamera(
@@ -163,5 +209,12 @@ private fun TextCamera(
             },
             modifier = Modifier.fillMaxSize(),
         )
+    }
+
+    // Stop the camera/analysis when this leaves the composition (e.g. after Capture).
+    DisposableEffect(Unit) {
+        onDispose {
+            runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
+        }
     }
 }
