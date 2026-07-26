@@ -7,7 +7,8 @@ import retrofit2.http.Query
 
 /**
  * PriceCharting product API (https://www.pricecharting.com/api-documentation).
- * Looks a product up by its UPC/EAN — exactly what a barcode scan gives us.
+ * Looks a product up by its UPC/EAN — exactly what a barcode scan gives us — or by name, which is
+ * all a front/OCR scan can offer.
  */
 interface PriceChartingApi {
 
@@ -15,6 +16,16 @@ interface PriceChartingApi {
     suspend fun productByUpc(
         @Query("t") token: String,
         @Query("upc") upc: String,
+    ): PriceChartingProductDto
+
+    /**
+     * Full-text lookup by product name (and optionally console), returning the single best match.
+     * Used for front/OCR scans, where there is no barcode at all.
+     */
+    @GET("api/product")
+    suspend fun productByName(
+        @Query("t") token: String,
+        @Query("q") query: String,
     ): PriceChartingProductDto
 }
 
