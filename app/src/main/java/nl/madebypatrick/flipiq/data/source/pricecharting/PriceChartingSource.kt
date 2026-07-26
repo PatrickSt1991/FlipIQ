@@ -13,8 +13,9 @@ import nl.madebypatrick.flipiq.domain.model.Money
 
 /**
  * Real PriceCharting integration — the first live marketplace source, sitting behind the same
- * [MarketplaceSource] seam as the mocks. It looks a product up by the scanned UPC and turns
- * PriceCharting's loose/CIB/new price guide into market listings the engine can score.
+ * [MarketplaceSource] seam as the mocks. It looks a product up by the scanned UPC — or, for a
+ * front/OCR scan, by name — and turns PriceCharting's loose/CIB/new price guide into market listings
+ * the engine can score.
  *
  * Only wired in when a token is configured (see [nl.madebypatrick.flipiq.di.NetworkModule]); without
  * one the mock stays in place. Guards against network/parse failures by returning an unavailable,
@@ -36,8 +37,17 @@ class PriceChartingSource(
     override suspend fun lookup(query: ProductQuery): SourceResult {
         val token = runCatching { tokenProvider() }.getOrDefault("")
         if (token.isBlank()) return unavailable()
+        val title = query.title?.trim().orEmpty()
+        if (query.barcode.isBlank() && title.isBlank()) return unavailable()
         return runCatching {
-            api.productByUpc(token, query.barcode)
+            // A front/OCR scan has no barcode; querying `upc=` with an empty string always misses,
+            // which silently knocked PriceCharting out of every title search.
+            val product = if (query.barcode.isNotBlank()) {
+                api.productByUpc(token, query.barcode)
+            } else {
+                api.productByName(token, title)
+            }
+            product
                 .toSourceResult()
                 .toEur(currencyConverter) // PriceCharting is USD → normalise to the EUR base.
         }.getOrElse { unavailable() }

@@ -1,9 +1,13 @@
 package nl.madebypatrick.flipiq.ui.scan
 
 import android.Manifest
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +50,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import java.util.concurrent.Executors
 
 /**
  * OCR fallback screen — wraps [FrontScanPane] in a Scaffold with a back button (used from the
@@ -77,8 +83,12 @@ fun TextScanScreen(
 
 /**
  * The reusable OCR **snapshot** pane (no Scaffold), used both as the standalone screen and inline in
- * the scan screen's "Front" mode. Aim → tap **Capture** → the recognised text freezes into an
- * editable field → trim → **Search**. The camera reads only while aiming; nothing churns.
+ * the scan screen's "Front" mode. Aim → tap **Capture** → the recognised title freezes into an
+ * editable field → trim → **Search**.
+ *
+ * The live candidate *is* shown while aiming: without it there's no way to tell whether the camera
+ * is reading anything, and a silent failure looks identical to a broken feature. Recomposition is
+ * bounded because the candidate is only re-published when the guess actually changes.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -87,10 +97,21 @@ fun FrontScanPane(
     modifier: Modifier = Modifier,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
-    // Latest recognised text — NOT shown while aiming (so it doesn't flicker); read on Capture.
-    var latest by remember { mutableStateOf("") }
+    // Best title guess from the most recent frame that read anything at all. Never blanked by a
+    // momentarily bad frame, so Capture stays available once we've seen the title.
+    var candidate by remember { mutableStateOf("") }
     // Null while aiming; a snapshot string once captured (switches to the review/edit state).
     var captured by remember { mutableStateOf<String?>(null) }
+
+    // Front is the default scan mode, so ask for the camera instead of silently dropping the user
+    // into the type-it-yourself fallback on first launch. Once per pane — no dialog spam.
+    var permissionRequested by remember { mutableStateOf(false) }
+    LaunchedEffect(cameraPermission.status.isGranted) {
+        if (!cameraPermission.status.isGranted && !permissionRequested) {
+            permissionRequested = true
+            cameraPermission.launchPermissionRequest()
+        }
+    }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         when {
@@ -101,15 +122,28 @@ fun FrontScanPane(
 
             captured == null -> {
                 TextCamera(
-                    onText = { latest = it },
+                    onLines = { lines ->
+                        val guess = bestTitleGuess(lines)
+                        if (guess.isNotBlank() && guess != candidate) candidate = guess
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(3f / 4f)
                         .clip(RoundedCornerShape(16.dp)),
                 )
-                Text("Aim at the product name, then capture.", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    if (candidate.isBlank()) {
+                        "Aim at the title — fill the frame with the cover and hold steady."
+                    } else {
+                        "Reading: $candidate"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Button(
-                    onClick = { captured = firstMeaningfulLine(latest) },
+                    // Guard: capturing a blank guess used to strand the user on the review step with
+                    // an empty field and a disabled Search button.
+                    onClick = { if (candidate.isNotBlank()) captured = candidate },
+                    enabled = candidate.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
@@ -119,7 +153,11 @@ fun FrontScanPane(
 
             else -> CapturedReview(
                 initial = captured.orEmpty(),
-                onRescan = { captured = null },
+                onRescan = {
+                    // Clear the guess too, or a rescan can "capture" the previous item's title.
+                    candidate = ""
+                    captured = null
+                },
                 onSearch = onSearch,
             )
         }
@@ -133,7 +171,7 @@ private fun CapturedReview(
     onRescan: () -> Unit,
     onSearch: (String) -> Unit,
 ) {
-    var query by remember { mutableStateOf(initial) }
+    var query by remember(initial) { mutableStateOf(initial) }
     Text("Captured — tidy it up if needed", style = MaterialTheme.typography.titleMedium)
     OutlinedTextField(
         value = query,
@@ -172,34 +210,48 @@ private fun ManualFallback(onEnableCamera: () -> Unit, onSearch: (String) -> Uni
     ) { Text("Search this") }
 }
 
-/** Product names are usually the largest text; the longest recognised line is a good first guess. */
-private fun firstMeaningfulLine(text: String): String =
-    text.lines().map { it.trim() }.filter { it.isNotBlank() }.maxByOrNull { it.length }?.take(80)
-        ?: text.trim()
-
 @Composable
 private fun TextCamera(
-    onText: (String) -> Unit,
+    onLines: (List<OcrLine>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    // OCR on a worker thread: the frames are ~1440x1080 now, which is far too much work to hang off
+    // the main executor like the barcode path does.
+    val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AndroidView(
             factory = { ctx ->
                 val previewView = PreviewView(ctx)
-                val executor = ContextCompat.getMainExecutor(ctx)
+                val mainExecutor = ContextCompat.getMainExecutor(ctx)
                 val providerFuture = ProcessCameraProvider.getInstance(ctx)
                 providerFuture.addListener({
                     val provider = providerFuture.get()
                     val preview = Preview.Builder().build().also {
                         it.surfaceProvider = previewView.surfaceProvider
                     }
+
+                    // ML Kit wants >= 1280x720 for text recognition and glyphs at least ~16px tall.
+                    // CameraX defaults ImageAnalysis to 640x480, at which a cover title held at
+                    // arm's length is a handful of pixels and simply never resolves — this was why
+                    // Front mode read nothing while Barcode mode was fine. 4:3 to match the preview.
+                    val resolutionSelector = ResolutionSelector.Builder()
+                        .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                        .setResolutionStrategy(
+                            ResolutionStrategy(
+                                Size(1440, 1080),
+                                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+                            ),
+                        )
+                        .build()
+
                     val analysis = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setResolutionSelector(resolutionSelector)
                         .build()
-                        .also { it.setAnalyzer(executor, TextRecognitionAnalyzer(onText)) }
+                        .also { it.setAnalyzer(analysisExecutor, TextRecognitionAnalyzer(onLines)) }
 
                     provider.unbindAll()
                     provider.bindToLifecycle(
@@ -208,7 +260,7 @@ private fun TextCamera(
                         preview,
                         analysis,
                     )
-                }, executor)
+                }, mainExecutor)
                 previewView
             },
             modifier = Modifier.fillMaxSize(),
@@ -219,6 +271,7 @@ private fun TextCamera(
     DisposableEffect(Unit) {
         onDispose {
             runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
+            analysisExecutor.shutdown()
         }
     }
 }
