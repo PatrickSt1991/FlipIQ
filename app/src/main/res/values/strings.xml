@@ -210,4 +210,15 @@
     <!-- Discover screen -->
     <string name="discover_title">What to hunt for</string>
     <string name="discover_load_error">Couldn\'t load games for %1$s.</string>
+    <string name="cd_haul">Haul scan</string>
+    <string name="haul_title">Haul scan</string>
+    <string name="haul_aim">Aim at the pile of games or DVDs.</string>
+    <string name="haul_scan_button">Scan the pile</string>
+    <string name="haul_reading">Reading the pile…</string>
+    <string name="haul_scan_again">Scan again</string>
+    <string name="haul_empty">Nothing recognised — try a clearer, closer photo.</string>
+    <string name="haul_grab">Grab</string>
+    <string name="haul_skip">Skip</string>
+    <string name="haul_max_buy">max buy %1$s</string>
+    <string name="haul_no_value">No price found</string>
 </resources>

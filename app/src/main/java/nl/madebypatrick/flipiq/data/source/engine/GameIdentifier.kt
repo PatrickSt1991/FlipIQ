@@ -52,7 +52,7 @@ class EngineGameIdentifier(
 private const val MAX_DIM = 1024
 private const val JPEG_QUALITY = 85
 
-private fun prepareForUpload(jpeg: ByteArray, rotationDegrees: Int): ByteArray {
+internal fun prepareForUpload(jpeg: ByteArray, rotationDegrees: Int): ByteArray {
     // Cheap first pass: let the decoder subsample so we never hold the full-res bitmap in memory.
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, bounds)
