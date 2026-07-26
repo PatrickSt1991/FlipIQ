@@ -39,7 +39,28 @@ interface EngineApi {
         @Header("X-App-Key") appKey: String,
         @Query("console") console: String,
     ): TopResponse
+
+    /** Many items in one photo → titles with quick resale values (`/haul`). */
+    @POST
+    suspend fun haul(
+        @Url url: String,
+        @Header("X-App-Key") appKey: String,
+        @Body body: IdentifyRequest,
+    ): HaulResponse
 }
+
+@Serializable
+data class HaulResponse(
+    @SerialName("items") val items: List<HaulItemDto> = emptyList(),
+)
+
+@Serializable
+data class HaulItemDto(
+    @SerialName("title") val title: String,
+    @SerialName("value_cents") val valueCents: Long? = null,
+    @SerialName("currency") val currency: String? = null,
+    @SerialName("image") val image: String? = null,
+)
 
 @Serializable
 data class TopResponse(

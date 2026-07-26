@@ -209,4 +209,15 @@
     <!-- Discover screen -->
     <string name="discover_title">Waar je op moet jagen</string>
     <string name="discover_load_error">Kon geen games laden voor %1$s.</string>
+    <string name="cd_haul">Partij scannen</string>
+    <string name="haul_title">Partij scannen</string>
+    <string name="haul_aim">Richt op de stapel games of dvd\'s.</string>
+    <string name="haul_scan_button">Scan de stapel</string>
+    <string name="haul_reading">De stapel lezen…</string>
+    <string name="haul_scan_again">Opnieuw scannen</string>
+    <string name="haul_empty">Niets herkend — probeer een scherpere foto van dichterbij.</string>
+    <string name="haul_grab">Pakken</string>
+    <string name="haul_skip">Overslaan</string>
+    <string name="haul_max_buy">max inkoop %1$s</string>
+    <string name="haul_no_value">Geen prijs gevonden</string>
 </resources>

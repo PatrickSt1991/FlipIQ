@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import nl.madebypatrick.flipiq.ui.collection.CollectionScreen
 import nl.madebypatrick.flipiq.ui.discover.DiscoverScreen
+import nl.madebypatrick.flipiq.ui.haul.HaulScreen
 import nl.madebypatrick.flipiq.ui.result.ResultScreen
 import nl.madebypatrick.flipiq.ui.scan.ScanScreen
 import nl.madebypatrick.flipiq.ui.scan.TextScanScreen
@@ -24,6 +25,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val STATS = "stats"
     const val DISCOVER = "discover"
+    const val HAUL = "haul"
     const val ARG_BARCODE = "barcode"
     const val ARG_TITLE = "title"
     fun result(barcode: String) = "$RESULT/$barcode"
@@ -43,6 +45,7 @@ fun FlipIQApp() {
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenStats = { navController.navigate(Routes.STATS) },
                 onOpenDiscover = { navController.navigate(Routes.DISCOVER) },
+                onOpenHaul = { navController.navigate(Routes.HAUL) },
             )
         }
         composable(Routes.COLLECTION) {
@@ -56,6 +59,12 @@ fun FlipIQApp() {
         }
         composable(Routes.DISCOVER) {
             DiscoverScreen(
+                onBack = { navController.popBackStack() },
+                onOpenGame = { title -> navController.navigate(Routes.search(title)) },
+            )
+        }
+        composable(Routes.HAUL) {
+            HaulScreen(
                 onBack = { navController.popBackStack() },
                 onOpenGame = { title -> navController.navigate(Routes.search(title)) },
             )
