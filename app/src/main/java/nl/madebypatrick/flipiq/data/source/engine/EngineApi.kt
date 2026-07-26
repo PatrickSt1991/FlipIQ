@@ -31,7 +31,28 @@ interface EngineApi {
         @Header("X-App-Key") appKey: String,
         @Body body: IdentifyRequest,
     ): IdentifyResponse
+
+    /** Most valuable games for a console (`/top?console=`). */
+    @GET
+    suspend fun top(
+        @Url url: String,
+        @Header("X-App-Key") appKey: String,
+        @Query("console") console: String,
+    ): TopResponse
 }
+
+@Serializable
+data class TopResponse(
+    @SerialName("console") val console: String? = null,
+    @SerialName("games") val games: List<TopGame> = emptyList(),
+)
+
+@Serializable
+data class TopGame(
+    @SerialName("title") val title: String,
+    @SerialName("price_cents") val priceCents: Long? = null,
+    @SerialName("currency") val currency: String? = null,
+)
 
 @Serializable
 data class IdentifyRequest(

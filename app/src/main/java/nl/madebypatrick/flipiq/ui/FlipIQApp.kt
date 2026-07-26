@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import nl.madebypatrick.flipiq.ui.collection.CollectionScreen
+import nl.madebypatrick.flipiq.ui.discover.DiscoverScreen
 import nl.madebypatrick.flipiq.ui.result.ResultScreen
 import nl.madebypatrick.flipiq.ui.scan.ScanScreen
 import nl.madebypatrick.flipiq.ui.scan.TextScanScreen
@@ -22,6 +23,7 @@ object Routes {
     const val COLLECTION = "collection"
     const val SETTINGS = "settings"
     const val STATS = "stats"
+    const val DISCOVER = "discover"
     const val ARG_BARCODE = "barcode"
     const val ARG_TITLE = "title"
     fun result(barcode: String) = "$RESULT/$barcode"
@@ -40,6 +42,7 @@ fun FlipIQApp() {
                 onOpenCollection = { navController.navigate(Routes.COLLECTION) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenStats = { navController.navigate(Routes.STATS) },
+                onOpenDiscover = { navController.navigate(Routes.DISCOVER) },
             )
         }
         composable(Routes.COLLECTION) {
@@ -50,6 +53,12 @@ fun FlipIQApp() {
         }
         composable(Routes.STATS) {
             StatsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.DISCOVER) {
+            DiscoverScreen(
+                onBack = { navController.popBackStack() },
+                onOpenGame = { title -> navController.navigate(Routes.search(title)) },
+            )
         }
         composable(
             route = "${Routes.RESULT}/{${Routes.ARG_BARCODE}}",
