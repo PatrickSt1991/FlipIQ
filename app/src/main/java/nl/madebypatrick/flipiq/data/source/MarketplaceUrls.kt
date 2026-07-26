@@ -23,8 +23,10 @@ object MarketplaceUrls {
     fun marktplaats(title: String) =
         "https://www.marktplaats.nl/q/${path(title)}/"
 
+    // CeX shut down its Dutch store (nl.webuy.com), so point at the UK site — the main English CeX
+    // and the closest broadly-available region for NL users.
     fun cex(title: String) =
-        "https://nl.webuy.com/search?stext=${q(title)}"
+        "https://uk.webuy.com/search?stext=${q(title)}"
 
     fun priceCharting(title: String) =
         "https://www.pricecharting.com/search-products?q=${q(title)}&type=prices"
