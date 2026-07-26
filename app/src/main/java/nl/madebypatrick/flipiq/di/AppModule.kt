@@ -23,8 +23,11 @@ import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
 import nl.madebypatrick.flipiq.data.source.engine.EngineGameIdentifier
 import nl.madebypatrick.flipiq.data.source.engine.EngineSource
+import nl.madebypatrick.flipiq.data.source.engine.EngineTopGamesService
 import nl.madebypatrick.flipiq.data.source.engine.GameIdentifier
 import nl.madebypatrick.flipiq.data.source.engine.NoopGameIdentifier
+import nl.madebypatrick.flipiq.data.source.engine.NoopTopGamesService
+import nl.madebypatrick.flipiq.data.source.engine.TopGamesService
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
@@ -127,6 +130,16 @@ object AppModule {
             EngineGameIdentifier(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
         } else {
             NoopGameIdentifier()
+        }
+
+    /** Most-valuable-games-per-console browse data; no-op when the engine isn't configured. */
+    @Provides
+    @Singleton
+    fun provideTopGamesService(engineApi: EngineApi): TopGamesService =
+        if (BuildConfig.ENGINE_URL.isNotBlank()) {
+            EngineTopGamesService(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+        } else {
+            NoopTopGamesService()
         }
 
     @Provides

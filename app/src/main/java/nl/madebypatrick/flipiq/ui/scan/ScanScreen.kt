@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -75,6 +76,7 @@ fun ScanScreen(
     onOpenCollection: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
+    onOpenDiscover: () -> Unit = {},
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     // Front (photograph the cover → AI identifies the game) is the default: barcodes rarely resolve
@@ -96,6 +98,9 @@ fun ScanScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenDiscover) {
+                        Icon(Icons.Default.TravelExplore, contentDescription = "What to hunt for")
+                    }
                     IconButton(onClick = onOpenStats) {
                         Icon(Icons.Default.BarChart, contentDescription = "Statistics")
                     }
