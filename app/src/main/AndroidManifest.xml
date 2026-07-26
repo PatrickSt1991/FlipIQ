@@ -19,7 +19,8 @@
         android:theme="@style/Theme.FlipIQ"
         tools:targetApi="31">
 
-        <!-- Bundle the barcode model with the app so scanning works offline on first launch. -->
+        <!-- ML Kit models are unbundled (Play Services): this asks Play to fetch the barcode + OCR
+             models at install so the APK stays small. Sideloads fetch them on first use instead. -->
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode,ocr" />
