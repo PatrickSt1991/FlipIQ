@@ -21,7 +21,10 @@ import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.MarketplaceUrls
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
+import nl.madebypatrick.flipiq.data.source.engine.EngineGameIdentifier
 import nl.madebypatrick.flipiq.data.source.engine.EngineSource
+import nl.madebypatrick.flipiq.data.source.engine.GameIdentifier
+import nl.madebypatrick.flipiq.data.source.engine.NoopGameIdentifier
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
@@ -115,6 +118,16 @@ object AppModule {
             ),
         )
     }
+
+    /** Snapshot → game title via the engine's vision model; no-op when the engine isn't configured. */
+    @Provides
+    @Singleton
+    fun provideGameIdentifier(engineApi: EngineApi): GameIdentifier =
+        if (BuildConfig.ENGINE_URL.isNotBlank()) {
+            EngineGameIdentifier(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+        } else {
+            NoopGameIdentifier()
+        }
 
     @Provides
     @Singleton

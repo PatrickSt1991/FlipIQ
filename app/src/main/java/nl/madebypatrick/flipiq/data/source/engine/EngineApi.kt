@@ -2,8 +2,10 @@ package nl.madebypatrick.flipiq.data.source.engine
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -21,7 +23,26 @@ interface EngineApi {
         @Query("q") query: String,
         @Query("ean") ean: String?,
     ): EngineResponse
+
+    /** Snapshot → game title via the engine's vision model (`/identify`). */
+    @POST
+    suspend fun identify(
+        @Url url: String,
+        @Header("X-App-Key") appKey: String,
+        @Body body: IdentifyRequest,
+    ): IdentifyResponse
 }
+
+@Serializable
+data class IdentifyRequest(
+    @SerialName("image") val image: String,           // base64-encoded JPEG
+    @SerialName("mime_type") val mimeType: String = "image/jpeg",
+)
+
+@Serializable
+data class IdentifyResponse(
+    @SerialName("title") val title: String? = null,   // null when nothing identifiable
+)
 
 @Serializable
 data class EngineResponse(
