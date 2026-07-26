@@ -58,6 +58,7 @@ fun FlipIQApp() {
             ResultScreen(
                 onBack = { navController.popBackStack() },
                 onScanFront = { navController.navigate(Routes.TEXT_SCAN) },
+                onEditSearch = { edited -> navController.navigate(Routes.search(edited)) },
             )
         }
         composable(
@@ -67,6 +68,7 @@ fun FlipIQApp() {
             ResultScreen(
                 onBack = { navController.popBackStack() },
                 onScanFront = { navController.navigate(Routes.TEXT_SCAN) },
+                onEditSearch = { edited -> navController.navigate(Routes.search(edited)) },
             )
         }
         composable(Routes.TEXT_SCAN) {
