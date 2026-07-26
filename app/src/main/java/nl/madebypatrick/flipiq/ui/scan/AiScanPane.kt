@@ -106,8 +106,9 @@ fun AiScanPane(
                     object : ImageCapture.OnImageCapturedCallback() {
                         override fun onCaptureSuccess(image: ImageProxy) {
                             val jpeg = image.toJpegBytes()
+                            val rotation = image.imageInfo.rotationDegrees
                             image.close()
-                            viewModel.identify(jpeg) { title ->
+                            viewModel.identify(jpeg, rotation) { title ->
                                 if (title != null) {
                                     onSearch(title)
                                 } else {
