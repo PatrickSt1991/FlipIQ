@@ -37,9 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import nl.madebypatrick.flipiq.R
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -81,7 +83,7 @@ fun AiScanPane(
             Button(
                 onClick = { cameraPermission.launchPermissionRequest() },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Enable camera") }
+            ) { Text(stringResource(R.string.enable_camera)) }
             TypeItFallback(onSearch = onSearch)
             return@Column
         }
@@ -94,7 +96,7 @@ fun AiScanPane(
                 .clip(RoundedCornerShape(16.dp)),
         )
         Text(
-            if (viewModel.identifying) "Identifying the game…" else "Aim at the game cover, then identify.",
+            if (viewModel.identifying) stringResource(R.string.ai_identifying) else stringResource(R.string.ai_aim),
             style = MaterialTheme.typography.bodyMedium,
         )
         Button(
@@ -112,13 +114,13 @@ fun AiScanPane(
                                 if (title != null) {
                                     onSearch(title)
                                 } else {
-                                    message = "Couldn't identify it — type the title below or try Barcode."
+                                    message = context.getString(R.string.ai_not_identified)
                                 }
                             }
                         }
 
                         override fun onError(exc: ImageCaptureException) {
-                            message = "Camera error, please try again."
+                            message = context.getString(R.string.ai_camera_error)
                         }
                     },
                 )
@@ -133,7 +135,7 @@ fun AiScanPane(
                 )
             } else {
                 Icon(Icons.Default.CameraAlt, contentDescription = null)
-                Text("  Identify game")
+                Text(stringResource(R.string.ai_identify_game))
             }
         }
         message?.let {
@@ -155,7 +157,7 @@ private fun ImageProxy.toJpegBytes(): ByteArray {
 private fun TypeItFallback(onSearch: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
     Text(
-        "Or type the game name.",
+        stringResource(R.string.ai_type_name),
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
@@ -163,7 +165,7 @@ private fun TypeItFallback(onSearch: (String) -> Unit) {
     OutlinedTextField(
         value = query,
         onValueChange = { query = it },
-        label = { Text("Game name") },
+        label = { Text(stringResource(R.string.ai_game_name_label)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
@@ -171,7 +173,7 @@ private fun TypeItFallback(onSearch: (String) -> Unit) {
         onClick = { if (query.isNotBlank()) onSearch(query.trim()) },
         enabled = query.isNotBlank(),
         modifier = Modifier.fillMaxWidth(),
-    ) { Text("Search this") }
+    ) { Text(stringResource(R.string.search_this)) }
 }
 
 @Composable

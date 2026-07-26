@@ -27,10 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import nl.madebypatrick.flipiq.R
 import nl.madebypatrick.flipiq.domain.model.DealTier
 import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.stats.FlipStats
@@ -48,10 +50,10 @@ fun StatsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Statistics") },
+                title = { Text(stringResource(R.string.stats_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -59,7 +61,7 @@ fun StatsScreen(
     ) { padding ->
         if (stats.totalScans == 0 && stats.inventory.itemsInStock == 0 && stats.inventory.itemsSold == 0) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Scan and buy some items to see your stats.")
+                Text(stringResource(R.string.stats_empty))
             }
             return@Scaffold
         }
@@ -82,12 +84,12 @@ fun StatsScreen(
 @Composable
 private fun HeadlineTiles(stats: FlipStats) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatTile("Scans", stats.totalScans.toString(), Modifier.weight(1f))
-        StatTile("Avg score", stats.averageDealScore.toString(), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stats_scans), stats.totalScans.toString(), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stats_avg_score), stats.averageDealScore.toString(), Modifier.weight(1f))
     }
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatTile("Realized profit", stats.inventory.realizedProfit.toString(), Modifier.weight(1f))
-        StatTile("Projected profit", stats.inventory.projectedProfit.toString(), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stats_realized_profit), stats.inventory.realizedProfit.toString(), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stats_projected_profit), stats.inventory.projectedProfit.toString(), Modifier.weight(1f))
     }
 }
 
@@ -112,7 +114,7 @@ private fun TierBreakdownCard(stats: FlipStats) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Deal scores", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.stats_deal_scores), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             DealTier.entries.forEach { tier ->
                 val count = stats.tierBreakdown[tier] ?: 0
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -151,7 +153,7 @@ private fun TopFlipsCard(topFlips: List<InventoryItem>) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text("Top flips", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.stats_top_flips), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             topFlips.forEach { item ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),

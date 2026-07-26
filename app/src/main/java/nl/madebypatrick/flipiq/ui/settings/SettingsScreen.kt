@@ -35,12 +35,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.R
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
 import nl.madebypatrick.flipiq.domain.model.ThemeMode
@@ -64,14 +66,15 @@ fun SettingsScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val savedMessage = stringResource(R.string.settings_saved)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profit Mode") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -86,30 +89,30 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            SettingsSection("Targets") {
-                MoneyField("Minimum profit", edited.minProfit) { edited = edited.copy(minProfit = it) }
-                PercentField("Minimum ROI", edited.minRoi) { edited = edited.copy(minRoi = it) }
-                MoneyField("Ignore items below", edited.ignoreBelow) { edited = edited.copy(ignoreBelow = it) }
-                IntField("Minimum recent sales", edited.minSales) { edited = edited.copy(minSales = it) }
+            SettingsSection(stringResource(R.string.settings_section_targets)) {
+                MoneyField(stringResource(R.string.settings_min_profit), edited.minProfit) { edited = edited.copy(minProfit = it) }
+                PercentField(stringResource(R.string.settings_min_roi), edited.minRoi) { edited = edited.copy(minRoi = it) }
+                MoneyField(stringResource(R.string.settings_ignore_below), edited.ignoreBelow) { edited = edited.copy(ignoreBelow = it) }
+                IntField(stringResource(R.string.settings_min_sales), edited.minSales) { edited = edited.copy(minSales = it) }
             }
 
-            SettingsSection("Costs") {
-                ToggleRow("Include marketplace fees", edited.includeFees) { edited = edited.copy(includeFees = it) }
-                PercentField("Marketplace fee", edited.marketplaceFee) { edited = edited.copy(marketplaceFee = it) }
-                ToggleRow("Include shipping", edited.includeShipping) { edited = edited.copy(includeShipping = it) }
-                MoneyField("Shipping cost", edited.shippingCost) { edited = edited.copy(shippingCost = it) }
+            SettingsSection(stringResource(R.string.settings_section_costs)) {
+                ToggleRow(stringResource(R.string.settings_include_fees), edited.includeFees) { edited = edited.copy(includeFees = it) }
+                PercentField(stringResource(R.string.settings_marketplace_fee), edited.marketplaceFee) { edited = edited.copy(marketplaceFee = it) }
+                ToggleRow(stringResource(R.string.settings_include_shipping), edited.includeShipping) { edited = edited.copy(includeShipping = it) }
+                MoneyField(stringResource(R.string.settings_shipping_cost), edited.shippingCost) { edited = edited.copy(shippingCost = it) }
             }
 
-            SettingsSection("Filters") {
-                ToggleRow("Ignore incomplete items", edited.ignoreIncomplete) { edited = edited.copy(ignoreIncomplete = it) }
-                ToggleRow("Ignore damaged items", edited.ignoreDamaged) { edited = edited.copy(ignoreDamaged = it) }
-                ToggleRow("Prefer fast sellers", edited.preferFastSellers) { edited = edited.copy(preferFastSellers = it) }
+            SettingsSection(stringResource(R.string.settings_section_filters)) {
+                ToggleRow(stringResource(R.string.settings_ignore_incomplete), edited.ignoreIncomplete) { edited = edited.copy(ignoreIncomplete = it) }
+                ToggleRow(stringResource(R.string.settings_ignore_damaged), edited.ignoreDamaged) { edited = edited.copy(ignoreDamaged = it) }
+                ToggleRow(stringResource(R.string.settings_prefer_fast), edited.preferFastSellers) { edited = edited.copy(preferFastSellers = it) }
             }
 
             // Data sources & appearance are applied immediately (no Save needed).
-            SettingsSection("Data sources") {
+            SettingsSection(stringResource(R.string.settings_section_data_sources)) {
                 Text(
-                    "PriceCharting API token — enables live PriceCharting prices. Leave blank to skip it.",
+                    stringResource(R.string.settings_pc_desc),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 var token by remember(pcToken) { mutableStateOf(pcToken) }
@@ -119,12 +122,12 @@ fun SettingsScreen(
                         token = it
                         viewModel.setPriceChartingToken(it)
                     },
-                    label = { Text("PriceCharting token") },
+                    label = { Text(stringResource(R.string.settings_pc_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    "EAN-Search API token — improves barcode→product matching (esp. EU/NL items).",
+                    stringResource(R.string.settings_ean_desc),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 var eanToken by remember(eanToken0) { mutableStateOf(eanToken0) }
@@ -134,26 +137,26 @@ fun SettingsScreen(
                         eanToken = it
                         viewModel.setEanSearchToken(it)
                     },
-                    label = { Text("EAN-Search token") },
+                    label = { Text(stringResource(R.string.settings_ean_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
 
-            SettingsSection("Appearance") {
-                Text("Theme", style = MaterialTheme.typography.labelLarge)
+            SettingsSection(stringResource(R.string.settings_section_appearance)) {
+                Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.labelLarge)
                 ThemeModeSelector(theme.mode, viewModel::setThemeMode)
-                ToggleRow("Material You colours", theme.dynamicColor, viewModel::setDynamicColor)
+                ToggleRow(stringResource(R.string.settings_material_you), theme.dynamicColor, viewModel::setDynamicColor)
             }
 
             Button(
                 onClick = {
                     viewModel.save(edited)
-                    scope.launch { snackbarHostState.showSnackbar("Saved") }
+                    scope.launch { snackbarHostState.showSnackbar(savedMessage) }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = edited != saved,
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.settings_save)) }
         }
     }
 }
@@ -180,7 +183,7 @@ private fun MoneyField(label: String, value: Money, onChange: (Money) -> Unit) {
             text = it
             it.replace(',', '.').toDoubleOrNull()?.let { euros -> onChange(Money.ofEuros(euros)) }
         },
-        label = { Text("$label (€)") },
+        label = { Text(stringResource(R.string.settings_money_label, label)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.fillMaxWidth(),
@@ -196,7 +199,7 @@ private fun PercentField(label: String, fraction: Double, onChange: (Double) -> 
             text = it
             it.replace(',', '.').toDoubleOrNull()?.let { pct -> onChange(pct / 100.0) }
         },
-        label = { Text("$label (%)") },
+        label = { Text(stringResource(R.string.settings_percent_label, label)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = Modifier.fillMaxWidth(),
@@ -223,9 +226,9 @@ private fun IntField(label: String, value: Int, onChange: (Int) -> Unit) {
 @Composable
 private fun ThemeModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
     val labels = mapOf(
-        ThemeMode.SYSTEM to "System",
-        ThemeMode.LIGHT to "Light",
-        ThemeMode.DARK to "Dark",
+        ThemeMode.SYSTEM to stringResource(R.string.settings_theme_system),
+        ThemeMode.LIGHT to stringResource(R.string.settings_theme_light),
+        ThemeMode.DARK to stringResource(R.string.settings_theme_dark),
     )
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemeMode.entries.forEach { mode ->

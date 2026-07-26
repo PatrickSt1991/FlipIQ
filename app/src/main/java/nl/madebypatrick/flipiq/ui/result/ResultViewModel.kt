@@ -1,9 +1,12 @@
 package nl.madebypatrick.flipiq.ui.result
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import nl.madebypatrick.flipiq.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +35,7 @@ sealed interface ResultUiState {
 
 @HiltViewModel
 class ResultViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val repository: PriceRepository,
     private val collection: CollectionRepository,
     private val settingsRepository: SettingsRepository,
@@ -70,8 +74,8 @@ class ResultViewModel @Inject constructor(
     fun setPriceAlert(target: Money) {
         viewModelScope.launch {
             runCatching { alertRepository.create(barcode, currentTitle(), target) }
-                .onSuccess { _message.value = "Price alert set for $target" }
-                .onFailure { _message.value = "Couldn't set the alert" }
+                .onSuccess { _message.value = context.getString(R.string.result_msg_alert_set, target.toString()) }
+                .onFailure { _message.value = context.getString(R.string.result_msg_alert_failed) }
         }
     }
 
@@ -98,7 +102,7 @@ class ResultViewModel @Inject constructor(
             settings = runCatching { settingsRepository.settings.first() }.getOrDefault(ProfitSettings.DEFAULT)
             runCatching { titleQuery?.let { repository.fetchByTitle(it) } ?: repository.fetch(barcode) }
                 .onSuccess { market = it; recompute(); recordOnce() }
-                .onFailure { _state.value = ResultUiState.Error(it.message ?: "Something went wrong.") }
+                .onFailure { _state.value = ResultUiState.Error(it.message ?: context.getString(R.string.result_error_generic)) }
         }
     }
 
@@ -122,8 +126,8 @@ class ResultViewModel @Inject constructor(
                     buyPrice = buyPrice ?: rec.recommendedBuyPrice,
                     estimatedResale = rec.estimatedResale,
                 )
-            }.onSuccess { _message.value = "Added to inventory" }
-                .onFailure { _message.value = "Couldn't add to inventory" }
+            }.onSuccess { _message.value = context.getString(R.string.result_msg_added_inventory) }
+                .onFailure { _message.value = context.getString(R.string.result_msg_add_inventory_failed) }
         }
     }
 

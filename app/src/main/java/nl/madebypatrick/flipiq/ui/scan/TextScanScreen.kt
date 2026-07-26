@@ -44,9 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import nl.madebypatrick.flipiq.R
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -67,10 +69,10 @@ fun TextScanScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan the front") },
+                title = { Text(stringResource(R.string.textscan_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -139,9 +141,9 @@ fun FrontScanPane(
                 )
                 Text(
                     if (candidate.isBlank()) {
-                        "Aim at the title — fill the frame with the cover and hold steady."
+                        stringResource(R.string.textscan_aim)
                     } else {
-                        "Reading: $candidate"
+                        stringResource(R.string.textscan_reading, candidate)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -153,7 +155,7 @@ fun FrontScanPane(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
-                    Text("  Capture")
+                    Text(stringResource(R.string.textscan_capture))
                 }
             }
 
@@ -178,34 +180,34 @@ private fun CapturedReview(
     onSearch: (String) -> Unit,
 ) {
     var query by remember(initial) { mutableStateOf(initial) }
-    Text("Captured — tidy it up if needed", style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.textscan_captured_title), style = MaterialTheme.typography.titleMedium)
     OutlinedTextField(
         value = query,
         onValueChange = { query = it },
-        label = { Text("Search text") },
+        label = { Text(stringResource(R.string.textscan_search_text_label)) },
         modifier = Modifier.fillMaxWidth(),
     )
     Button(
         onClick = { if (query.isNotBlank()) onSearch(query.trim()) },
         enabled = query.isNotBlank(),
         modifier = Modifier.fillMaxWidth(),
-    ) { Text("Search this") }
-    OutlinedButton(onClick = onRescan, modifier = Modifier.fillMaxWidth()) { Text("Rescan") }
+    ) { Text(stringResource(R.string.search_this)) }
+    OutlinedButton(onClick = onRescan, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.textscan_rescan)) }
 }
 
 @Composable
 private fun ManualFallback(onEnableCamera: () -> Unit, onSearch: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
-    Button(onClick = onEnableCamera, modifier = Modifier.fillMaxWidth()) { Text("Enable camera") }
+    Button(onClick = onEnableCamera, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.enable_camera)) }
     Text(
-        "Or type the product name below.",
+        stringResource(R.string.textscan_type_product),
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
     )
     OutlinedTextField(
         value = query,
         onValueChange = { query = it },
-        label = { Text("Search text") },
+        label = { Text(stringResource(R.string.textscan_search_text_label)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
@@ -213,7 +215,7 @@ private fun ManualFallback(onEnableCamera: () -> Unit, onSearch: (String) -> Uni
         onClick = { if (query.isNotBlank()) onSearch(query.trim()) },
         enabled = query.isNotBlank(),
         modifier = Modifier.fillMaxWidth(),
-    ) { Text("Search this") }
+    ) { Text(stringResource(R.string.search_this)) }
 }
 
 @Composable

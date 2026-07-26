@@ -1,3 +1,213 @@
 <resources>
     <string name="app_name">FlipIQ</string>
+
+    <!-- Common / shared -->
+    <string name="cd_back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="enable_camera">Enable camera</string>
+    <string name="search_this">Search this</string>
+
+    <!-- Scan screen -->
+    <string name="scan_cd_discover">What to hunt for</string>
+    <string name="scan_cd_stats">Statistics</string>
+    <string name="scan_cd_collection">Collection</string>
+    <string name="scan_cd_settings">Profit Mode settings</string>
+    <string name="scan_barcode_hint">Point at a barcode and we\'ll do the math ✨</string>
+    <string name="scan_mode_front">📸 Front</string>
+    <string name="scan_mode_barcode">⁞⁞ Barcode</string>
+    <string name="scan_camera_prompt">Turn on the camera and start scanning in a tap.</string>
+    <string name="scan_manual_title">Or enter a barcode</string>
+    <string name="scan_barcode_label">Barcode</string>
+    <string name="scan_analyze">Analyze</string>
+    <string name="scan_try_sample">Try a sample:</string>
+
+    <!-- AI (front) scan pane -->
+    <string name="ai_identifying">Identifying the game…</string>
+    <string name="ai_aim">Aim at the game cover, then identify.</string>
+    <string name="ai_not_identified">Couldn\'t identify it — type the title below or try Barcode.</string>
+    <string name="ai_camera_error">Camera error, please try again.</string>
+    <string name="ai_identify_game">"  Identify game"</string>
+    <string name="ai_type_name">Or type the game name.</string>
+    <string name="ai_game_name_label">Game name</string>
+
+    <!-- Text (OCR) scan screen -->
+    <string name="textscan_title">Scan the front</string>
+    <string name="textscan_aim">Aim at the title — fill the frame with the cover and hold steady.</string>
+    <string name="textscan_reading">Reading: %1$s</string>
+    <string name="textscan_capture">"  Capture"</string>
+    <string name="textscan_captured_title">Captured — tidy it up if needed</string>
+    <string name="textscan_search_text_label">Search text</string>
+    <string name="textscan_rescan">Rescan</string>
+    <string name="textscan_type_product">Or type the product name below.</string>
+
+    <!-- Result screen -->
+    <string name="result_analyzing">Analyzing…</string>
+    <string name="result_cd_edit_search">Edit search</string>
+    <string name="result_cd_alert_set">Price alert set</string>
+    <string name="result_cd_set_alert">Set price alert</string>
+    <string name="result_cd_remove_wishlist">Remove from wishlist</string>
+    <string name="result_cd_add_wishlist">Add to wishlist</string>
+    <string name="result_cd_remove_favorites">Remove from favorites</string>
+    <string name="result_cd_add_favorites">Add to favorites</string>
+    <string name="result_error_format">⚠ %1$s</string>
+    <string name="result_error_generic">Something went wrong.</string>
+    <string name="result_alert_title">Alert me when it drops to</string>
+    <string name="result_alert_price_label">Target price (€)</string>
+    <string name="result_alert_confirm">Set alert</string>
+    <string name="result_edit_dialog_title">Edit search</string>
+    <string name="result_edit_search_term_label">Search term</string>
+    <string name="result_search">Search</string>
+    <string name="result_loading">Checking the marketplaces… 🔍</string>
+    <string name="result_cd_product_image">Product image</string>
+    <string name="result_i_bought">I bought this</string>
+    <string name="result_add_inventory_title">Add to inventory</string>
+    <string name="result_buy_price_label">Buy price (€)</string>
+    <string name="result_add">Add</string>
+    <string name="result_nodata_title">No price data yet</string>
+    <string name="result_nodata_unknown">We couldn\'t identify this barcode. Scan the front of the item, or try the marketplaces below.</string>
+    <string name="result_nodata_no_prices">We couldn\'t find prices for “%1$s”. Check the marketplaces below — it might be listed there.</string>
+    <string name="result_scan_front_instead">📸  Scan the front instead</string>
+    <string name="result_nodata_tip">Tip: adding a PriceCharting or EAN-Search token in Settings improves coverage.</string>
+    <string name="result_deal_score">Deal Score %1$d/100</string>
+    <string name="result_confidence">👍 %1$d%% sure</string>
+    <string name="result_not_viable">Heads up — doesn\'t meet your Profit Mode targets</string>
+    <string name="result_condition_section">Item condition</string>
+    <string name="result_condition_label">Condition</string>
+    <string name="result_completeness_label">Completeness</string>
+    <string name="result_sold_prices">Sold prices (%1$d sales)</string>
+    <string name="result_avg_sold">Average sold</string>
+    <string name="result_median_sold">Median sold</string>
+    <string name="result_lowest">Lowest</string>
+    <string name="result_highest">Highest</string>
+    <string name="result_estimate_section">FlipIQ estimate</string>
+    <string name="result_est_resale">Estimated resale</string>
+    <string name="result_net_after">Net after fees &amp; shipping</string>
+    <string name="result_recommended_max">Recommended max buy</string>
+    <string name="result_expected_profit">Expected profit</string>
+    <string name="result_roi">ROI</string>
+    <string name="result_roi_value">%1$d%%</string>
+    <string name="result_buy_ladder">Buy ladder</string>
+    <string name="result_notes_section">Why</string>
+    <string name="result_marketplace_section">Open on marketplace</string>
+
+    <!-- Result presentation labels (deal tier / sell speed / trend / buy tier / condition) -->
+    <string name="tier_buy_immediately">Buy Immediately</string>
+    <string name="tier_great_deal">Great Deal</string>
+    <string name="tier_fair_price">Fair Price</string>
+    <string name="tier_low_profit">Low Profit</string>
+    <string name="tier_skip">Skip</string>
+    <string name="tier_headline_buy_immediately">Grab it!</string>
+    <string name="tier_headline_great_deal">Great find</string>
+    <string name="tier_headline_fair_price">Fair enough</string>
+    <string name="tier_headline_low_profit">A bit tight</string>
+    <string name="tier_headline_skip">Maybe skip this one</string>
+    <string name="sell_speed_very_fast">Very Fast</string>
+    <string name="sell_speed_fast">Fast</string>
+    <string name="sell_speed_medium">Medium</string>
+    <string name="sell_speed_slow">Slow</string>
+    <string name="sell_speed_hint_very_fast">Usually sells within days</string>
+    <string name="sell_speed_hint_fast">Usually sells within 1–2 weeks</string>
+    <string name="sell_speed_hint_medium">Usually sells within 2–8 weeks</string>
+    <string name="sell_speed_hint_slow">May take several months</string>
+    <string name="trend_rising">Rising ↗</string>
+    <string name="trend_stable">Stable →</string>
+    <string name="trend_falling">Falling ↘</string>
+    <string name="buy_tier_excellent">Excellent</string>
+    <string name="buy_tier_good">Good</string>
+    <string name="buy_tier_fair">Fair</string>
+    <string name="buy_tier_skip_above">Skip above</string>
+    <string name="condition_sealed">Sealed</string>
+    <string name="condition_mint">Mint</string>
+    <string name="condition_good">Good</string>
+    <string name="condition_acceptable">Acceptable</string>
+    <string name="condition_poor">Poor</string>
+    <string name="completeness_sealed">Sealed</string>
+    <string name="completeness_complete">Complete</string>
+    <string name="completeness_loose">Loose</string>
+
+    <!-- Result view model messages -->
+    <string name="result_msg_alert_set">Price alert set for %1$s</string>
+    <string name="result_msg_alert_failed">Couldn\'t set the alert</string>
+    <string name="result_msg_added_inventory">Added to inventory</string>
+    <string name="result_msg_add_inventory_failed">Couldn\'t add to inventory</string>
+
+    <!-- Collection screen -->
+    <string name="collection_title">Collection</string>
+    <string name="collection_cd_export">Export CSV</string>
+    <string name="collection_export_inventory">Export inventory (CSV)</string>
+    <string name="collection_export_history">Export history (CSV)</string>
+    <string name="collection_tab_inventory">Inventory</string>
+    <string name="collection_tab_favorites">Favorites</string>
+    <string name="collection_tab_wishlist">Wishlist</string>
+    <string name="collection_tab_alerts">Alerts</string>
+    <string name="collection_tab_history">History</string>
+    <string name="collection_empty_favorites">No favorites yet.\nTap the heart on a result to save one.</string>
+    <string name="collection_empty_wishlist">Your wishlist is empty.\nTap the bookmark on a result to add one.</string>
+    <string name="collection_empty_alerts">No price alerts yet.\nTap the bell on a result to watch an item.</string>
+    <string name="collection_empty_inventory">Nothing in your inventory yet.\nScan an item and tap \"I bought this\".</string>
+    <string name="collection_empty_history">No scans yet.</string>
+    <string name="collection_profit_tracker">Profit tracker</string>
+    <string name="collection_in_stock">In stock</string>
+    <string name="collection_in_stock_value">%1$d items · %2$s</string>
+    <string name="collection_sold">Sold</string>
+    <string name="collection_sold_value">%1$d items</string>
+    <string name="collection_realized_profit">Realized profit</string>
+    <string name="collection_projected_profit">Projected profit</string>
+    <string name="collection_bought_for">Bought for</string>
+    <string name="collection_sold_for">Sold for</string>
+    <string name="collection_profit">Profit</string>
+    <string name="collection_est_resale">Est. resale</string>
+    <string name="collection_mark_sold">Mark sold</string>
+    <string name="collection_cd_remove">Remove</string>
+    <string name="collection_notify_at">Notify at ≤ %1$s</string>
+    <string name="collection_cd_remove_alert">Remove alert</string>
+    <string name="collection_mark_sold_title">Mark as sold</string>
+    <string name="collection_sold_price_label">Sold price (€)</string>
+    <string name="collection_confirm">Confirm</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Profit Mode</string>
+    <string name="settings_section_targets">Targets</string>
+    <string name="settings_min_profit">Minimum profit</string>
+    <string name="settings_min_roi">Minimum ROI</string>
+    <string name="settings_ignore_below">Ignore items below</string>
+    <string name="settings_min_sales">Minimum recent sales</string>
+    <string name="settings_section_costs">Costs</string>
+    <string name="settings_include_fees">Include marketplace fees</string>
+    <string name="settings_marketplace_fee">Marketplace fee</string>
+    <string name="settings_include_shipping">Include shipping</string>
+    <string name="settings_shipping_cost">Shipping cost</string>
+    <string name="settings_section_filters">Filters</string>
+    <string name="settings_ignore_incomplete">Ignore incomplete items</string>
+    <string name="settings_ignore_damaged">Ignore damaged items</string>
+    <string name="settings_prefer_fast">Prefer fast sellers</string>
+    <string name="settings_section_data_sources">Data sources</string>
+    <string name="settings_pc_desc">PriceCharting API token — enables live PriceCharting prices. Leave blank to skip it.</string>
+    <string name="settings_pc_label">PriceCharting token</string>
+    <string name="settings_ean_desc">EAN-Search API token — improves barcode→product matching (esp. EU/NL items).</string>
+    <string name="settings_ean_label">EAN-Search token</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_material_you">Material You colours</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_saved">Saved</string>
+    <string name="settings_money_label">%1$s (€)</string>
+    <string name="settings_percent_label">%1$s (%%)</string>
+
+    <!-- Stats screen -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_empty">Scan and buy some items to see your stats.</string>
+    <string name="stats_scans">Scans</string>
+    <string name="stats_avg_score">Avg score</string>
+    <string name="stats_realized_profit">Realized profit</string>
+    <string name="stats_projected_profit">Projected profit</string>
+    <string name="stats_deal_scores">Deal scores</string>
+    <string name="stats_top_flips">Top flips</string>
+
+    <!-- Discover screen -->
+    <string name="discover_title">What to hunt for</string>
+    <string name="discover_load_error">Couldn\'t load games for %1$s.</string>
 </resources>
