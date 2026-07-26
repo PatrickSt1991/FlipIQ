@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.madebypatrick.flipiq.R
@@ -99,16 +100,16 @@ fun ScanScreen(
                 },
                 actions = {
                     IconButton(onClick = onOpenDiscover) {
-                        Icon(Icons.Default.TravelExplore, contentDescription = "What to hunt for")
+                        Icon(Icons.Default.TravelExplore, contentDescription = stringResource(R.string.scan_cd_discover))
                     }
                     IconButton(onClick = onOpenStats) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Statistics")
+                        Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.scan_cd_stats))
                     }
                     IconButton(onClick = onOpenCollection) {
-                        Icon(Icons.Default.Inventory2, contentDescription = "Collection")
+                        Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.scan_cd_collection))
                     }
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Tune, contentDescription = "Profit Mode settings")
+                        Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.scan_cd_settings))
                     }
                 },
             )
@@ -142,7 +143,7 @@ fun ScanScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            "Point at a barcode and we'll do the math ✨",
+                            stringResource(R.string.scan_barcode_hint),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     } else {
@@ -166,12 +167,12 @@ private fun ModeToggle(mode: ScanMode, onModeChange: (ScanMode) -> Unit) {
             selected = mode == ScanMode.FRONT,
             onClick = { onModeChange(ScanMode.FRONT) },
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-        ) { Text("📸 Front") }
+        ) { Text(stringResource(R.string.scan_mode_front)) }
         SegmentedButton(
             selected = mode == ScanMode.BARCODE,
             onClick = { onModeChange(ScanMode.BARCODE) },
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-        ) { Text("⁞⁞ Barcode") }
+        ) { Text(stringResource(R.string.scan_mode_barcode)) }
     }
 }
 
@@ -192,11 +193,11 @@ private fun CameraPermissionPrompt(onRequest: () -> Unit) {
                 modifier = Modifier.height(48.dp),
             )
             Text(
-                "Turn on the camera and start scanning in a tap.",
+                stringResource(R.string.scan_camera_prompt),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge,
             )
-            Button(onClick = onRequest) { Text("Enable camera") }
+            Button(onClick = onRequest) { Text(stringResource(R.string.enable_camera)) }
         }
     }
 }
@@ -212,11 +213,11 @@ private fun ManualEntry(onSubmit: (String) -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Or enter a barcode", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.scan_manual_title), style = MaterialTheme.typography.titleMedium)
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it.filter(Char::isDigit) },
-                label = { Text("Barcode") },
+                label = { Text(stringResource(R.string.scan_barcode_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -224,9 +225,9 @@ private fun ManualEntry(onSubmit: (String) -> Unit) {
                 onClick = { if (text.isNotBlank()) onSubmit(text.trim()) },
                 enabled = text.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Analyze") }
+            ) { Text(stringResource(R.string.scan_analyze)) }
 
-            Text("Try a sample:", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.scan_try_sample), style = MaterialTheme.typography.labelLarge)
             SampleBarcodes.forEach { (label, code) ->
                 OutlinedButton(
                     onClick = { onSubmit(code) },

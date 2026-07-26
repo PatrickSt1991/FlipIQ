@@ -1,0 +1,212 @@
+<resources>
+
+    <!-- Common / shared -->
+    <string name="cd_back">Terug</string>
+    <string name="cancel">Annuleren</string>
+    <string name="enable_camera">Camera aanzetten</string>
+    <string name="search_this">Hierop zoeken</string>
+
+    <!-- Scan screen -->
+    <string name="scan_cd_discover">Waar je op moet jagen</string>
+    <string name="scan_cd_stats">Statistieken</string>
+    <string name="scan_cd_collection">Collectie</string>
+    <string name="scan_cd_settings">Winstmodus-instellingen</string>
+    <string name="scan_barcode_hint">Richt op een barcode en wij rekenen het uit ✨</string>
+    <string name="scan_mode_front">📸 Voorkant</string>
+    <string name="scan_mode_barcode">⁞⁞ Barcode</string>
+    <string name="scan_camera_prompt">Zet de camera aan en begin met scannen in één tik.</string>
+    <string name="scan_manual_title">Of voer een barcode in</string>
+    <string name="scan_barcode_label">Barcode</string>
+    <string name="scan_analyze">Analyseren</string>
+    <string name="scan_try_sample">Probeer een voorbeeld:</string>
+
+    <!-- AI (front) scan pane -->
+    <string name="ai_identifying">Game herkennen…</string>
+    <string name="ai_aim">Richt op de gamehoes en herken \'m.</string>
+    <string name="ai_not_identified">Kon \'m niet herkennen — typ de titel hieronder of probeer Barcode.</string>
+    <string name="ai_camera_error">Camerafout, probeer het opnieuw.</string>
+    <string name="ai_identify_game">"  Game herkennen"</string>
+    <string name="ai_type_name">Of typ de naam van de game.</string>
+    <string name="ai_game_name_label">Naam van de game</string>
+
+    <!-- Text (OCR) scan screen -->
+    <string name="textscan_title">Scan de voorkant</string>
+    <string name="textscan_aim">Richt op de titel — vul het beeld met de hoes en houd stil.</string>
+    <string name="textscan_reading">Gelezen: %1$s</string>
+    <string name="textscan_capture">"  Vastleggen"</string>
+    <string name="textscan_captured_title">Vastgelegd — pas het even aan indien nodig</string>
+    <string name="textscan_search_text_label">Zoektekst</string>
+    <string name="textscan_rescan">Opnieuw scannen</string>
+    <string name="textscan_type_product">Of typ hieronder de productnaam.</string>
+
+    <!-- Result screen -->
+    <string name="result_analyzing">Bezig met analyseren…</string>
+    <string name="result_cd_edit_search">Zoekopdracht bewerken</string>
+    <string name="result_cd_alert_set">Prijsmelding ingesteld</string>
+    <string name="result_cd_set_alert">Prijsmelding instellen</string>
+    <string name="result_cd_remove_wishlist">Uit verlanglijst halen</string>
+    <string name="result_cd_add_wishlist">Aan verlanglijst toevoegen</string>
+    <string name="result_cd_remove_favorites">Uit favorieten halen</string>
+    <string name="result_cd_add_favorites">Aan favorieten toevoegen</string>
+    <string name="result_error_format">⚠ %1$s</string>
+    <string name="result_error_generic">Er ging iets mis.</string>
+    <string name="result_alert_title">Waarschuw me als de prijs zakt naar</string>
+    <string name="result_alert_price_label">Streefprijs (€)</string>
+    <string name="result_alert_confirm">Melding instellen</string>
+    <string name="result_edit_dialog_title">Zoekopdracht bewerken</string>
+    <string name="result_edit_search_term_label">Zoekterm</string>
+    <string name="result_search">Zoeken</string>
+    <string name="result_loading">Marktplaatsen checken… 🔍</string>
+    <string name="result_cd_product_image">Productafbeelding</string>
+    <string name="result_i_bought">Deze heb ik gekocht</string>
+    <string name="result_add_inventory_title">Aan voorraad toevoegen</string>
+    <string name="result_buy_price_label">Inkoopprijs (€)</string>
+    <string name="result_add">Toevoegen</string>
+    <string name="result_nodata_title">Nog geen prijsdata</string>
+    <string name="result_nodata_unknown">We konden deze barcode niet herkennen. Scan de voorkant van het item of probeer de marktplaatsen hieronder.</string>
+    <string name="result_nodata_no_prices">We konden geen prijzen vinden voor “%1$s”. Bekijk de marktplaatsen hieronder — misschien staat het daar.</string>
+    <string name="result_scan_front_instead">📸  Scan liever de voorkant</string>
+    <string name="result_nodata_tip">Tip: een PriceCharting- of EAN-Search-token toevoegen in Instellingen verbetert de dekking.</string>
+    <string name="result_deal_score">Dealscore %1$d/100</string>
+    <string name="result_confidence">👍 %1$d%% zeker</string>
+    <string name="result_not_viable">Let op — voldoet niet aan je Winstmodus-doelen</string>
+    <string name="result_condition_section">Staat van het item</string>
+    <string name="result_condition_label">Conditie</string>
+    <string name="result_completeness_label">Compleetheid</string>
+    <string name="result_sold_prices">Verkoopprijzen (%1$d verkopen)</string>
+    <string name="result_avg_sold">Gemiddeld verkocht</string>
+    <string name="result_median_sold">Mediaan verkocht</string>
+    <string name="result_lowest">Laagste</string>
+    <string name="result_highest">Hoogste</string>
+    <string name="result_estimate_section">FlipIQ-schatting</string>
+    <string name="result_est_resale">Geschatte verkoop</string>
+    <string name="result_net_after">Netto na kosten &amp; verzending</string>
+    <string name="result_recommended_max">Aanbevolen max. inkoop</string>
+    <string name="result_expected_profit">Verwachte winst</string>
+    <string name="result_roi">ROI</string>
+    <string name="result_roi_value">%1$d%%</string>
+    <string name="result_buy_ladder">Inkoopladder</string>
+    <string name="result_notes_section">Waarom</string>
+    <string name="result_marketplace_section">Openen op marktplaats</string>
+
+    <!-- Result presentation labels (deal tier / sell speed / trend / buy tier / condition) -->
+    <string name="tier_buy_immediately">Direct kopen</string>
+    <string name="tier_great_deal">Topdeal</string>
+    <string name="tier_fair_price">Redelijke prijs</string>
+    <string name="tier_low_profit">Weinig winst</string>
+    <string name="tier_skip">Overslaan</string>
+    <string name="tier_headline_buy_immediately">Pak \'m!</string>
+    <string name="tier_headline_great_deal">Mooie vondst</string>
+    <string name="tier_headline_fair_price">Prima deal</string>
+    <string name="tier_headline_low_profit">Beetje krap</string>
+    <string name="tier_headline_skip">Misschien overslaan</string>
+    <string name="sell_speed_very_fast">Heel snel</string>
+    <string name="sell_speed_fast">Snel</string>
+    <string name="sell_speed_medium">Gemiddeld</string>
+    <string name="sell_speed_slow">Langzaam</string>
+    <string name="sell_speed_hint_very_fast">Verkoopt meestal binnen enkele dagen</string>
+    <string name="sell_speed_hint_fast">Verkoopt meestal binnen 1–2 weken</string>
+    <string name="sell_speed_hint_medium">Verkoopt meestal binnen 2–8 weken</string>
+    <string name="sell_speed_hint_slow">Kan enkele maanden duren</string>
+    <string name="trend_rising">Stijgend ↗</string>
+    <string name="trend_stable">Stabiel →</string>
+    <string name="trend_falling">Dalend ↘</string>
+    <string name="buy_tier_excellent">Uitstekend</string>
+    <string name="buy_tier_good">Goed</string>
+    <string name="buy_tier_fair">Redelijk</string>
+    <string name="buy_tier_skip_above">Boven dit overslaan</string>
+    <string name="condition_sealed">Verzegeld</string>
+    <string name="condition_mint">Als nieuw</string>
+    <string name="condition_good">Goed</string>
+    <string name="condition_acceptable">Acceptabel</string>
+    <string name="condition_poor">Slecht</string>
+    <string name="completeness_sealed">Verzegeld</string>
+    <string name="completeness_complete">Compleet</string>
+    <string name="completeness_loose">Los</string>
+
+    <!-- Result view model messages -->
+    <string name="result_msg_alert_set">Prijsmelding ingesteld voor %1$s</string>
+    <string name="result_msg_alert_failed">Kon de melding niet instellen</string>
+    <string name="result_msg_added_inventory">Toegevoegd aan voorraad</string>
+    <string name="result_msg_add_inventory_failed">Kon niet aan voorraad toevoegen</string>
+
+    <!-- Collection screen -->
+    <string name="collection_title">Collectie</string>
+    <string name="collection_cd_export">CSV exporteren</string>
+    <string name="collection_export_inventory">Voorraad exporteren (CSV)</string>
+    <string name="collection_export_history">Geschiedenis exporteren (CSV)</string>
+    <string name="collection_tab_inventory">Voorraad</string>
+    <string name="collection_tab_favorites">Favorieten</string>
+    <string name="collection_tab_wishlist">Verlanglijst</string>
+    <string name="collection_tab_alerts">Meldingen</string>
+    <string name="collection_tab_history">Geschiedenis</string>
+    <string name="collection_empty_favorites">Nog geen favorieten.\nTik op het hartje bij een resultaat om er een te bewaren.</string>
+    <string name="collection_empty_wishlist">Je verlanglijst is leeg.\nTik op de bladwijzer bij een resultaat om er een toe te voegen.</string>
+    <string name="collection_empty_alerts">Nog geen prijsmeldingen.\nTik op het belletje bij een resultaat om een item te volgen.</string>
+    <string name="collection_empty_inventory">Nog niets in je voorraad.\nScan een item en tik op \"Deze heb ik gekocht\".</string>
+    <string name="collection_empty_history">Nog geen scans.</string>
+    <string name="collection_profit_tracker">Winsttracker</string>
+    <string name="collection_in_stock">Op voorraad</string>
+    <string name="collection_in_stock_value">%1$d items · %2$s</string>
+    <string name="collection_sold">Verkocht</string>
+    <string name="collection_sold_value">%1$d items</string>
+    <string name="collection_realized_profit">Gerealiseerde winst</string>
+    <string name="collection_projected_profit">Verwachte winst</string>
+    <string name="collection_bought_for">Gekocht voor</string>
+    <string name="collection_sold_for">Verkocht voor</string>
+    <string name="collection_profit">Winst</string>
+    <string name="collection_est_resale">Gesch. verkoop</string>
+    <string name="collection_mark_sold">Verkocht markeren</string>
+    <string name="collection_cd_remove">Verwijderen</string>
+    <string name="collection_notify_at">Melden bij ≤ %1$s</string>
+    <string name="collection_cd_remove_alert">Melding verwijderen</string>
+    <string name="collection_mark_sold_title">Markeren als verkocht</string>
+    <string name="collection_sold_price_label">Verkoopprijs (€)</string>
+    <string name="collection_confirm">Bevestigen</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Winstmodus</string>
+    <string name="settings_section_targets">Doelen</string>
+    <string name="settings_min_profit">Minimale winst</string>
+    <string name="settings_min_roi">Minimale ROI</string>
+    <string name="settings_ignore_below">Items negeren onder</string>
+    <string name="settings_min_sales">Minimaal aantal recente verkopen</string>
+    <string name="settings_section_costs">Kosten</string>
+    <string name="settings_include_fees">Marktplaatskosten meerekenen</string>
+    <string name="settings_marketplace_fee">Marktplaatskosten</string>
+    <string name="settings_include_shipping">Verzending meerekenen</string>
+    <string name="settings_shipping_cost">Verzendkosten</string>
+    <string name="settings_section_filters">Filters</string>
+    <string name="settings_ignore_incomplete">Incomplete items negeren</string>
+    <string name="settings_ignore_damaged">Beschadigde items negeren</string>
+    <string name="settings_prefer_fast">Voorkeur voor snelle verkopers</string>
+    <string name="settings_section_data_sources">Databronnen</string>
+    <string name="settings_pc_desc">PriceCharting API-token — schakelt live PriceCharting-prijzen in. Laat leeg om over te slaan.</string>
+    <string name="settings_pc_label">PriceCharting-token</string>
+    <string name="settings_ean_desc">EAN-Search API-token — verbetert het koppelen van barcode→product (vooral EU/NL-items).</string>
+    <string name="settings_ean_label">EAN-Search-token</string>
+    <string name="settings_section_appearance">Weergave</string>
+    <string name="settings_theme">Thema</string>
+    <string name="settings_material_you">Material You-kleuren</string>
+    <string name="settings_theme_system">Systeem</string>
+    <string name="settings_theme_light">Licht</string>
+    <string name="settings_theme_dark">Donker</string>
+    <string name="settings_save">Opslaan</string>
+    <string name="settings_saved">Opgeslagen</string>
+    <string name="settings_money_label">%1$s (€)</string>
+    <string name="settings_percent_label">%1$s (%%)</string>
+
+    <!-- Stats screen -->
+    <string name="stats_title">Statistieken</string>
+    <string name="stats_empty">Scan en koop wat items om je statistieken te zien.</string>
+    <string name="stats_scans">Scans</string>
+    <string name="stats_avg_score">Gem. score</string>
+    <string name="stats_realized_profit">Gerealiseerde winst</string>
+    <string name="stats_projected_profit">Verwachte winst</string>
+    <string name="stats_deal_scores">Dealscores</string>
+    <string name="stats_top_flips">Beste flips</string>
+
+    <!-- Discover screen -->
+    <string name="discover_title">Waar je op moet jagen</string>
+    <string name="discover_load_error">Kon geen games laden voor %1$s.</string>
+</resources>

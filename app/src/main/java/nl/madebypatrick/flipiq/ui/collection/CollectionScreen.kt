@@ -36,10 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import nl.madebypatrick.flipiq.R
 import nl.madebypatrick.flipiq.ui.util.shareCsv
 import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
@@ -68,32 +70,38 @@ fun CollectionScreen(
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
     var exportMenu by remember { mutableStateOf(false) }
-    val tabs = listOf("Inventory", "Favorites", "Wishlist", "Alerts", "History")
+    val tabs = listOf(
+        stringResource(R.string.collection_tab_inventory),
+        stringResource(R.string.collection_tab_favorites),
+        stringResource(R.string.collection_tab_wishlist),
+        stringResource(R.string.collection_tab_alerts),
+        stringResource(R.string.collection_tab_history),
+    )
     val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Collection") },
+                title = { Text(stringResource(R.string.collection_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { exportMenu = true }) {
-                        Icon(Icons.Default.IosShare, contentDescription = "Export CSV")
+                        Icon(Icons.Default.IosShare, contentDescription = stringResource(R.string.collection_cd_export))
                     }
                     DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
                         DropdownMenuItem(
-                            text = { Text("Export inventory (CSV)") },
+                            text = { Text(stringResource(R.string.collection_export_inventory)) },
                             onClick = {
                                 exportMenu = false
                                 shareCsv(context, "flipiq-inventory.csv", viewModel.inventoryCsv())
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Export history (CSV)") },
+                            text = { Text(stringResource(R.string.collection_export_history)) },
                             onClick = {
                                 exportMenu = false
                                 shareCsv(context, "flipiq-history.csv", viewModel.historyCsv())
@@ -113,10 +121,10 @@ fun CollectionScreen(
             }
             when (tab) {
                 0 -> InventoryList(inventory, onSellClick = { sellTarget = it })
-                1 -> SavedItemsList(favorites, "No favorites yet.\nTap the heart on a result to save one.") {
+                1 -> SavedItemsList(favorites, stringResource(R.string.collection_empty_favorites)) {
                     viewModel.removeSaved(it.barcode, SavedList.FAVORITE)
                 }
-                2 -> SavedItemsList(wishlist, "Your wishlist is empty.\nTap the bookmark on a result to add one.") {
+                2 -> SavedItemsList(wishlist, stringResource(R.string.collection_empty_wishlist)) {
                     viewModel.removeSaved(it.barcode, SavedList.WISHLIST)
                 }
                 3 -> AlertsList(alerts) { viewModel.removeAlert(it.id) }
@@ -144,11 +152,11 @@ private fun ProfitSummaryCard(summary: InventorySummary) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text("Profit tracker", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            SummaryRow("In stock", "${summary.itemsInStock} items · ${summary.capitalInStock}")
-            SummaryRow("Sold", "${summary.itemsSold} items")
-            SummaryRow("Realized profit", summary.realizedProfit.toString(), emphasise = true)
-            SummaryRow("Projected profit", summary.projectedProfit.toString())
+            Text(stringResource(R.string.collection_profit_tracker), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            SummaryRow(stringResource(R.string.collection_in_stock), stringResource(R.string.collection_in_stock_value, summary.itemsInStock, summary.capitalInStock.toString()))
+            SummaryRow(stringResource(R.string.collection_sold), stringResource(R.string.collection_sold_value, summary.itemsSold))
+            SummaryRow(stringResource(R.string.collection_realized_profit), summary.realizedProfit.toString(), emphasise = true)
+            SummaryRow(stringResource(R.string.collection_projected_profit), summary.projectedProfit.toString())
         }
     }
 }
@@ -169,7 +177,7 @@ private fun SummaryRow(label: String, value: String, emphasise: Boolean = false)
 @Composable
 private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryItem) -> Unit) {
     if (items.isEmpty()) {
-        EmptyState("Nothing in your inventory yet.\nScan an item and tap \"I bought this\".")
+        EmptyState(stringResource(R.string.collection_empty_inventory))
         return
     }
     LazyColumn(
@@ -181,15 +189,15 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(item.title, fontWeight = FontWeight.Bold)
-                    SummaryRow("Bought for", item.buyPrice.toString())
+                    SummaryRow(stringResource(R.string.collection_bought_for), item.buyPrice.toString())
                     if (item.status == InventoryStatus.SOLD) {
-                        SummaryRow("Sold for", item.soldPrice?.toString() ?: "—")
-                        SummaryRow("Profit", item.realizedProfit?.toString() ?: "—", emphasise = true)
+                        SummaryRow(stringResource(R.string.collection_sold_for), item.soldPrice?.toString() ?: "—")
+                        SummaryRow(stringResource(R.string.collection_profit), item.realizedProfit?.toString() ?: "—", emphasise = true)
                     } else {
-                        SummaryRow("Est. resale", item.estimatedResale.toString())
-                        SummaryRow("Projected profit", item.projectedProfit.toString())
+                        SummaryRow(stringResource(R.string.collection_est_resale), item.estimatedResale.toString())
+                        SummaryRow(stringResource(R.string.collection_projected_profit), item.projectedProfit.toString())
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                            TextButton(onClick = { onSellClick(item) }) { Text("Mark sold") }
+                            TextButton(onClick = { onSellClick(item) }) { Text(stringResource(R.string.collection_mark_sold)) }
                         }
                     }
                 }
@@ -222,7 +230,7 @@ private fun SavedItemsList(
                 ) {
                     Text(item.title, fontWeight = FontWeight.Medium, maxLines = 1)
                     IconButton(onClick = { onRemove(item) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Remove")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.collection_cd_remove))
                     }
                 }
             }
@@ -233,7 +241,7 @@ private fun SavedItemsList(
 @Composable
 private fun AlertsList(alerts: List<PriceAlert>, onRemove: (PriceAlert) -> Unit) {
     if (alerts.isEmpty()) {
-        EmptyState("No price alerts yet.\nTap the bell on a result to watch an item.")
+        EmptyState(stringResource(R.string.collection_empty_alerts))
         return
     }
     LazyColumn(
@@ -251,12 +259,12 @@ private fun AlertsList(alerts: List<PriceAlert>, onRemove: (PriceAlert) -> Unit)
                     Column(modifier = Modifier.padding(vertical = 12.dp)) {
                         Text(alert.title, fontWeight = FontWeight.Medium, maxLines = 1)
                         Text(
-                            "Notify at ≤ ${alert.targetPrice}",
+                            stringResource(R.string.collection_notify_at, alert.targetPrice.toString()),
                             style = MaterialTheme.typography.labelMedium,
                         )
                     }
                     IconButton(onClick = { onRemove(alert) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Remove alert")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.collection_cd_remove_alert))
                     }
                 }
             }
@@ -267,7 +275,7 @@ private fun AlertsList(alerts: List<PriceAlert>, onRemove: (PriceAlert) -> Unit)
 @Composable
 private fun HistoryList(records: List<ScanRecord>) {
     if (records.isEmpty()) {
-        EmptyState("No scans yet.")
+        EmptyState(stringResource(R.string.collection_empty_history))
         return
     }
     LazyColumn(
@@ -325,14 +333,14 @@ private fun SellPriceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Mark as sold") },
+        title = { Text(stringResource(R.string.collection_mark_sold_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(item.title)
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    label = { Text("Sold price (€)") },
+                    label = { Text(stringResource(R.string.collection_sold_price_label)) },
                     singleLine = true,
                 )
             }
@@ -341,8 +349,8 @@ private fun SellPriceDialog(
             TextButton(
                 onClick = { parsed?.let { onConfirm(Money.ofEuros(it)) } },
                 enabled = parsed != null,
-            ) { Text("Confirm") }
+            ) { Text(stringResource(R.string.collection_confirm)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }

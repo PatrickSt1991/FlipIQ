@@ -63,11 +63,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.domain.model.BuyTierLevel
 import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.FlipRecommendation
@@ -87,7 +90,7 @@ fun ResultScreen(
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val isWishlisted by viewModel.isWishlisted.collectAsStateWithLifecycle()
     val hasAlert by viewModel.hasAlert.collectAsStateWithLifecycle()
-    val title = (state as? ResultUiState.Success)?.analysis?.product?.title ?: "Analyzing…"
+    val title = (state as? ResultUiState.Success)?.analysis?.product?.title ?: stringResource(R.string.result_analyzing)
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(message) {
@@ -117,31 +120,31 @@ fun ResultScreen(
                 title = { Text(title, maxLines = 1) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     if (hasTitle) {
                         IconButton(onClick = { showEditDialog = true }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit search")
+                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.result_cd_edit_search))
                         }
                     }
                     IconButton(onClick = { openAlertDialog() }) {
                         Icon(
                             if (hasAlert) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
-                            contentDescription = if (hasAlert) "Price alert set" else "Set price alert",
+                            contentDescription = if (hasAlert) stringResource(R.string.result_cd_alert_set) else stringResource(R.string.result_cd_set_alert),
                         )
                     }
                     IconButton(onClick = viewModel::toggleWishlist) {
                         Icon(
                             if (isWishlisted) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = if (isWishlisted) "Remove from wishlist" else "Add to wishlist",
+                            contentDescription = if (isWishlisted) stringResource(R.string.result_cd_remove_wishlist) else stringResource(R.string.result_cd_add_wishlist),
                         )
                     }
                     IconButton(onClick = viewModel::toggleFavorite) {
                         Icon(
                             if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                            contentDescription = if (isFavorite) stringResource(R.string.result_cd_remove_favorites) else stringResource(R.string.result_cd_add_favorites),
                         )
                     }
                 },
@@ -157,7 +160,7 @@ fun ResultScreen(
         ) {
             when (val s = state) {
                 is ResultUiState.Loading -> LoadingState()
-                is ResultUiState.Error -> Text("⚠ ${s.message}", modifier = Modifier.padding(24.dp))
+                is ResultUiState.Error -> Text(stringResource(R.string.result_error_format, s.message), modifier = Modifier.padding(24.dp))
                 is ResultUiState.Success -> AnalysisContent(
                     analysis = s.analysis,
                     onConditionChange = viewModel::setCondition,
@@ -173,9 +176,9 @@ fun ResultScreen(
         val rec = (state as? ResultUiState.Success)?.analysis?.recommendation
         val suggested = rec?.bestBuyPrice ?: rec?.recommendedBuyPrice ?: Money.ofEuros(10.0)
         PriceInputDialog(
-            titleText = "Alert me when it drops to",
-            label = "Target price (€)",
-            confirmText = "Set alert",
+            titleText = stringResource(R.string.result_alert_title),
+            label = stringResource(R.string.result_alert_price_label),
+            confirmText = stringResource(R.string.result_alert_confirm),
             suggested = suggested,
             onConfirm = { price ->
                 showAlertDialog = false
@@ -207,21 +210,21 @@ private fun EditSearchDialog(
     var text by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit search") },
+        title = { Text(stringResource(R.string.result_edit_dialog_title)) },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("Search term") },
+                label = { Text(stringResource(R.string.result_edit_search_term_label)) },
                 singleLine = true,
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(text.trim()) }, enabled = text.isNotBlank()) {
-                Text("Search")
+                Text(stringResource(R.string.result_search))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -230,7 +233,7 @@ private fun LoadingState() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CircularProgressIndicator()
         Spacer(Modifier.height(16.dp))
-        Text("Checking the marketplaces… 🔍", style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(R.string.result_loading), style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -239,7 +242,7 @@ private fun LoadingState() {
 private fun ProductImage(url: String) {
     AsyncImage(
         model = url,
-        contentDescription = "Product image",
+        contentDescription = stringResource(R.string.result_cd_product_image),
         contentScale = ContentScale.Fit,
         modifier = Modifier
             .fillMaxWidth()
@@ -274,7 +277,7 @@ private fun AnalysisContent(
             Button(
                 onClick = { showBuyDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("I bought this") }
+            ) { Text(stringResource(R.string.result_i_bought)) }
             ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
             PriceSummaryCard(rec)
             EstimateCard(rec)
@@ -289,9 +292,9 @@ private fun AnalysisContent(
 
     if (showBuyDialog) {
         PriceInputDialog(
-            titleText = "Add to inventory",
-            label = "Buy price (€)",
-            confirmText = "Add",
+            titleText = stringResource(R.string.result_add_inventory_title),
+            label = stringResource(R.string.result_buy_price_label),
+            confirmText = stringResource(R.string.result_add),
             suggested = rec.recommendedBuyPrice,
             onConfirm = { price ->
                 showBuyDialog = false
@@ -333,7 +336,7 @@ private fun PriceInputDialog(
             ) { Text(confirmText) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }
@@ -348,25 +351,25 @@ private fun NoDataCard(title: String, onScanFront: () -> Unit) {
         ) {
             Text("🕵️", fontSize = 40.sp)
             Text(
-                "No price data yet",
+                stringResource(R.string.result_nodata_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
             Text(
                 if (title == "Unknown item") {
-                    "We couldn't identify this barcode. Scan the front of the item, or try the marketplaces below."
+                    stringResource(R.string.result_nodata_unknown)
                 } else {
-                    "We couldn't find prices for “$title”. Check the marketplaces below — it might be listed there."
+                    stringResource(R.string.result_nodata_no_prices, title)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
             Spacer(Modifier.height(4.dp))
             Button(onClick = onScanFront, modifier = Modifier.fillMaxWidth()) {
-                Text("📸  Scan the front instead")
+                Text(stringResource(R.string.result_scan_front_instead))
             }
             Text(
-                "Tip: adding a PriceCharting or EAN-Search token in Settings improves coverage.",
+                stringResource(R.string.result_nodata_tip),
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -398,7 +401,7 @@ private fun VerdictCard(rec: FlipRecommendation) {
                 color = tierColor,
             )
             Text(
-                "Deal Score ${rec.dealScore.value}/100",
+                stringResource(R.string.result_deal_score, rec.dealScore.value),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -408,13 +411,13 @@ private fun VerdictCard(rec: FlipRecommendation) {
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 AssistChip(onClick = {}, label = { Text("${rec.sellSpeed.emoji} ${rec.sellSpeed.label}") })
-                AssistChip(onClick = {}, label = { Text("👍 ${rec.confidence}% sure") })
+                AssistChip(onClick = {}, label = { Text(stringResource(R.string.result_confidence, rec.confidence)) })
                 AssistChip(onClick = {}, label = { Text(rec.trend.label) })
             }
             if (!rec.viable) {
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "Heads up — doesn't meet your Profit Mode targets",
+                    stringResource(R.string.result_not_viable),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -431,8 +434,8 @@ private fun ConditionSelectors(
     onConditionChange: (Condition) -> Unit,
     onCompletenessChange: (Completeness) -> Unit,
 ) {
-    SectionCard("Item condition") {
-        Text("Condition", style = MaterialTheme.typography.labelLarge)
+    SectionCard(stringResource(R.string.result_condition_section)) {
+        Text(stringResource(R.string.result_condition_label), style = MaterialTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Condition.entries.forEach { c ->
                 FilterChip(
@@ -443,7 +446,7 @@ private fun ConditionSelectors(
             }
         }
         Spacer(Modifier.height(8.dp))
-        Text("Completeness", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.result_completeness_label), style = MaterialTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Completeness.entries.forEach { c ->
                 FilterChip(
@@ -458,36 +461,36 @@ private fun ConditionSelectors(
 
 @Composable
 private fun PriceSummaryCard(rec: FlipRecommendation) {
-    SectionCard("Sold prices (${rec.stats.soldCount} sales)") {
-        StatRow("Average sold", rec.stats.average.toString())
-        StatRow("Median sold", rec.stats.median.toString())
-        StatRow("Lowest", rec.stats.lowest.toString())
-        StatRow("Highest", rec.stats.highest.toString())
+    SectionCard(stringResource(R.string.result_sold_prices, rec.stats.soldCount)) {
+        StatRow(stringResource(R.string.result_avg_sold), rec.stats.average.toString())
+        StatRow(stringResource(R.string.result_median_sold), rec.stats.median.toString())
+        StatRow(stringResource(R.string.result_lowest), rec.stats.lowest.toString())
+        StatRow(stringResource(R.string.result_highest), rec.stats.highest.toString())
     }
 }
 
 @Composable
 private fun EstimateCard(rec: FlipRecommendation) {
-    SectionCard("FlipIQ estimate") {
-        StatRow("Estimated resale", rec.estimatedResale.toString())
-        StatRow("Net after fees & shipping", rec.netResale.toString())
+    SectionCard(stringResource(R.string.result_estimate_section)) {
+        StatRow(stringResource(R.string.result_est_resale), rec.estimatedResale.toString())
+        StatRow(stringResource(R.string.result_net_after), rec.netResale.toString())
         HorizontalDivider(Modifier.padding(vertical = 4.dp))
-        StatRow("Recommended max buy", rec.recommendedBuyPrice.toString(), emphasise = true)
-        StatRow("Expected profit", rec.expectedProfit.toString())
-        StatRow("ROI", "${rec.roiPercent}%")
+        StatRow(stringResource(R.string.result_recommended_max), rec.recommendedBuyPrice.toString(), emphasise = true)
+        StatRow(stringResource(R.string.result_expected_profit), rec.expectedProfit.toString())
+        StatRow(stringResource(R.string.result_roi), stringResource(R.string.result_roi_value, rec.roiPercent))
     }
 }
 
 @Composable
 private fun BuyLadderCard(rec: FlipRecommendation) {
-    SectionCard("Buy ladder") {
+    SectionCard(stringResource(R.string.result_buy_ladder)) {
         rec.buyTiers.forEach { tier ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(tier.level.label, color = tier.level.color, fontWeight = FontWeight.Medium)
-                val prefix = if (tier.level.label == "Skip above") "> " else "≤ "
+                val prefix = if (tier.level == BuyTierLevel.SKIP) "> " else "≤ "
                 Text("$prefix${tier.maxPrice}")
             }
         }
@@ -496,7 +499,7 @@ private fun BuyLadderCard(rec: FlipRecommendation) {
 
 @Composable
 private fun NotesCard(rec: FlipRecommendation) {
-    SectionCard("Why") {
+    SectionCard(stringResource(R.string.result_notes_section)) {
         rec.notes.forEach { note ->
             Text("• $note", style = MaterialTheme.typography.bodyMedium)
         }
@@ -507,7 +510,7 @@ private fun NotesCard(rec: FlipRecommendation) {
 @Composable
 private fun MarketplaceShortcutsCard(analysis: ScanAnalysis) {
     val context = LocalContext.current
-    SectionCard("Open on marketplace") {
+    SectionCard(stringResource(R.string.result_marketplace_section)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             analysis.sources.filter { it.shortcutUrl != null }.forEach { source ->
                 AssistChip(

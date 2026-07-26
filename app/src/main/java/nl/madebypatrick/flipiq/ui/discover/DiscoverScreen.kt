@@ -28,10 +28,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import nl.madebypatrick.flipiq.R
 import nl.madebypatrick.flipiq.data.source.engine.ConsoleGame
 
 /**
@@ -53,10 +55,10 @@ fun DiscoverScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(selected?.let { "${it.emoji} ${it.name}" } ?: "What to hunt for") },
+                title = { Text(selected?.let { "${it.emoji} ${it.name}" } ?: stringResource(R.string.discover_title)) },
                 navigationIcon = {
                     IconButton(onClick = { if (selected != null) viewModel.clearSelection() else onBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -69,7 +71,7 @@ fun DiscoverScreen(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (viewModel.games.isEmpty()) {
                 Text(
-                    "Couldn't load games for ${selected.name}.",
+                    stringResource(R.string.discover_load_error, selected.name),
                     modifier = Modifier.align(Alignment.Center).padding(24.dp),
                     style = MaterialTheme.typography.bodyMedium,
                 )
