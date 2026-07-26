@@ -62,10 +62,17 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # Without these the release build ships an empty engine config, so EngineSource is
+          # disabled and the app shows no marketplace listings (issue #36).
+          ENGINE_URL: ${{ secrets.ENGINE_URL }}
+          ENGINE_KEY: ${{ secrets.ENGINE_KEY }}
         run: ./gradlew :app:assembleRelease :app:bundleRelease --no-daemon
 
       - name: Build unsigned release APK (no keystore secret)
         if: env.KEYSTORE_BASE64 == ''
+        env:
+          ENGINE_URL: ${{ secrets.ENGINE_URL }}
+          ENGINE_KEY: ${{ secrets.ENGINE_KEY }}
         run: ./gradlew :app:assembleRelease --no-daemon
 
       - name: Stage artifacts
