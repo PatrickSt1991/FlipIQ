@@ -53,5 +53,6 @@ fun EngineResponse.toSourceResult(): SourceResult {
         listings = mapped,
         available = mapped.isNotEmpty(),
         shortcutUrl = null,
+        imageUrl = image,
     )
 }

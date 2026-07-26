@@ -16,6 +16,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -230,6 +234,20 @@ private fun LoadingState() {
     }
 }
 
+/** Box-art / listing photo for the scanned item (PriceCharting cover when available). */
+@Composable
+private fun ProductImage(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = "Product image",
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .clip(RoundedCornerShape(12.dp)),
+    )
+}
+
 @Composable
 private fun AnalysisContent(
     analysis: ScanAnalysis,
@@ -250,6 +268,7 @@ private fun AnalysisContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        analysis.product.imageUrl?.let { ProductImage(it) }
         if (hasData) {
             VerdictCard(rec)
             Button(

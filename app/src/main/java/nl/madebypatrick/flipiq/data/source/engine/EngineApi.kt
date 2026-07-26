@@ -67,6 +67,7 @@ data class IdentifyResponse(
 
 @Serializable
 data class EngineResponse(
+    @SerialName("image") val image: String? = null,
     @SerialName("listings") val listings: List<EngineListing> = emptyList(),
     @SerialName("providers") val providers: List<EngineProvider> = emptyList(),
 )
