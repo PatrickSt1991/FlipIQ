@@ -75,8 +75,8 @@ fun ScanScreen(
     onOpenStats: () -> Unit,
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
-    // Front (OCR the box) is the default: without a complete EAN database, a barcode often can't be
-    // resolved to a title, and the real sources (eBay, Marktplaats) search by title anyway.
+    // Front (photograph the cover → AI identifies the game) is the default: barcodes rarely resolve
+    // without a complete EAN database, and the real sources (eBay, Marktplaats) search by title.
     var mode by remember { mutableStateOf(ScanMode.FRONT) }
 
     Scaffold(
@@ -118,7 +118,7 @@ fun ScanScreen(
             Spacer(Modifier.height(16.dp))
 
             when (mode) {
-                ScanMode.FRONT -> FrontScanPane(
+                ScanMode.FRONT -> AiScanPane(
                     onSearch = onSearchTitle,
                     modifier = Modifier.fillMaxWidth(),
                 )
