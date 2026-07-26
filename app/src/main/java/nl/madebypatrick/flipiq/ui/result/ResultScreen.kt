@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -74,6 +75,7 @@ import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 fun ResultScreen(
     onBack: () -> Unit,
     onScanFront: () -> Unit = {},
+    onEditSearch: (String) -> Unit = {},
     viewModel: ResultViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -92,6 +94,8 @@ fun ResultScreen(
     }
 
     var showAlertDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    val hasTitle = state is ResultUiState.Success
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* Alert is stored regardless; notifications simply stay silent until granted. */ }
@@ -113,6 +117,11 @@ fun ResultScreen(
                     }
                 },
                 actions = {
+                    if (hasTitle) {
+                        IconButton(onClick = { showEditDialog = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit search")
+                        }
+                    }
                     IconButton(onClick = { openAlertDialog() }) {
                         Icon(
                             if (hasAlert) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
@@ -171,6 +180,45 @@ fun ResultScreen(
             onDismiss = { showAlertDialog = false },
         )
     }
+
+    if (showEditDialog) {
+        EditSearchDialog(
+            initial = title,
+            onConfirm = { edited ->
+                showEditDialog = false
+                if (edited.isNotBlank() && edited != title) onEditSearch(edited)
+            },
+            onDismiss = { showEditDialog = false },
+        )
+    }
+}
+
+/** Fix an off-title (e.g. a slightly-wrong AI identification) and re-run the search. */
+@Composable
+private fun EditSearchDialog(
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit search") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Search term") },
+                singleLine = true,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(text.trim()) }, enabled = text.isNotBlank()) {
+                Text("Search")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 @Composable
