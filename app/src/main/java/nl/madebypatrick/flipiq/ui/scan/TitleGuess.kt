@@ -9,22 +9,33 @@ package nl.madebypatrick.flipiq.ui.scan
  */
 data class OcrLine(val text: String, val height: Int)
 
-/** Lines that appear on nearly every cover and are hardly ever the product name. */
+/**
+ * Lines that appear on nearly every cover and are hardly ever the product name — publisher/platform
+ * banners and legal text. Dropping these lets the height floor go lower (so a stylised title word
+ * that OCRs a bit smaller, like the distressed "FIFA" over "STREET", still joins the title) without
+ * dragging in "EA SPORTS" or "PlayStation Network".
+ */
 private val Boilerplate = listOf(
-    "playstation", "nintendo", "xbox", "blu-ray", "bluray", "dvd video", "pegi",
-    "only on", "exclusive", "all rights reserved", "www.", "made in", "©",
+    "playstation", "nintendo", "xbox", "ea sports", "ubisoft", "activision", "bandai",
+    "network", "blu-ray", "bluray", "dvd video", "pegi", "usk", "esrb",
+    "only on", "exclusive", "official", "licensed", "all rights reserved", "www.", "made in", "©", "®", "™",
 )
 
 private val WhitespaceRun = Regex("\\s+")
 
-/** Lines within this fraction of the tallest line's height are treated as part of the same title. */
-private const val SAME_SIZE_FLOOR = 0.75
+/**
+ * Lines within this fraction of the tallest line's height join the title. Deliberately generous
+ * (0.55): cover titles are often two words at slightly different sizes, and after boilerplate is
+ * stripped the remaining big text is almost always the title, so erring toward *fuller* text — which
+ * the user can trim in the review field — beats collapsing to a single word.
+ */
+private const val SAME_SIZE_FLOOR = 0.55
 
 /**
  * Best guess at the product name from a single OCR frame.
  *
  * Takes the tallest usable line and glues on any other line within [SAME_SIZE_FLOOR] of that height
- * (so multi-line titles stay together), in reading order.
+ * (so multi-line / multi-size titles stay together), in reading order.
  *
  * Returns an **empty string** when nothing usable was recognised. Callers must treat that as "no
  * capture" rather than an empty title — see [FrontScanPane].

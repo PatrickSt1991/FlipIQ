@@ -26,6 +26,20 @@ class TitleGuessTest {
     }
 
     @Test
+    fun `joins a stylised two-size title and drops publisher banners (FIFA Street)`() {
+        // Real issue #33 cover: distressed "FIFA" OCRs smaller than "STREET"; banners surround it.
+        // Old 0.75 floor kept only "STREET"; the 0.55 floor + boilerplate list recovers "FIFA STREET".
+        val lines = listOf(
+            OcrLine("EA SPORTS", 30),
+            OcrLine("FIFA", 40),
+            OcrLine("STREET", 60),
+            OcrLine("PlayStation Network", 18),
+            OcrLine("3", 44), // PEGI age badge — no letters, filtered
+        )
+        assertThat(bestTitleGuess(lines)).isEqualTo("FIFA STREET")
+    }
+
+    @Test
     fun `returns blank when nothing usable was read`() {
         assertThat(bestTitleGuess(emptyList())).isEmpty()
         assertThat(bestTitleGuess(listOf(OcrLine("18", 40), OcrLine("©", 10)))).isEmpty()
