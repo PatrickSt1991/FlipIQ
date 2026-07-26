@@ -21,11 +21,11 @@ class ScanViewModel @Inject constructor(
         private set
 
     /** Identify the captured JPEG; [onResult] gets the title, or null if it couldn't be identified. */
-    fun identify(jpeg: ByteArray, onResult: (String?) -> Unit) {
+    fun identify(jpeg: ByteArray, rotationDegrees: Int, onResult: (String?) -> Unit) {
         if (identifying) return
         identifying = true
         viewModelScope.launch {
-            val title = identifier.identify(jpeg)
+            val title = identifier.identify(jpeg, rotationDegrees)
             identifying = false
             onResult(title)
         }
