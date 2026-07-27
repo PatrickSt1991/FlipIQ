@@ -36,9 +36,22 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
             .map { it.price.cents }
             .sorted()
 
-        val stats = computeStatistics(soldPrices)
+        // Prefer real sold comps. Marktplaats + eBay give only ASKING prices (active listings), and
+        // eBay sold data is behind a gated API, so most non-game items have no sold comps at all.
+        // When that happens, estimate resale from the asking prices (median asking × askingToSold)
+        // so the item still gets a recommendation — flagged with a note and reduced confidence.
+        val activePrices = input.listings
+            .filter { it.type == ListingType.ACTIVE }
+            .map { it.price.cents }
+            .sorted()
+        val estimatedFromAsking = soldPrices.isEmpty() && activePrices.isNotEmpty()
+        val stats = if (soldPrices.isNotEmpty()) {
+            computeStatistics(soldPrices)
+        } else {
+            computeStatistics(activePrices).scaledBy(config.askingToSold)
+        }
 
-        // Resale estimate: median sold, adjusted for this item's condition & completeness.
+        // Resale estimate: median (sold, or discounted asking), adjusted for condition & completeness.
         val conditionAdj = config.conditionMultiplier(input.condition) *
             config.completenessMultiplier(input.completeness)
         val estimatedResale = (stats.median * conditionAdj).coerceAtLeastZero()
@@ -50,7 +63,10 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
 
         val sellSpeed = computeSellSpeed(input.listings)
         val trend = computeTrend(input.listings)
-        val confidence = computeConfidence(stats)
+        // An asking-based estimate is inherently less certain — cap its confidence.
+        val confidence = computeConfidence(stats).let {
+            if (estimatedFromAsking) (it / 2).coerceAtMost(40) else it
+        }
 
         // Acquisition reference for the Deal Score: what you'd actually pay to get the item. The
         // asking price if the user entered one; otherwise the cheapest currently-buyable (active)
@@ -63,7 +79,7 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
         val dealScore = computeDealScore(netResale, acquisitionReference, stats, sellSpeed, trend)
 
         val buyTiers = buildBuyTiers(netResale)
-        val (viable, notes) = evaluateViability(input, stats, estimatedResale)
+        val (viable, notes) = evaluateViability(input, stats, estimatedResale, estimatedFromAsking)
 
         return FlipRecommendation(
             stats = stats,
@@ -110,6 +126,15 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
             dispersion = dispersion,
         )
     }
+
+    /** Scale the money fields (used to turn asking-price stats into an estimated-sold basis). */
+    private fun PriceStatistics.scaledBy(factor: Double): PriceStatistics =
+        if (!hasData) this else copy(
+            average = average * factor,
+            median = median * factor,
+            lowest = lowest * factor,
+            highest = highest * factor,
+        )
 
     // --- Pricing ----------------------------------------------------------------------------
 
@@ -245,16 +270,21 @@ class FlipIQEngine(private val config: EngineConfig = EngineConfig.DEFAULT) {
         input: EngineInput,
         stats: PriceStatistics,
         estimatedResale: Money,
+        estimatedFromAsking: Boolean,
     ): Pair<Boolean, List<String>> {
         val settings = input.settings
         val notes = mutableListOf<String>()
         var viable = true
 
         if (!stats.hasData) {
-            notes += "No sold-price data found for this item."
+            notes += "No price data found for this item."
             return false to notes
         }
-        if (stats.soldCount < settings.minSales) {
+        if (estimatedFromAsking) {
+            // No real sales — the estimate is asking-based, so don't gate on the sold-count target;
+            // just be transparent. minSales still applies once real sold comps exist.
+            notes += "Estimated from ${stats.soldCount} asking prices (no recent sales found) — treat as a rough guide."
+        } else if (stats.soldCount < settings.minSales) {
             viable = false
             notes += "Only ${stats.soldCount} recent sales (need ${settings.minSales})."
         }

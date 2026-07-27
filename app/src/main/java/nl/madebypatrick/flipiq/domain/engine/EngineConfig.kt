@@ -15,6 +15,8 @@ data class EngineConfig(
     val weightVelocity: Double = 0.20,
     val weightTrend: Double = 0.10,
 
+    /** When there are no sold comps, resale is estimated from asking prices × this factor. */
+    val askingToSold: Double = 0.85,
     /** ROI at which the profitability component maxes out (1.0 = a 100% return scores full marks). */
     val roiForFullProfitability: Double = 1.0,
     /** Sold count at which the liquidity component maxes out. */
