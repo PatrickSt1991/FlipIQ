@@ -223,63 +223,35 @@ private fun TextCamera(
     onLines: (List<OcrLine>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    // OCR on a worker thread: the frames are ~1440x1080 now, which is far too much work to hang off
-    // the main executor like the barcode path does.
+    // OCR on a worker thread: the frames are ~1440x1080, far too much work for the main executor.
     val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        AndroidView(
-            factory = { ctx ->
-                val previewView = PreviewView(ctx)
-                val mainExecutor = ContextCompat.getMainExecutor(ctx)
-                val providerFuture = ProcessCameraProvider.getInstance(ctx)
-                providerFuture.addListener({
-                    val provider = providerFuture.get()
-                    val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
-                    }
+    CameraPreview(
+        modifier = modifier,
+        extraUseCases = {
+            // ML Kit wants >= 1280x720 with glyphs ~16px tall; CameraX defaults ImageAnalysis to
+            // 640x480, at which a cover title at arm's length never resolves. Request 1440x1080 (4:3).
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        Size(1440, 1080),
+                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+                    ),
+                )
+                .build()
+            listOf(
+                ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setResolutionSelector(resolutionSelector)
+                    .build()
+                    .also { it.setAnalyzer(analysisExecutor, TextRecognitionAnalyzer(onLines)) },
+            )
+        },
+    )
 
-                    // ML Kit wants >= 1280x720 for text recognition and glyphs at least ~16px tall.
-                    // CameraX defaults ImageAnalysis to 640x480, at which a cover title held at
-                    // arm's length is a handful of pixels and simply never resolves — this was why
-                    // Front mode read nothing while Barcode mode was fine. 4:3 to match the preview.
-                    val resolutionSelector = ResolutionSelector.Builder()
-                        .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
-                        .setResolutionStrategy(
-                            ResolutionStrategy(
-                                Size(1440, 1080),
-                                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
-                            ),
-                        )
-                        .build()
-
-                    val analysis = ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setResolutionSelector(resolutionSelector)
-                        .build()
-                        .also { it.setAnalyzer(analysisExecutor, TextRecognitionAnalyzer(onLines)) }
-
-                    provider.unbindAll()
-                    provider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        analysis,
-                    )
-                }, mainExecutor)
-                previewView
-            },
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    // Stop the camera/analysis when this leaves the composition (e.g. after Capture).
+    // Shut the OCR worker thread when this leaves composition (CameraPreview releases the camera).
     DisposableEffect(Unit) {
-        onDispose {
-            runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
-            analysisExecutor.shutdown()
-        }
+        onDispose { analysisExecutor.shutdown() }
     }
 }
