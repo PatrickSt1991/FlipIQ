@@ -255,36 +255,15 @@ private fun CameraScanner(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    Box(modifier = modifier) {
-        AndroidView(
-            factory = { ctx ->
-                val previewView = PreviewView(ctx)
-                val executor = ContextCompat.getMainExecutor(ctx)
-                val providerFuture = ProcessCameraProvider.getInstance(ctx)
-                providerFuture.addListener({
-                    val provider = providerFuture.get()
-
-                    val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
-                    }
-                    val analysis = ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
-                        .also { it.setAnalyzer(executor, BarcodeAnalyzer(onBarcode)) }
-
-                    provider.unbindAll()
-                    provider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        analysis,
-                    )
-                }, executor)
-                previewView
-            },
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
+    CameraPreview(
+        modifier = modifier,
+        extraUseCases = {
+            listOf(
+                ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                    .also { it.setAnalyzer(ContextCompat.getMainExecutor(context), BarcodeAnalyzer(onBarcode)) },
+            )
+        },
+    )
 }

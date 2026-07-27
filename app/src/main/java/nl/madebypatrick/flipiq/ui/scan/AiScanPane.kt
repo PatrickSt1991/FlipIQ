@@ -181,37 +181,5 @@ private fun CaptureCamera(
     imageCapture: ImageCapture,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    Box(modifier = modifier) {
-        AndroidView(
-            factory = { ctx ->
-                val previewView = PreviewView(ctx)
-                val executor = ContextCompat.getMainExecutor(ctx)
-                val providerFuture = ProcessCameraProvider.getInstance(ctx)
-                providerFuture.addListener({
-                    val provider = providerFuture.get()
-                    val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
-                    }
-                    provider.unbindAll()
-                    provider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        imageCapture,
-                    )
-                }, executor)
-                previewView
-            },
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
-        }
-    }
+    CameraPreview(modifier = modifier, extraUseCases = { listOf(imageCapture) })
 }

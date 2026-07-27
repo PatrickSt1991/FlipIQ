@@ -21,7 +21,7 @@
     <!-- Barcode -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M66,74 h7 v58 h-7 z M78,74 h4 v58 h-4 z M88,74 h10 v58 h-10 z M104,74 h5 v58 h-5 z M115,74 h8 v58 h-8 z M129,74 h4 v58 h-4 z M139,74 h7 v58 h-7 z" />
+        android:pathData="M60,74 h7 v58 h-7 z M72,74 h4 v58 h-4 z M82,74 h10 v58 h-10 z M98,74 h5 v58 h-5 z M109,74 h8 v58 h-8 z M123,74 h4 v58 h-4 z M133,74 h7 v58 h-7 z" />
 
     <!-- Rising deal/value arrow (green outline under amber) -->
     <path
