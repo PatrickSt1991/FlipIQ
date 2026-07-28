@@ -1,5 +1,8 @@
 package nl.madebypatrick.flipiq.ui.settings
 
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import nl.madebypatrick.flipiq.ui.util.AppLocale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -144,6 +147,8 @@ fun SettingsScreen(
             }
 
             SettingsSection(stringResource(R.string.settings_section_appearance)) {
+                Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.labelLarge)
+                LanguageSelector()
                 Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.labelLarge)
                 ThemeModeSelector(theme.mode, viewModel::setThemeMode)
                 ToggleRow(stringResource(R.string.settings_material_you), theme.dynamicColor, viewModel::setDynamicColor)
@@ -222,7 +227,34 @@ private fun IntField(label: String, value: Int, onChange: (Int) -> Unit) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+/** App-language override. Writing it + recreate() re-runs MainActivity.attachBaseContext. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LanguageSelector() {
+    val context = LocalContext.current
+    val current = remember { AppLocale.getTag(context) }
+    val options = listOf(
+        "" to stringResource(R.string.settings_language_system),
+        "en" to stringResource(R.string.settings_language_english),
+        "nl" to stringResource(R.string.settings_language_dutch),
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEach { (tag, label) ->
+            FilterChip(
+                selected = tag == current,
+                onClick = {
+                    if (tag != current) {
+                        AppLocale.setTag(context, tag)
+                        (context as? Activity)?.recreate()
+                    }
+                },
+                label = { Text(label) },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ThemeModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
     val labels = mapOf(
