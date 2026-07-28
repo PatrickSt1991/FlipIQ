@@ -15,6 +15,7 @@ import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -35,6 +36,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()
+        // The engine's /haul (Gemini lists titles + a PriceCharting scrape per item) and eBay-sold
+        // lookups can legitimately take 20–40s; OkHttp's 10s default read timeout killed them
+        // mid-flight, so haul "hung" then returned nothing. Give slow marketplace calls room.
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(90, TimeUnit.SECONDS)
         .addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
