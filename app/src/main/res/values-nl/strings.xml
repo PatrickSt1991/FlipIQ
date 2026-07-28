@@ -186,6 +186,10 @@
     <string name="settings_ean_desc">EAN-Search API-token — verbetert het koppelen van barcode→product (vooral EU/NL-items).</string>
     <string name="settings_ean_label">EAN-Search-token</string>
     <string name="settings_section_appearance">Weergave</string>
+    <string name="settings_language">Taal</string>
+    <string name="settings_language_system">Systeem</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_dutch">Nederlands</string>
     <string name="settings_theme">Thema</string>
     <string name="settings_material_you">Material You-kleuren</string>
     <string name="settings_theme_system">Systeem</string>
@@ -220,4 +224,10 @@
     <string name="haul_skip">Overslaan</string>
     <string name="haul_max_buy">max inkoop %1$s</string>
     <string name="haul_no_value">Geen prijs gevonden</string>
+
+    <!-- Screenshot import & share target -->
+    <string name="pick_screenshot">"  Uit een screenshot"</string>
+    <string name="image_unreadable">Kon die afbeelding niet lezen — probeer een andere.</string>
+    <string name="shared_title">Gedeeld met FlipIQ</string>
+    <string name="shared_identifying">Uitzoeken wat je hebt gedeeld…</string>
 </resources>

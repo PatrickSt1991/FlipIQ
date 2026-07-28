@@ -2,6 +2,12 @@ package nl.madebypatrick.flipiq.ui
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +20,8 @@ import nl.madebypatrick.flipiq.ui.result.ResultScreen
 import nl.madebypatrick.flipiq.ui.scan.ScanScreen
 import nl.madebypatrick.flipiq.ui.scan.TextScanScreen
 import nl.madebypatrick.flipiq.ui.settings.SettingsScreen
+import nl.madebypatrick.flipiq.ui.share.SharedImageScreen
+import nl.madebypatrick.flipiq.ui.share.SharedItem
 import nl.madebypatrick.flipiq.ui.stats.StatsScreen
 
 object Routes {
@@ -26,6 +34,7 @@ object Routes {
     const val STATS = "stats"
     const val DISCOVER = "discover"
     const val HAUL = "haul"
+    const val SHARED_IMAGE = "shared-image"
     const val ARG_BARCODE = "barcode"
     const val ARG_TITLE = "title"
     fun result(barcode: String) = "$RESULT/$barcode"
@@ -33,8 +42,30 @@ object Routes {
 }
 
 @Composable
-fun FlipIQApp() {
+fun FlipIQApp(shared: SharedItem? = null) {
     val navController = rememberNavController()
+
+    // Passed as a parameter, not a route argument: a content URI would have to survive string
+    // encode/decode and the read grant is tied to this activity anyway.
+    var sharedImageUri by remember { mutableStateOf<Uri?>(null) }
+    // Deduplicate on the item's string so rotating on the result screen doesn't re-navigate, but a
+    // genuinely new share does. rememberSaveable so it survives config changes.
+    var lastHandledShare by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(shared) {
+        if (shared == null) return@LaunchedEffect
+        val key = shared.toString()
+        if (key == lastHandledShare) return@LaunchedEffect
+        lastHandledShare = key
+        when (shared) {
+            is SharedItem.Title -> navController.navigate(Routes.search(shared.value))
+            is SharedItem.Barcode -> navController.navigate(Routes.result(shared.value))
+            is SharedItem.Image -> {
+                sharedImageUri = shared.uri
+                navController.navigate(Routes.SHARED_IMAGE)
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = Routes.SCAN) {
         composable(Routes.SCAN) {
@@ -87,6 +118,17 @@ fun FlipIQApp() {
                 onBack = { navController.popBackStack() },
                 onScanFront = { navController.navigate(Routes.TEXT_SCAN) },
                 onEditSearch = { edited -> navController.navigate(Routes.search(edited)) },
+            )
+        }
+        composable(Routes.SHARED_IMAGE) {
+            SharedImageScreen(
+                uri = sharedImageUri,
+                onBack = { navController.popBackStack() },
+                onTitle = { title ->
+                    navController.navigate(Routes.search(title)) {
+                        popUpTo(Routes.SHARED_IMAGE) { inclusive = true }
+                    }
+                },
             )
         }
         composable(Routes.TEXT_SCAN) {

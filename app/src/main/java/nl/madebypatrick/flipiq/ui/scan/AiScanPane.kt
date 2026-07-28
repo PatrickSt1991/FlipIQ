@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.util.rememberImagePicker
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -69,6 +71,20 @@ fun AiScanPane(
     }
     var message by remember { mutableStateOf<String?>(null) }
 
+    // Picker must be remembered unconditionally — it's used in both the camera and no-camera branches.
+    val pickImage = rememberImagePicker { uri ->
+        message = null
+        viewModel.identifyImage(uri) { title, unreadable ->
+            if (title != null) {
+                onSearch(title)
+            } else {
+                message = context.getString(
+                    if (unreadable) R.string.image_unreadable else R.string.ai_not_identified,
+                )
+            }
+        }
+    }
+
     // Front is the default mode — ask for the camera once instead of dumping into the typed fallback.
     var permissionRequested by remember { mutableStateOf(false) }
     LaunchedEffect(cameraPermission.status.isGranted) {
@@ -84,6 +100,16 @@ fun AiScanPane(
                 onClick = { cameraPermission.launchPermissionRequest() },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.enable_camera)) }
+            // A screenshot is a complete flow with no camera at all — offer it here, not just a dead
+            // end into the typed fallback.
+            ScreenshotButton(
+                busy = viewModel.identifying,
+                onClick = pickImage,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            message?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
             TypeItFallback(onSearch = onSearch)
             return@Column
         }
@@ -138,10 +164,27 @@ fun AiScanPane(
                 Text(stringResource(R.string.ai_identify_game))
             }
         }
+        ScreenshotButton(
+            busy = viewModel.identifying,
+            onClick = pickImage,
+            modifier = Modifier.fillMaxWidth(),
+        )
         message?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
         TypeItFallback(onSearch = onSearch)
+    }
+}
+
+/**
+ * Pick an image from the gallery instead of using the camera. `internal` so [HaulScreen] reuses the
+ * exact same button. Outlined to sit visually below the primary capture/identify action.
+ */
+@Composable
+internal fun ScreenshotButton(busy: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(onClick = onClick, enabled = !busy, modifier = modifier) {
+        Icon(Icons.Default.Image, contentDescription = null)
+        Text(stringResource(R.string.pick_screenshot))
     }
 }
 

@@ -60,6 +60,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import nl.madebypatrick.flipiq.R
 import nl.madebypatrick.flipiq.ui.scan.CameraPreview
+import nl.madebypatrick.flipiq.ui.scan.ScreenshotButton
+import nl.madebypatrick.flipiq.ui.util.rememberImagePicker
 
 /**
  * Haul scan — photograph a pile of games/DVDs; the engine lists them and prices each, and Profit
@@ -79,6 +81,8 @@ fun HaulScreen(
         ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
     }
     var captureError by remember { mutableStateOf<String?>(null) }
+    // Remembered unconditionally so it works both in the capture view and the permission prompt.
+    val pickImage = rememberImagePicker { uri -> viewModel.scanImage(uri) }
 
     Scaffold(
         topBar = {
@@ -93,17 +97,9 @@ fun HaulScreen(
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Order matters: a picked screenshot must work without camera permission, so loading /
+            // unreadable / scanned are all checked before the permission gate.
             when {
-                !cameraPermission.status.isGranted -> Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Button(onClick = { cameraPermission.launchPermissionRequest() }) {
-                        Text(stringResource(R.string.enable_camera))
-                    }
-                }
-
                 viewModel.loading -> Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -117,15 +113,42 @@ fun HaulScreen(
                     )
                 }
 
+                viewModel.unreadable -> Column(
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        stringResource(R.string.image_unreadable),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    OutlinedButton(
+                        onClick = viewModel::reset,
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    ) { Text(stringResource(R.string.haul_scan_again)) }
+                }
+
                 viewModel.scanned -> ResultsList(
                     viewModel = viewModel,
                     onOpenGame = onOpenGame,
                     onScanAgain = viewModel::reset,
                 )
 
+                !cameraPermission.status.isGranted -> Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Button(onClick = { cameraPermission.launchPermissionRequest() }) {
+                        Text(stringResource(R.string.enable_camera))
+                    }
+                    ScreenshotButton(busy = false, onClick = pickImage)
+                }
+
                 else -> CaptureView(
                     imageCapture = imageCapture,
                     error = captureError,
+                    onPickImage = pickImage,
                     onCapture = {
                         captureError = null
                         imageCapture.takePicture(
@@ -152,7 +175,12 @@ fun HaulScreen(
 }
 
 @Composable
-private fun CaptureView(imageCapture: ImageCapture, error: String?, onCapture: () -> Unit) {
+private fun CaptureView(
+    imageCapture: ImageCapture,
+    error: String?,
+    onCapture: () -> Unit,
+    onPickImage: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -165,6 +193,7 @@ private fun CaptureView(imageCapture: ImageCapture, error: String?, onCapture: (
         Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.haul_scan_button))
         }
+        ScreenshotButton(busy = false, onClick = onPickImage, modifier = Modifier.fillMaxWidth())
         error?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
