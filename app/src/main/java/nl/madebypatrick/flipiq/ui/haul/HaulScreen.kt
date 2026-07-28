@@ -40,7 +40,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +78,7 @@ fun HaulScreen(
     val imageCapture = remember {
         ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
     }
+    var captureError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -122,7 +125,9 @@ fun HaulScreen(
 
                 else -> CaptureView(
                     imageCapture = imageCapture,
+                    error = captureError,
                     onCapture = {
+                        captureError = null
                         imageCapture.takePicture(
                             mainExecutor,
                             object : ImageCapture.OnImageCapturedCallback() {
@@ -133,7 +138,10 @@ fun HaulScreen(
                                     viewModel.scan(bytes, rotation)
                                 }
 
-                                override fun onError(exc: ImageCaptureException) {}
+                                // Silently swallowing this made a dead camera look like a frozen app.
+                                override fun onError(exc: ImageCaptureException) {
+                                    captureError = context.getString(R.string.ai_camera_error)
+                                }
                             },
                         )
                     },
@@ -144,7 +152,7 @@ fun HaulScreen(
 }
 
 @Composable
-private fun CaptureView(imageCapture: ImageCapture, onCapture: () -> Unit) {
+private fun CaptureView(imageCapture: ImageCapture, error: String?, onCapture: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -156,6 +164,9 @@ private fun CaptureView(imageCapture: ImageCapture, onCapture: () -> Unit) {
         Text(stringResource(R.string.haul_aim), style = MaterialTheme.typography.bodyMedium)
         Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.haul_scan_button))
+        }
+        error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
