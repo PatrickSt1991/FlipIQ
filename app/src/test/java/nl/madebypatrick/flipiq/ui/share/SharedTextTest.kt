@@ -31,6 +31,14 @@ class SharedTextTest {
     }
 
     @Test
+    fun `marktplaats pipe-separated title keeps only the first segment (issue 59)`() {
+        val shared = "Super Mario Party | Nintendo Switch | Als Nieuw.\n" +
+            "€ 35,00\n" +
+            "https://link.marktplaats.nl/m2407077198?utm_source=android_social&utm_medium=android_social"
+        assertThat(sharedTitle(shared)).isEqualTo("Super Mario Party")
+    }
+
+    @Test
     fun `old-style eBay itm slug in an earlier path segment`() {
         val shared = "https://www.ebay.com/itm/LEGO-Technic-Bugatti-Chiron-42083/" +
             "183456789012?hash=item2a"
