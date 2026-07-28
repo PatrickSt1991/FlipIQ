@@ -26,8 +26,18 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  * quick navigate-away could bind the camera *after* dispose and never release it — locking the
  * camera for other apps until the process died.
  *
- * [extraUseCases] is invoked once at bind time; return any [ImageCapture]/[ImageAnalysis] to bind
- * alongside the preview.
+ * Two rules keep it correct when a *second* preview appears while this one is still on screen (any
+ * navigation between two camera screens: the outgoing destination stays in composition until the
+ * transition finishes, so it disposes **after** the incoming one has bound):
+ *  - Binding clears everything ([ProcessCameraProvider.unbindAll]) — CameraX allows only one active
+ *    [androidx.lifecycle.LifecycleOwner], and two `Preview`s is not a supported surface combination.
+ *  - Disposing unbinds only *our own* use cases. `unbindAll()` here used to tear down the incoming
+ *    screen's freshly bound camera, leaving a frozen preview and an [ImageCapture] whose
+ *    `takePicture` only ever reports `ERROR_INVALID_CAMERA`.
+ *
+ * The use cases are therefore built once, so dispose can name the same instances. [extraUseCases]
+ * is invoked once, at first composition; return any [ImageCapture]/[ImageAnalysis] to bind alongside
+ * the preview.
  */
 @Composable
 fun CameraPreview(
@@ -37,28 +47,28 @@ fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
+    val preview = remember { Preview.Builder().build() }
+    val useCases = remember { (listOf<UseCase>(preview) + extraUseCases()).toTypedArray() }
 
     DisposableEffect(lifecycleOwner) {
         var disposed = false
+        var provider: ProcessCameraProvider? = null
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
             if (disposed) return@addListener
-            val provider = future.get()
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
-            provider.unbindAll()
-            provider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                preview,
-                *extraUseCases().toTypedArray(),
-            )
+            // The listener only runs once the future is done, so get() returns without blocking.
+            val resolved = future.get()
+            provider = resolved
+            preview.surfaceProvider = previewView.surfaceProvider
+            resolved.unbindAll()
+            resolved.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, *useCases)
         }, ContextCompat.getMainExecutor(context))
 
         onDispose {
             disposed = true
-            runCatching { future.get().unbindAll() }
+            // Never future.get() here: on the first camera launch the provider may still be
+            // initialising, and blocking the main thread on it is an ANR.
+            provider?.unbind(*useCases)
         }
     }
 
