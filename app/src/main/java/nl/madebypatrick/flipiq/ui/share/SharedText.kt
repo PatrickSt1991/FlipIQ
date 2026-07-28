@@ -135,6 +135,11 @@ private fun shareSignificantWord(a: String, b: String): Boolean {
 
 private fun clean(raw: String, maxLength: Int): String {
     var text = raw.replace(Whitespace, " ").trim()
+    // Marktplaats/eBay share text is "Title | Platform | Condition" (or a page title "Title | eBay").
+    // The first pipe segment is the listing title — keep it, drop the rest.
+    if ('|' in text) {
+        text.split('|').firstOrNull { it.count(Char::isLetter) >= 2 }?.let { text = it.trim() }
+    }
     text = TrailingPrice.replace(text, "").trim()
     text = SiteSuffix.replace(text, "").trim()
     text = text.trim { it in EDGE_PUNCT }

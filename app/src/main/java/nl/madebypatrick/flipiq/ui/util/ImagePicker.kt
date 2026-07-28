@@ -50,10 +50,12 @@ suspend fun readImageAsJpeg(context: Context, uri: Uri, maxDim: Int): ByteArray?
         runCatching {
             val resolver = context.contentResolver
 
-            // Cheap bounds-only pass so we never hold a full-res bitmap in memory.
+            // Cheap bounds-only pass so we never hold a full-res bitmap in memory. A bounds decode
+            // ALWAYS returns a null Bitmap by design, so null-check the *stream*, not the decode —
+            // guarding the decode result made every image look unreadable.
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-                ?: return@runCatching null
+            val boundsStream = resolver.openInputStream(uri) ?: return@runCatching null
+            boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
             val w = bounds.outWidth
             val h = bounds.outHeight
             if (w <= 0 || h <= 0) return@runCatching null
