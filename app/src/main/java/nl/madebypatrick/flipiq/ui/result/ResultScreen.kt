@@ -277,26 +277,26 @@ private fun AnalysisContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         analysis.product.imageUrl?.let { ProductImage(it) }
+        // Reway first — it's the certain NL price (what they pay you + what they sell it for). Shows
+        // even without market data; renders nothing when Reway had no match or is switched off.
+        if (!analysis.allSourcesDisabled && analysis.reway.hasAny) RewayCard(analysis.reway)
         when {
             analysis.allSourcesDisabled -> SourcesOffCard()
             hasData -> {
+                // "Sell it yourself" — the market view (eBay sold history + Marktplaats).
+                PriceSummaryCard(rec)
                 VerdictCard(rec)
                 Button(
                     onClick = { showBuyDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.result_i_bought)) }
                 ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
-                PriceSummaryCard(rec)
                 EstimateCard(rec, analysis.reway)
                 BuyLadderCard(rec)
                 if (rec.notes.isNotEmpty()) NotesCard(rec)
             }
             else -> NoDataCard(analysis.product.title, onScanFront = onScanFront)
         }
-        // Reway's buy-in/retail on their own lines, never blended into the market estimate (§3/§8).
-        // Shows even without engine data (a guaranteed floor is useful on its own); renders nothing
-        // when Reway had no match or is switched off.
-        if (!analysis.allSourcesDisabled && analysis.reway.hasAny) RewayCard(analysis.reway)
         if (!analysis.allSourcesDisabled) MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }

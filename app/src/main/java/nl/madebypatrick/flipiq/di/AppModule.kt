@@ -78,14 +78,7 @@ object AppModule {
     ): List<@JvmSuppressWildcards MarketplaceSource> {
         val demo = BuildConfig.DEMO_MODE
 
-        // Runtime PriceCharting token (Settings) with the build-time value as fallback.
-        val tokenProvider: suspend () -> String = {
-            settingsRepository.priceChartingToken.first().ifBlank { BuildConfig.PRICECHARTING_TOKEN }
-        }
-        val priceCharting: MarketplaceSource =
-            if (demo) PriceChartingSource() else LivePriceChartingSource(priceChartingApi, tokenProvider, currencyConverter)
-
-        // FlipIQ Engine — aggregated Marktplaats + eBay data when configured.
+        // FlipIQ Engine — aggregated Marktplaats + eBay(-sold) data when configured.
         val engine: MarketplaceSource? =
             if (BuildConfig.ENGINE_URL.isNotBlank()) {
                 EngineSource(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
@@ -118,18 +111,15 @@ object AppModule {
             skipDuringHaul = true,
         )
 
+        // Reway first (the primary NL price), then the market data (engine = eBay-sold + Marktplaats),
+        // then the two "open in browser" links. PriceCharting (USD guide) and CeX/Vinted/Tweakers were
+        // dropped as price sources — Reway is the NL reference now.
         return listOfNotNull(
-            engine,
-            priceCharting,
             rewayBuyIn,
             rewayRetail,
-            // Shortcut-only "open search" links.
+            engine,
             ShortcutOnlySource("ebay", "eBay", MarketplaceUrls::ebaySold),
             ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
-            // CeX's API is behind Cloudflare bot protection (403), so it's a search link for now.
-            ShortcutOnlySource("cex", "CeX", MarketplaceUrls::cex),
-            ShortcutOnlySource("vinted", "Vinted", MarketplaceUrls::vinted),
-            ShortcutOnlySource("tweakers", "Tweakers", MarketplaceUrls::tweakers),
         )
     }
 
