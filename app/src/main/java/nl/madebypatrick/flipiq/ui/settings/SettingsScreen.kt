@@ -62,8 +62,6 @@ fun SettingsScreen(
 ) {
     val saved by viewModel.settings.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
-    val pcToken by viewModel.priceChartingToken.collectAsStateWithLifecycle()
-    val eanToken0 by viewModel.eanSearchToken.collectAsStateWithLifecycle()
     val sourceToggles by viewModel.sourceToggles.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
@@ -111,40 +109,6 @@ fun SettingsScreen(
                 ToggleRow(stringResource(R.string.settings_ignore_incomplete), edited.ignoreIncomplete) { edited = edited.copy(ignoreIncomplete = it) }
                 ToggleRow(stringResource(R.string.settings_ignore_damaged), edited.ignoreDamaged) { edited = edited.copy(ignoreDamaged = it) }
                 ToggleRow(stringResource(R.string.settings_prefer_fast), edited.preferFastSellers) { edited = edited.copy(preferFastSellers = it) }
-            }
-
-            // Data sources & appearance are applied immediately (no Save needed).
-            SettingsSection(stringResource(R.string.settings_section_data_sources)) {
-                Text(
-                    stringResource(R.string.settings_pc_desc),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                var token by remember(pcToken) { mutableStateOf(pcToken) }
-                OutlinedTextField(
-                    value = token,
-                    onValueChange = {
-                        token = it
-                        viewModel.setPriceChartingToken(it)
-                    },
-                    label = { Text(stringResource(R.string.settings_pc_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    stringResource(R.string.settings_ean_desc),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                var eanToken by remember(eanToken0) { mutableStateOf(eanToken0) }
-                OutlinedTextField(
-                    value = eanToken,
-                    onValueChange = {
-                        eanToken = it
-                        viewModel.setEanSearchToken(it)
-                    },
-                    label = { Text(stringResource(R.string.settings_ean_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
 
             // Deny-list toggles, applied on the next scan without a restart (§7). Built from the
