@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material3.AlertDialog
@@ -18,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +71,7 @@ fun CollectionScreen(
 
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
+    var showAddManual by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
     val tabs = listOf(
         stringResource(R.string.collection_tab_inventory),
@@ -111,6 +114,14 @@ fun CollectionScreen(
                 },
             )
         },
+        floatingActionButton = {
+            // Manual add — put something in inventory without scanning it.
+            if (tab == 0) {
+                FloatingActionButton(onClick = { showAddManual = true }) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.collection_add_manual))
+                }
+            }
+        },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             ProfitSummaryCard(summary)
@@ -143,6 +154,72 @@ fun CollectionScreen(
             onDismiss = { sellTarget = null },
         )
     }
+
+    if (showAddManual) {
+        AddManualDialog(
+            onConfirm = { title, buyPrice, resale ->
+                viewModel.addManual(title, buyPrice, resale)
+                showAddManual = false
+            },
+            onDismiss = { showAddManual = false },
+        )
+    }
+}
+
+@Composable
+private fun AddManualDialog(
+    onConfirm: (title: String, buyPrice: Money, estimatedResale: Money) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var title by remember { mutableStateOf("") }
+    var buyText by remember { mutableStateOf("") }
+    var resaleText by remember { mutableStateOf("") }
+
+    // Need a title and a valid price paid; expected resale is optional (blank → falls back to buy).
+    val buyEuros = buyText.replace(',', '.').toDoubleOrNull()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.collection_add_manual)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text(stringResource(R.string.collection_manual_title_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = buyText,
+                    onValueChange = { buyText = it },
+                    label = { Text(stringResource(R.string.collection_manual_buy_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = resaleText,
+                    onValueChange = { resaleText = it },
+                    label = { Text(stringResource(R.string.collection_manual_resale_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = title.isNotBlank() && buyEuros != null,
+                onClick = {
+                    val buy = Money.ofEuros(buyEuros ?: return@TextButton)
+                    val est = resaleText.replace(',', '.').toDoubleOrNull()?.let { Money.ofEuros(it) } ?: buy
+                    onConfirm(title.trim(), buy, est)
+                },
+            ) { Text(stringResource(R.string.result_add)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
 }
 
 @Composable
