@@ -6,8 +6,15 @@ enum class Condition { SEALED, MINT, GOOD, ACCEPTABLE, POOR }
 /** How complete the item is — a loose cartridge is worth far less than a complete-in-box copy. */
 enum class Completeness { SEALED, COMPLETE, LOOSE }
 
-/** Whether a data point is a completed sale or a currently-active listing. */
-enum class ListingType { SOLD, ACTIVE }
+/**
+ * Whether a data point is a completed sale, a currently-active listing, or a guaranteed trade-in
+ * (buy-in) offer.
+ *
+ * [TRADE_IN] is a dealer's guaranteed buy-in price (what they pay *you*), not a market value. The
+ * engine filters explicitly for [SOLD] and [ACTIVE], so trade-in points fall through both paths and
+ * never enter the resale median — a wholesale bid must not drag a Deal Score down. See Reway (§3).
+ */
+enum class ListingType { SOLD, ACTIVE, TRADE_IN }
 
 /** Direction the recent sold-price is trending. */
 enum class MarketTrend { RISING, STABLE, FALLING }

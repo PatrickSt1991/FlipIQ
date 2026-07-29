@@ -12,6 +12,8 @@ import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
+import nl.madebypatrick.flipiq.data.source.reway.RewayApi
+import nl.madebypatrick.flipiq.data.source.reway.RewayThrottle
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -99,6 +101,47 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(EngineApi::class.java)
+
+    /**
+     * Reway's two Shopify stores. Direct client calls (like PriceCharting), on a dedicated OkHttp
+     * client whose interceptor (a) sets a repo-identifying User-Agent and (b) trips the shared
+     * [RewayThrottle] circuit breaker on a 429, honouring `Retry-After` (§6). The base URL is a
+     * placeholder — [RewayApi.suggest] uses `@Url` so one client serves both hosts.
+     */
+    @Provides
+    @Singleton
+    fun provideRewayApi(json: Json, throttle: RewayThrottle): RewayApi {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .callTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header("User-Agent", RewayApi.REWAY_USER_AGENT)
+                    .header("Accept", "application/json")
+                    .build()
+                val response = chain.proceed(request)
+                if (response.code == 429) {
+                    val retryAfter = response.header("Retry-After")?.trim()?.toLongOrNull()
+                        ?: RewayThrottle.DEFAULT_BACKOFF_SECONDS
+                    throttle.blockFor(retryAfter)
+                }
+                response
+            }
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
+                    else HttpLoggingInterceptor.Level.NONE
+                },
+            )
+            .build()
+        return Retrofit.Builder()
+            .baseUrl("https://www.reway.nl/") // placeholder; @Url supplies the real per-call host
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(RewayApi::class.java)
+    }
 
     @Provides
     @Named(PRICECHARTING_TOKEN)

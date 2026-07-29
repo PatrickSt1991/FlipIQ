@@ -35,6 +35,10 @@ import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingSource as LivePriceChartingSource
+import nl.madebypatrick.flipiq.data.source.reway.RewayApi
+import nl.madebypatrick.flipiq.data.source.reway.RewaySource
+import nl.madebypatrick.flipiq.data.source.reway.RewayThrottle
+import nl.madebypatrick.flipiq.domain.model.ListingType
 import nl.madebypatrick.flipiq.domain.CurrencyConverter
 import nl.madebypatrick.flipiq.domain.StaticCurrencyConverter
 import nl.madebypatrick.flipiq.domain.engine.EngineConfig
@@ -67,6 +71,8 @@ object AppModule {
     fun provideSources(
         priceChartingApi: PriceChartingApi,
         engineApi: EngineApi,
+        rewayApi: RewayApi,
+        rewayThrottle: RewayThrottle,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
@@ -89,9 +95,34 @@ object AppModule {
                 null
             }
 
+        // Reway's two Shopify stores — a Dutch buy-in floor and retail ceiling (§6). No token gate;
+        // toggled off in Settings if their theme ever breaks the endpoints. Buy-in is TRADE_IN so it
+        // stays out of the resale median (§3); retail is ACTIVE and skips bulk Haul scans (§6).
+        val rewayBuyIn: MarketplaceSource = RewaySource(
+            api = rewayApi,
+            throttle = rewayThrottle,
+            id = RewaySource.BUY_IN_ID,
+            displayName = "Reway (inkoop)",
+            host = RewaySource.BUY_IN_HOST,
+            listingType = ListingType.TRADE_IN,
+            searchUrl = MarketplaceUrls::rewayBuyIn,
+        )
+        val rewayRetail: MarketplaceSource = RewaySource(
+            api = rewayApi,
+            throttle = rewayThrottle,
+            id = RewaySource.RETAIL_ID,
+            displayName = "Reway",
+            host = RewaySource.RETAIL_HOST,
+            listingType = ListingType.ACTIVE,
+            searchUrl = MarketplaceUrls::rewayRetail,
+            skipDuringHaul = true,
+        )
+
         return listOfNotNull(
             engine,
             priceCharting,
+            rewayBuyIn,
+            rewayRetail,
             // Shortcut-only "open search" links.
             ShortcutOnlySource("ebay", "eBay", MarketplaceUrls::ebaySold),
             ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
@@ -161,5 +192,6 @@ object AppModule {
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
         barcodeResolver: BarcodeResolver,
-    ): PriceRepository = PriceRepository(sources, engine, barcodeResolver)
+        settingsRepository: SettingsRepository,
+    ): PriceRepository = PriceRepository(sources, engine, barcodeResolver, settingsRepository)
 }

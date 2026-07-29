@@ -90,6 +90,18 @@
     <string name="result_notes_section">Why</string>
     <string name="result_marketplace_section">Open on marketplace</string>
 
+    <!-- Reway (buy-in / retail) block -->
+    <string name="result_reway_section">Reway (NL)</string>
+    <string name="result_reway_pays">Reway pays up to</string>
+    <string name="result_reway_sells">Reway sells at</string>
+    <string name="result_reway_guaranteed_buy">Can\'t-lose buy</string>
+    <string name="result_reway_guaranteed_hint">Fees off — Reway buys it back, so there\'s no marketplace cut.</string>
+    <string name="result_reway_payout_hint">A guaranteed, zero-effort exit — a payout, not a market value.</string>
+
+    <!-- All sources switched off -->
+    <string name="result_sources_off_title">All sources are off</string>
+    <string name="result_sources_off_body">Turn a price source back on in Settings to see prices for this item.</string>
+
     <!-- Result presentation labels (deal tier / sell speed / trend / buy tier / condition) -->
     <string name="tier_buy_immediately">Buy Immediately</string>
     <string name="tier_great_deal">Great Deal</string>
@@ -186,6 +198,18 @@
     <string name="settings_pc_label">PriceCharting token</string>
     <string name="settings_ean_desc">EAN-Search API token — improves barcode→product matching (esp. EU/NL items).</string>
     <string name="settings_ean_label">EAN-Search token</string>
+    <string name="settings_section_sources">Sources</string>
+    <string name="settings_sources_all_off">All sources are off — turn at least one on, or scans won\'t show any prices.</string>
+    <string name="source_sub_reway_buyin">Guaranteed buy-in price · NL</string>
+    <string name="source_sub_reway_retail">Retail asking price · NL</string>
+    <string name="source_sub_pricecharting">Market value · USD, converted</string>
+    <string name="source_sub_ebay">Sold listings · international</string>
+    <string name="source_sub_marktplaats">Link only, no prices</string>
+    <string name="source_sub_vinted">Link only, no prices</string>
+    <string name="source_sub_cex">Link only, no prices</string>
+    <string name="source_sub_tweakers">Link only, no prices</string>
+    <string name="source_sub_engine">Aggregated market data · NL</string>
+    <string name="source_sub_generic">Price source</string>
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_system">System</string>

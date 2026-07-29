@@ -10,6 +10,8 @@ import nl.madebypatrick.flipiq.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -69,6 +71,15 @@ class ResultViewModel @Inject constructor(
 
     init {
         load()
+        // A source toggle must force a refetch, not just a re-evaluate (evaluate re-scores the cached
+        // market) — the disabled set changes which sources are queried at all (§7). Skip the initial
+        // emission (load() already used the current set) and reload on any later change.
+        viewModelScope.launch {
+            settingsRepository.disabledSourceIds
+                .drop(1)
+                .distinctUntilChanged()
+                .collect { load() }
+        }
     }
 
     fun setPriceAlert(target: Money) {
