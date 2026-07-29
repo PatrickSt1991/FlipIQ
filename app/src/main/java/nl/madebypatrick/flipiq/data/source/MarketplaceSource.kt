@@ -6,6 +6,12 @@ import nl.madebypatrick.flipiq.domain.model.MarketListing
 data class ProductQuery(
     val barcode: String,
     val title: String? = null,
+    /** Known platform (e.g. from the barcode resolver or cover scan). Reway needs it to match (§4). */
+    val platform: String? = null,
+    /** Known category (e.g. "Games"); lets platform-agnostic sources reject cross-category traps. */
+    val category: String? = null,
+    /** True during a bulk Haul scan, so latency-sensitive/retail sources can opt out (§6). */
+    val haul: Boolean = false,
 )
 
 /** What a single marketplace returns for a query. */

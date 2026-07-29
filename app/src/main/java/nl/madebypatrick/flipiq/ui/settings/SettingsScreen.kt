@@ -64,6 +64,7 @@ fun SettingsScreen(
     val theme by viewModel.theme.collectAsStateWithLifecycle()
     val pcToken by viewModel.priceChartingToken.collectAsStateWithLifecycle()
     val eanToken0 by viewModel.eanSearchToken.collectAsStateWithLifecycle()
+    val sourceToggles by viewModel.sourceToggles.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
 
@@ -144,6 +145,26 @@ fun SettingsScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+
+            // Deny-list toggles, applied on the next scan without a restart (§7). Built from the
+            // injected source list, so the screen never drifts when a source is added.
+            SettingsSection(stringResource(R.string.settings_section_sources)) {
+                if (sourceToggles.none { it.enabled }) {
+                    Text(
+                        stringResource(R.string.settings_sources_all_off),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                sourceToggles.forEach { source ->
+                    SourceToggleRow(
+                        title = source.displayName,
+                        subtitle = sourceSubtitle(source.id),
+                        checked = source.enabled,
+                        onChange = { viewModel.setSourceEnabled(source.id, it) },
+                    )
+                }
             }
 
             SettingsSection(stringResource(R.string.settings_section_appearance)) {
@@ -270,6 +291,42 @@ private fun ThemeModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit
                 label = { Text(labels.getValue(mode)) },
             )
         }
+    }
+}
+
+/** Human subtitle for a source row — what kind of price it contributes (§7). Keyed on the stable id. */
+@Composable
+private fun sourceSubtitle(id: String): String = stringResource(
+    when (id) {
+        "reway_buyin" -> R.string.source_sub_reway_buyin
+        "reway_retail" -> R.string.source_sub_reway_retail
+        "pricecharting" -> R.string.source_sub_pricecharting
+        "ebay" -> R.string.source_sub_ebay
+        "marktplaats" -> R.string.source_sub_marktplaats
+        "vinted" -> R.string.source_sub_vinted
+        "cex" -> R.string.source_sub_cex
+        "tweakers" -> R.string.source_sub_tweakers
+        "engine" -> R.string.source_sub_engine
+        else -> R.string.source_sub_generic
+    },
+)
+
+@Composable
+private fun SourceToggleRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 

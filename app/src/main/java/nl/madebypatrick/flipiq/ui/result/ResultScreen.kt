@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,7 +76,11 @@ import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.FlipRecommendation
 import nl.madebypatrick.flipiq.domain.model.Money
+import nl.madebypatrick.flipiq.domain.model.RewayInsight
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
+
+/** Reway's brand-neutral accent for its guaranteed/payout figures, distinct from the deal-score palette. */
+private val RewayAccent = Color(0xFF00838F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -272,21 +277,27 @@ private fun AnalysisContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         analysis.product.imageUrl?.let { ProductImage(it) }
-        if (hasData) {
-            VerdictCard(rec)
-            Button(
-                onClick = { showBuyDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.result_i_bought)) }
-            ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
-            PriceSummaryCard(rec)
-            EstimateCard(rec)
-            BuyLadderCard(rec)
-            if (rec.notes.isNotEmpty()) NotesCard(rec)
-        } else {
-            NoDataCard(analysis.product.title, onScanFront = onScanFront)
+        when {
+            analysis.allSourcesDisabled -> SourcesOffCard()
+            hasData -> {
+                VerdictCard(rec)
+                Button(
+                    onClick = { showBuyDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.result_i_bought)) }
+                ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
+                PriceSummaryCard(rec)
+                EstimateCard(rec, analysis.reway)
+                BuyLadderCard(rec)
+                if (rec.notes.isNotEmpty()) NotesCard(rec)
+            }
+            else -> NoDataCard(analysis.product.title, onScanFront = onScanFront)
         }
-        MarketplaceShortcutsCard(analysis)
+        // Reway's buy-in/retail on their own lines, never blended into the market estimate (§3/§8).
+        // Shows even without engine data (a guaranteed floor is useful on its own); renders nothing
+        // when Reway had no match or is switched off.
+        if (!analysis.allSourcesDisabled && analysis.reway.hasAny) RewayCard(analysis.reway)
+        if (!analysis.allSourcesDisabled) MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }
 
@@ -470,7 +481,7 @@ private fun PriceSummaryCard(rec: FlipRecommendation) {
 }
 
 @Composable
-private fun EstimateCard(rec: FlipRecommendation) {
+private fun EstimateCard(rec: FlipRecommendation, reway: RewayInsight) {
     SectionCard(stringResource(R.string.result_estimate_section)) {
         StatRow(stringResource(R.string.result_est_resale), rec.estimatedResale.toString())
         StatRow(stringResource(R.string.result_net_after), rec.netResale.toString())
@@ -478,6 +489,87 @@ private fun EstimateCard(rec: FlipRecommendation) {
         StatRow(stringResource(R.string.result_recommended_max), rec.recommendedBuyPrice.toString(), emphasise = true)
         StatRow(stringResource(R.string.result_expected_profit), rec.expectedProfit.toString())
         StatRow(stringResource(R.string.result_roi), stringResource(R.string.result_roi_value, rec.roiPercent))
+        // The can't-lose buy sits next to the Profit-Mode number but is deliberately distinct — a
+        // different accent colour and its own hint — because it's fees-off and guaranteed (§8).
+        reway.guaranteedBuy?.let { guaranteed ->
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.result_reway_guaranteed_buy),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = RewayAccent,
+                )
+                Text(guaranteed.toString(), fontWeight = FontWeight.Bold, color = RewayAccent)
+            }
+            Text(
+                stringResource(R.string.result_reway_guaranteed_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Reway's guaranteed buy-in and retail asking price, each on its own line, never blended (§3/§8). */
+@Composable
+private fun RewayCard(reway: RewayInsight) {
+    val context = LocalContext.current
+    fun open(url: String?) {
+        url ?: return
+        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+    }
+    SectionCard(stringResource(R.string.result_reway_section)) {
+        reway.buyIn?.let { buyIn ->
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { open(reway.buyInUrl) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                // Labelled as a payout, not a value — it's what Reway pays you, not what it's worth.
+                Text(stringResource(R.string.result_reway_pays), style = MaterialTheme.typography.bodyMedium)
+                Text(buyIn.toString(), fontWeight = FontWeight.Bold, color = RewayAccent)
+            }
+            Text(
+                stringResource(R.string.result_reway_payout_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        reway.retail?.let { retail ->
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { open(reway.retailUrl) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(stringResource(R.string.result_reway_sells), style = MaterialTheme.typography.bodyMedium)
+                Text(retail.toString())
+            }
+        }
+    }
+}
+
+@Composable
+private fun SourcesOffCard() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("🔌", fontSize = 40.sp)
+            Text(
+                stringResource(R.string.result_sources_off_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(R.string.result_sources_off_body),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+        }
     }
 }
 

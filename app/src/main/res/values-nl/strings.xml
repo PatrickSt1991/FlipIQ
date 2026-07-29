@@ -89,6 +89,18 @@
     <string name="result_notes_section">Waarom</string>
     <string name="result_marketplace_section">Openen op marktplaats</string>
 
+    <!-- Reway (inkoop / retail) blok -->
+    <string name="result_reway_section">Reway (NL)</string>
+    <string name="result_reway_pays">Reway betaalt max</string>
+    <string name="result_reway_sells">Reway verkoopt voor</string>
+    <string name="result_reway_guaranteed_buy">Zeker-weten-inkoop</string>
+    <string name="result_reway_guaranteed_hint">Zonder kosten — Reway koopt \'m terug, dus geen marktplaatsmarge.</string>
+    <string name="result_reway_payout_hint">Een gegarandeerde, moeiteloze exit — een uitbetaling, geen marktwaarde.</string>
+
+    <!-- Alle bronnen uitgeschakeld -->
+    <string name="result_sources_off_title">Alle bronnen staan uit</string>
+    <string name="result_sources_off_body">Zet in Instellingen een prijsbron weer aan om prijzen voor dit item te zien.</string>
+
     <!-- Result presentation labels (deal tier / sell speed / trend / buy tier / condition) -->
     <string name="tier_buy_immediately">Direct kopen</string>
     <string name="tier_great_deal">Topdeal</string>
@@ -185,6 +197,18 @@
     <string name="settings_pc_label">PriceCharting-token</string>
     <string name="settings_ean_desc">EAN-Search API-token — verbetert het koppelen van barcode→product (vooral EU/NL-items).</string>
     <string name="settings_ean_label">EAN-Search-token</string>
+    <string name="settings_section_sources">Bronnen</string>
+    <string name="settings_sources_all_off">Alle bronnen staan uit — zet er minstens één aan, anders tonen scans geen prijzen.</string>
+    <string name="source_sub_reway_buyin">Gegarandeerde inkoopprijs · NL</string>
+    <string name="source_sub_reway_retail">Winkel-vraagprijs · NL</string>
+    <string name="source_sub_pricecharting">Marktwaarde · USD, omgerekend</string>
+    <string name="source_sub_ebay">Verkochte advertenties · internationaal</string>
+    <string name="source_sub_marktplaats">Alleen link, geen prijzen</string>
+    <string name="source_sub_vinted">Alleen link, geen prijzen</string>
+    <string name="source_sub_cex">Alleen link, geen prijzen</string>
+    <string name="source_sub_tweakers">Alleen link, geen prijzen</string>
+    <string name="source_sub_engine">Samengevoegde marktdata · NL</string>
+    <string name="source_sub_generic">Prijsbron</string>
     <string name="settings_section_appearance">Weergave</string>
     <string name="settings_language">Taal</string>
     <string name="settings_language_system">Systeem</string>

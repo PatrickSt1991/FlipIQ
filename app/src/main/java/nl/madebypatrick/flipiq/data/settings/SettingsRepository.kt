@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.madebypatrick.flipiq.domain.model.Money
@@ -34,6 +35,7 @@ class SettingsRepository(
         val SHIPPING_CENTS = longPreferencesKey("shipping_cents")
         val PRICECHARTING_TOKEN = stringPreferencesKey("pricecharting_token")
         val EAN_SEARCH_TOKEN = stringPreferencesKey("ean_search_token")
+        val DISABLED_SOURCES = stringSetPreferencesKey("disabled_source_ids")
     }
 
     val settings: Flow<ProfitSettings> = dataStore.data.map { it.toSettings() }
@@ -50,6 +52,23 @@ class SettingsRepository(
 
     suspend fun setEanSearchToken(token: String) {
         dataStore.edit { it[Keys.EAN_SEARCH_TOKEN] = token.trim() }
+    }
+
+    /**
+     * Ids of sources the user has switched off. Deny-list, not allow-list, on purpose (§7): a source
+     * added in a later release lights up by default because existing users' saved set won't contain
+     * its id, and an unknown id (a source removed later) is simply ignored — no migration. This is a
+     * separate concept from a token gate: switched-off ≠ needs-setup. (Demo mode uses different ids,
+     * so a set saved there won't map onto live ids — harmless.)
+     */
+    val disabledSourceIds: Flow<Set<String>> =
+        dataStore.data.map { it[Keys.DISABLED_SOURCES] ?: emptySet() }
+
+    suspend fun setSourceEnabled(id: String, enabled: Boolean) {
+        dataStore.edit { prefs ->
+            val current = prefs[Keys.DISABLED_SOURCES] ?: emptySet()
+            prefs[Keys.DISABLED_SOURCES] = if (enabled) current - id else current + id
+        }
     }
 
     suspend fun update(settings: ProfitSettings) {

@@ -16,4 +16,7 @@ data class MarketListing(
     val url: String? = null,
 ) {
     val isSold: Boolean get() = type == ListingType.SOLD
+
+    /** A guaranteed dealer buy-in (trade-in) offer — deliberately kept out of the resale median. */
+    val isTradeIn get() = type == ListingType.TRADE_IN
 }
