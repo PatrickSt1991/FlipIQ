@@ -20,7 +20,7 @@ class EngineSource(
 ) : MarketplaceSource {
 
     override val id = "engine"
-    override val displayName = "FlipIQ Engine"
+    override val displayName = "eBay & Marktplaats"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
         val term = query.title ?: query.barcode

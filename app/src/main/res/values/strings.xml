@@ -74,7 +74,7 @@
     <string name="result_condition_section">Item condition</string>
     <string name="result_condition_label">Condition</string>
     <string name="result_completeness_label">Completeness</string>
-    <string name="result_sold_prices">Sold prices (%1$d sales)</string>
+    <string name="result_sold_prices">Sell it yourself · market (%1$d sold)</string>
     <string name="result_avg_sold">Average sold</string>
     <string name="result_median_sold">Median sold</string>
     <string name="result_lowest">Lowest</string>

@@ -73,7 +73,7 @@
     <string name="result_condition_section">Staat van het item</string>
     <string name="result_condition_label">Conditie</string>
     <string name="result_completeness_label">Compleetheid</string>
-    <string name="result_sold_prices">Verkoopprijzen (%1$d verkopen)</string>
+    <string name="result_sold_prices">Zelf verkopen · markt (%1$d verkopen)</string>
     <string name="result_avg_sold">Gemiddeld verkocht</string>
     <string name="result_median_sold">Mediaan verkocht</string>
     <string name="result_lowest">Laagste</string>
