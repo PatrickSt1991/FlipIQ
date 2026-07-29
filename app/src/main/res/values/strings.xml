@@ -176,6 +176,10 @@
     <string name="collection_mark_sold_title">Mark as sold</string>
     <string name="collection_sold_price_label">Sold price (€)</string>
     <string name="collection_confirm">Confirm</string>
+    <string name="collection_add_manual">Add item manually</string>
+    <string name="collection_manual_title_label">Title</string>
+    <string name="collection_manual_buy_label">What you paid (€)</string>
+    <string name="collection_manual_resale_label">Expected resale (€, optional)</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Profit Mode</string>

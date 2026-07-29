@@ -175,6 +175,10 @@
     <string name="collection_mark_sold_title">Markeren als verkocht</string>
     <string name="collection_sold_price_label">Verkoopprijs (€)</string>
     <string name="collection_confirm">Bevestigen</string>
+    <string name="collection_add_manual">Handmatig toevoegen</string>
+    <string name="collection_manual_title_label">Titel</string>
+    <string name="collection_manual_buy_label">Inkoopprijs (€)</string>
+    <string name="collection_manual_resale_label">Verwachte verkoop (€, optioneel)</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Winstmodus</string>

@@ -42,6 +42,20 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch { runCatching { collection.markSold(id, soldPrice) } }
     }
 
+    /** Add an item to inventory by hand (no scan) — a title, what you paid, and expected resale. */
+    fun addManual(title: String, buyPrice: Money, estimatedResale: Money) {
+        viewModelScope.launch {
+            runCatching {
+                collection.addToInventory(
+                    barcode = "manual",
+                    title = title,
+                    buyPrice = buyPrice,
+                    estimatedResale = estimatedResale,
+                )
+            }
+        }
+    }
+
     fun removeSaved(barcode: String, list: SavedList) {
         viewModelScope.launch { runCatching { collection.setSaved(barcode, "", list, saved = false) } }
     }
