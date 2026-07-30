@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.settings.EbayLocation
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.settings.ThemeRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
@@ -46,6 +47,13 @@ class SettingsViewModel @Inject constructor(
 
     val theme = themeRepository.preferences
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemePreferences.DEFAULT)
+
+    val ebayLocation = settingsRepository.ebayLocation
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EbayLocation.DEFAULT)
+
+    fun setEbayLocation(location: EbayLocation) {
+        viewModelScope.launch { runCatching { settingsRepository.setEbayLocation(location) } }
+    }
 
 
     val eanSearchToken = settingsRepository.eanSearchToken

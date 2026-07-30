@@ -71,7 +71,9 @@ object AppModule {
         // FlipIQ Engine — aggregated Marktplaats + eBay(-sold) data when configured.
         val engine: MarketplaceSource? =
             if (BuildConfig.ENGINE_URL.isNotBlank()) {
-                EngineSource(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+                EngineSource(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY) {
+                    settingsRepository.ebayLocation.first().param
+                }
             } else if (demo) {
                 EbaySoldSource() // demo fallback so there's some data
             } else {
@@ -122,9 +124,14 @@ object AppModule {
     /** Most-valuable-games-per-console browse data; no-op when the engine isn't configured. */
     @Provides
     @Singleton
-    fun provideTopGamesService(engineApi: EngineApi): TopGamesService =
+    fun provideTopGamesService(
+        engineApi: EngineApi,
+        settingsRepository: SettingsRepository,
+    ): TopGamesService =
         if (BuildConfig.ENGINE_URL.isNotBlank()) {
-            EngineTopGamesService(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+            EngineTopGamesService(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY) {
+                settingsRepository.ebayLocation.first().param
+            }
         } else {
             NoopTopGamesService()
         }
@@ -132,9 +139,14 @@ object AppModule {
     /** Haul (many-items-in-one-photo) scanning; no-op when the engine isn't configured. */
     @Provides
     @Singleton
-    fun provideHaulService(engineApi: EngineApi): HaulService =
+    fun provideHaulService(
+        engineApi: EngineApi,
+        settingsRepository: SettingsRepository,
+    ): HaulService =
         if (BuildConfig.ENGINE_URL.isNotBlank()) {
-            EngineHaulService(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY)
+            EngineHaulService(engineApi, BuildConfig.ENGINE_URL, BuildConfig.ENGINE_KEY) {
+                settingsRepository.ebayLocation.first().param
+            }
         } else {
             NoopHaulService()
         }

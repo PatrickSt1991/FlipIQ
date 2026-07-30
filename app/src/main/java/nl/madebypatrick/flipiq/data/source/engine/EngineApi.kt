@@ -22,6 +22,7 @@ interface EngineApi {
         @Header("X-App-Key") appKey: String,
         @Query("q") query: String,
         @Query("ean") ean: String?,
+        @Query("loc") loc: String?,
     ): EngineResponse
 
     /** Snapshot → game title via the engine's vision model (`/identify`). */
@@ -38,6 +39,7 @@ interface EngineApi {
         @Url url: String,
         @Header("X-App-Key") appKey: String,
         @Query("console") console: String,
+        @Query("loc") loc: String?,
     ): TopResponse
 
     /** Many items in one photo → titles with quick resale values (`/haul`). */
@@ -45,6 +47,7 @@ interface EngineApi {
     suspend fun haul(
         @Url url: String,
         @Header("X-App-Key") appKey: String,
+        @Query("loc") loc: String?,
         @Body body: IdentifyRequest,
     ): HaulResponse
 }

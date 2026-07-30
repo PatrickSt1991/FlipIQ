@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.data.settings.EbayLocation
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
 import nl.madebypatrick.flipiq.domain.model.ThemeMode
@@ -63,6 +64,7 @@ fun SettingsScreen(
     val saved by viewModel.settings.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
     val sourceToggles by viewModel.sourceToggles.collectAsStateWithLifecycle()
+    val ebayLocation by viewModel.ebayLocation.collectAsStateWithLifecycle()
     // Re-seed the working copy whenever the persisted value changes (initial load / after save).
     var edited by remember(saved) { mutableStateOf(saved) }
 
@@ -129,6 +131,15 @@ fun SettingsScreen(
                         onChange = { viewModel.setSourceEnabled(source.id, it) },
                     )
                 }
+            }
+
+            SettingsSection(stringResource(R.string.settings_section_ebay_location)) {
+                Text(
+                    stringResource(R.string.settings_ebay_location_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                EbayLocationSelector(ebayLocation, viewModel::setEbayLocation)
             }
 
             SettingsSection(stringResource(R.string.settings_section_appearance)) {
@@ -234,6 +245,25 @@ private fun LanguageSelector() {
                     }
                 },
                 label = { Text(label) },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EbayLocationSelector(selected: EbayLocation, onSelect: (EbayLocation) -> Unit) {
+    val labels = mapOf(
+        EbayLocation.NETHERLANDS to stringResource(R.string.settings_ebay_loc_nl),
+        EbayLocation.DELIVERS_TO_NL to stringResource(R.string.settings_ebay_loc_eu),
+        EbayLocation.WORLDWIDE to stringResource(R.string.settings_ebay_loc_world),
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        EbayLocation.entries.forEach { loc ->
+            FilterChip(
+                selected = loc == selected,
+                onClick = { onSelect(loc) },
+                label = { Text(labels.getValue(loc)) },
             )
         }
     }

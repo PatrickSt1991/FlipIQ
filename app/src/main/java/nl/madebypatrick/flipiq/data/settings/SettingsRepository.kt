@@ -35,10 +35,18 @@ class SettingsRepository(
         val SHIPPING_CENTS = longPreferencesKey("shipping_cents")
         val EAN_SEARCH_TOKEN = stringPreferencesKey("ean_search_token")
         val DISABLED_SOURCES = stringSetPreferencesKey("disabled_source_ids")
+        val EBAY_LOCATION = stringPreferencesKey("ebay_location")
     }
 
     val settings: Flow<ProfitSettings> = dataStore.data.map { it.toSettings() }
 
+    /** Where eBay listings may be located (Settings). Defaults to the Netherlands. */
+    val ebayLocation: Flow<EbayLocation> =
+        dataStore.data.map { EbayLocation.fromParam(it[Keys.EBAY_LOCATION]) }
+
+    suspend fun setEbayLocation(location: EbayLocation) {
+        dataStore.edit { it[Keys.EBAY_LOCATION] = location.param }
+    }
 
     /** User-entered EAN-Search API token (empty when unset). */
     val eanSearchToken: Flow<String> = dataStore.data.map { it[Keys.EAN_SEARCH_TOKEN] ?: "" }
