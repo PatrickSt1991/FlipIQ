@@ -17,17 +17,6 @@ object MarketplaceUrls {
     fun ebaySold(title: String) =
         "https://www.ebay.nl/sch/i.html?_nkw=${q(title)}&LH_Sold=1&LH_Complete=1"
 
-    fun vinted(title: String) =
-        "https://www.vinted.nl/catalog?search_text=${q(title)}"
-
     fun marktplaats(title: String) =
         "https://www.marktplaats.nl/q/${path(title)}/"
-
-    // CeX shut down its Dutch store (nl.webuy.com), so point at the UK site — the main English CeX
-    // and the closest broadly-available region for NL users.
-    fun cex(title: String) =
-        "https://uk.webuy.com/search?stext=${q(title)}"
-
-    fun tweakers(title: String) =
-        "https://tweakers.net/pricewatch/zoeken/?keyword=${q(title)}"
 }
