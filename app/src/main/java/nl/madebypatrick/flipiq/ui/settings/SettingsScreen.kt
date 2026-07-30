@@ -262,7 +262,6 @@ private fun ThemeModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit
 @Composable
 private fun sourceSubtitle(id: String): String = stringResource(
     when (id) {
-        "pricecharting" -> R.string.source_sub_pricecharting
         "ebay" -> R.string.source_sub_ebay
         "marktplaats" -> R.string.source_sub_marktplaats
         "vinted" -> R.string.source_sub_vinted

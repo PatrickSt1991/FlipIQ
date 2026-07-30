@@ -238,7 +238,7 @@ private fun LoadingState() {
     }
 }
 
-/** Box-art / listing photo for the scanned item (PriceCharting cover when available). */
+/** Box-art / listing photo for the scanned item (from a marketplace listing when available). */
 @Composable
 private fun ProductImage(url: String) {
     AsyncImage(

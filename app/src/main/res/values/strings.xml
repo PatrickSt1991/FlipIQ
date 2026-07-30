@@ -67,7 +67,7 @@
     <string name="result_nodata_unknown">We couldn\'t identify this barcode. Scan the front of the item, or try the marketplaces below.</string>
     <string name="result_nodata_no_prices">We couldn\'t find prices for “%1$s”. Check the marketplaces below — it might be listed there.</string>
     <string name="result_scan_front_instead">📸  Scan the front instead</string>
-    <string name="result_nodata_tip">Tip: adding a PriceCharting or EAN-Search token in Settings improves coverage.</string>
+    <string name="result_nodata_tip">Tip: scan the front of the cover or type the exact title for a better match.</string>
     <string name="result_deal_score">Deal Score %1$d/100</string>
     <string name="result_confidence">👍 %1$d%% sure</string>
     <string name="result_not_viable">Heads up — doesn\'t meet your Profit Mode targets</string>
@@ -191,13 +191,10 @@
     <string name="settings_ignore_damaged">Ignore damaged items</string>
     <string name="settings_prefer_fast">Prefer fast sellers</string>
     <string name="settings_section_data_sources">Data sources</string>
-    <string name="settings_pc_desc">PriceCharting API token — enables live PriceCharting prices. Leave blank to skip it.</string>
-    <string name="settings_pc_label">PriceCharting token</string>
     <string name="settings_ean_desc">EAN-Search API token — improves barcode→product matching (esp. EU/NL items).</string>
     <string name="settings_ean_label">EAN-Search token</string>
     <string name="settings_section_sources">Sources</string>
     <string name="settings_sources_all_off">All sources are off — turn at least one on, or scans won\'t show any prices.</string>
-    <string name="source_sub_pricecharting">Market value · USD, converted</string>
     <string name="source_sub_ebay">Sold listings · international</string>
     <string name="source_sub_marktplaats">Link only, no prices</string>
     <string name="source_sub_vinted">Link only, no prices</string>

@@ -20,7 +20,7 @@ private const val PLAYSTATION = 0xFF003791
 private const val NINTENDO = 0xFFE60012
 private const val XBOX = 0xFF107C10
 
-/** Curated set of consoles resellers actually hunt, mapped to PriceCharting slugs. */
+/** Curated set of consoles resellers actually hunt. The slug maps to an eBay.nl query in the engine. */
 val CONSOLES = listOf(
     Console("PlayStation 2", "playstation-2", "🎮", PLAYSTATION),
     Console("PlayStation 3", "playstation-3", "🎮", PLAYSTATION),

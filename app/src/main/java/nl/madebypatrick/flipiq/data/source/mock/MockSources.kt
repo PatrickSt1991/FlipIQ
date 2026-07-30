@@ -31,22 +31,3 @@ class EbaySoldSource : MarketplaceSource {
         )
     }
 }
-
-/** PriceCharting — curated sold prices, strongest for games and collectibles. */
-class PriceChartingSource : MarketplaceSource {
-    override val id = "pricecharting"
-    override val displayName = "PriceCharting"
-    override suspend fun lookup(query: ProductQuery): SourceResult {
-        delay(180)
-        val product = MockCatalog.productFor(query.barcode)
-        val relevant = product.category in setOf("Video Games", "LEGO", "Collectibles")
-        return SourceResult(
-            sourceId = id,
-            listings = if (relevant) MockCatalog.soldListings(product, id, max = 8) else emptyList(),
-            productTitle = product.title,
-            category = product.category,
-            available = relevant,
-            shortcutUrl = MarketplaceUrls.priceCharting(product.title),
-        )
-    }
-}
