@@ -22,13 +22,14 @@ class EngineHaulService(
     private val api: EngineApi,
     private val engineUrl: String,
     private val appKey: String,
+    private val location: suspend () -> String,
 ) : HaulService {
     override suspend fun scan(jpeg: ByteArray, rotationDegrees: Int, maxDim: Int): List<HaulItem> =
         withContext(Dispatchers.Default) {
             val prepared = prepareForUpload(jpeg, rotationDegrees, maxDim)
             val b64 = Base64.encodeToString(prepared, Base64.NO_WRAP)
             val endpoint = engineUrl.trimEnd('/') + "/haul"
-            runCatching { api.haul(endpoint, appKey, IdentifyRequest(image = b64)).items }
+            runCatching { api.haul(endpoint, appKey, location(), IdentifyRequest(image = b64)).items }
                 .getOrDefault(emptyList())
                 .map { HaulItem(it.title, it.valueCents?.let(Money::ofCents), it.image) }
         }

@@ -19,10 +19,11 @@ class EngineTopGamesService(
     private val api: EngineApi,
     private val engineUrl: String,
     private val appKey: String,
+    private val location: suspend () -> String,
 ) : TopGamesService {
     override suspend fun top(consoleSlug: String): List<ConsoleGame> {
         val endpoint = engineUrl.trimEnd('/') + "/top"
-        return runCatching { api.top(endpoint, appKey, consoleSlug).games }
+        return runCatching { api.top(endpoint, appKey, consoleSlug, location()).games }
             .getOrDefault(emptyList())
             .mapNotNull { g -> g.priceCents?.let { ConsoleGame(g.title, Money.ofCents(it)) } }
     }

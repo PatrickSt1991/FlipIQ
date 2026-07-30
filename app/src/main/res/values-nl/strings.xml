@@ -201,6 +201,11 @@
     <string name="source_sub_tweakers">Alleen link, geen prijzen</string>
     <string name="source_sub_engine">Samengevoegde marktdata · NL</string>
     <string name="source_sub_generic">Prijsbron</string>
+    <string name="settings_section_ebay_location">eBay-locatie</string>
+    <string name="settings_ebay_location_desc">Waar eBay-advertenties vandaan mogen komen. Geldt voor prijzen, Ontdekken en Haul.</string>
+    <string name="settings_ebay_loc_nl">Nederland</string>
+    <string name="settings_ebay_loc_eu">Levert aan NL</string>
+    <string name="settings_ebay_loc_world">Wereldwijd</string>
     <string name="settings_section_appearance">Weergave</string>
     <string name="settings_language">Taal</string>
     <string name="settings_language_system">Systeem</string>

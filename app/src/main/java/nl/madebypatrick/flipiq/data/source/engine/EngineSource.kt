@@ -17,6 +17,7 @@ class EngineSource(
     private val api: EngineApi,
     private val engineUrl: String,
     private val appKey: String,
+    private val location: suspend () -> String,
 ) : MarketplaceSource {
 
     override val id = "engine"
@@ -26,7 +27,7 @@ class EngineSource(
         val term = query.title ?: query.barcode
         if (term.isBlank()) return unavailable()
         val endpoint = engineUrl.trimEnd('/') + "/prices"
-        return runCatching { api.prices(endpoint, appKey, term, query.barcode.ifBlank { null }) }
+        return runCatching { api.prices(endpoint, appKey, term, query.barcode.ifBlank { null }, location()) }
             .map { it.toSourceResult() }
             .getOrElse { unavailable() }
     }
