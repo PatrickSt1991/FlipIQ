@@ -20,6 +20,7 @@ import nl.madebypatrick.flipiq.domain.model.ProductInfo
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.domain.model.SourceOutcome
+import nl.madebypatrick.flipiq.domain.model.SourcePriceGroup
 
 /** Raw market data fetched for a barcode, before any engine scoring. */
 data class FetchedMarket(
@@ -130,8 +131,38 @@ class PriceRepository(
             sources = market.sources,
             condition = condition,
             completeness = completeness,
+            pricesBySource = pricesBySource(market.listings),
             allSourcesDisabled = market.allSourcesDisabled,
         )
+    }
+
+    /**
+     * Group the raw listings by the marketplace they came from and summarise each — count + low /
+     * median / high — so the UI can show where every price originated. Ordered most-data-first.
+     */
+    private fun pricesBySource(listings: List<MarketListing>): List<SourcePriceGroup> =
+        listings.groupBy { it.sourceId }
+            .map { (sourceId, group) ->
+                val cents = group.map { it.price.cents }.sorted()
+                SourcePriceGroup(
+                    sourceId = sourceId,
+                    displayName = sourceDisplayName(sourceId),
+                    count = group.size,
+                    low = Money(cents.first()),
+                    median = Money(cents[cents.size / 2]),
+                    high = Money(cents.last()),
+                    // A group is "sold" comps when most of its points are completed sales.
+                    sold = group.count { it.isSold } * 2 >= group.size,
+                )
+            }
+            .sortedByDescending { it.count }
+
+    /** Marketplace brand name for a source id (brand names aren't translated; the UI adds a badge). */
+    private fun sourceDisplayName(id: String): String = when (id) {
+        "marktplaats" -> "Marktplaats"
+        "ebay", "ebay_sold" -> "eBay"
+        "discogs" -> "Discogs"
+        else -> id.replaceFirstChar { it.uppercase() }
     }
 
     /** Convenience: fetch then evaluate in one call. */

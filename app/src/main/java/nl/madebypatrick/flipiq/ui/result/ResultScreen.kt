@@ -77,6 +77,7 @@ import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.FlipRecommendation
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
+import nl.madebypatrick.flipiq.domain.model.SourcePriceGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,6 +279,7 @@ private fun AnalysisContent(
             hasData -> {
                 // The market view — eBay sold history + Marktplaats, aggregated by the engine.
                 PriceSummaryCard(rec)
+                if (analysis.pricesBySource.isNotEmpty()) PricesBySourceCard(analysis.pricesBySource)
                 VerdictCard(rec)
                 Button(
                     onClick = { showBuyDialog = true },
@@ -458,6 +460,42 @@ private fun ConditionSelectors(
                     onClick = { onCompletenessChange(c) },
                     label = { Text(c.label) },
                 )
+            }
+        }
+    }
+}
+
+/** Where each price came from — one row per marketplace, with its own price range, sold vs asking. */
+@Composable
+private fun PricesBySourceCard(groups: List<SourcePriceGroup>) {
+    SectionCard(stringResource(R.string.result_by_source_section)) {
+        groups.forEach { g ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(g.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    val kind = stringResource(
+                        if (g.sold) R.string.result_by_source_sold else R.string.result_by_source_asking,
+                    )
+                    Text(
+                        stringResource(R.string.result_by_source_meta, kind, g.count),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(g.median.toString(), fontWeight = FontWeight.Bold)
+                    if (g.low != g.high) {
+                        Text(
+                            stringResource(R.string.result_by_source_range, g.low.toString(), g.high.toString()),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
     }
