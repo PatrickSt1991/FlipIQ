@@ -76,11 +76,7 @@ import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.FlipRecommendation
 import nl.madebypatrick.flipiq.domain.model.Money
-import nl.madebypatrick.flipiq.domain.model.RewayInsight
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
-
-/** Reway's brand-neutral accent for its guaranteed/payout figures, distinct from the deal-score palette. */
-private val RewayAccent = Color(0xFF00838F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -277,13 +273,10 @@ private fun AnalysisContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         analysis.product.imageUrl?.let { ProductImage(it) }
-        // Reway first — it's the certain NL price (what they pay you + what they sell it for). Shows
-        // even without market data; renders nothing when Reway had no match or is switched off.
-        if (!analysis.allSourcesDisabled && analysis.reway.hasAny) RewayCard(analysis.reway)
         when {
             analysis.allSourcesDisabled -> SourcesOffCard()
             hasData -> {
-                // "Sell it yourself" — the market view (eBay sold history + Marktplaats).
+                // The market view — eBay sold history + Marktplaats, aggregated by the engine.
                 PriceSummaryCard(rec)
                 VerdictCard(rec)
                 Button(
@@ -291,7 +284,7 @@ private fun AnalysisContent(
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.result_i_bought)) }
                 ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
-                EstimateCard(rec, analysis.reway)
+                EstimateCard(rec)
                 BuyLadderCard(rec)
                 if (rec.notes.isNotEmpty()) NotesCard(rec)
             }
@@ -481,7 +474,7 @@ private fun PriceSummaryCard(rec: FlipRecommendation) {
 }
 
 @Composable
-private fun EstimateCard(rec: FlipRecommendation, reway: RewayInsight) {
+private fun EstimateCard(rec: FlipRecommendation) {
     SectionCard(stringResource(R.string.result_estimate_section)) {
         StatRow(stringResource(R.string.result_est_resale), rec.estimatedResale.toString())
         StatRow(stringResource(R.string.result_net_after), rec.netResale.toString())
@@ -489,64 +482,6 @@ private fun EstimateCard(rec: FlipRecommendation, reway: RewayInsight) {
         StatRow(stringResource(R.string.result_recommended_max), rec.recommendedBuyPrice.toString(), emphasise = true)
         StatRow(stringResource(R.string.result_expected_profit), rec.expectedProfit.toString())
         StatRow(stringResource(R.string.result_roi), stringResource(R.string.result_roi_value, rec.roiPercent))
-        // The can't-lose buy sits next to the Profit-Mode number but is deliberately distinct — a
-        // different accent colour and its own hint — because it's fees-off and guaranteed (§8).
-        reway.guaranteedBuy?.let { guaranteed ->
-            HorizontalDivider(Modifier.padding(vertical = 4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    stringResource(R.string.result_reway_guaranteed_buy),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = RewayAccent,
-                )
-                Text(guaranteed.toString(), fontWeight = FontWeight.Bold, color = RewayAccent)
-            }
-            Text(
-                stringResource(R.string.result_reway_guaranteed_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-/** Reway's guaranteed buy-in and retail asking price, each on its own line, never blended (§3/§8). */
-@Composable
-private fun RewayCard(reway: RewayInsight) {
-    val context = LocalContext.current
-    fun open(url: String?) {
-        url ?: return
-        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-    }
-    SectionCard(stringResource(R.string.result_reway_section)) {
-        reway.buyIn?.let { buyIn ->
-            Row(
-                modifier = Modifier.fillMaxWidth().clickable { open(reway.buyInUrl) },
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                // Labelled as a payout, not a value — it's what Reway pays you, not what it's worth.
-                Text(stringResource(R.string.result_reway_pays), style = MaterialTheme.typography.bodyMedium)
-                Text(buyIn.toString(), fontWeight = FontWeight.Bold, color = RewayAccent)
-            }
-            Text(
-                stringResource(R.string.result_reway_payout_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        reway.retail?.let { retail ->
-            Row(
-                modifier = Modifier.fillMaxWidth().clickable { open(reway.retailUrl) },
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(stringResource(R.string.result_reway_sells), style = MaterialTheme.typography.bodyMedium)
-                Text(retail.toString())
-            }
-        }
     }
 }
 

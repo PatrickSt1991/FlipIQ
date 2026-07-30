@@ -33,12 +33,4 @@ object MarketplaceUrls {
 
     fun tweakers(title: String) =
         "https://tweakers.net/pricewatch/zoeken/?keyword=${q(title)}"
-
-    /** Reway inkoop (buy-in) storefront search — the guaranteed Dutch exit price. */
-    fun rewayBuyIn(title: String) =
-        "https://www.rewayverkopen.nl/search?q=${q(title)}"
-
-    /** Reway retail storefront search — a real NL asking price. */
-    fun rewayRetail(title: String) =
-        "https://www.reway.nl/search?q=${q(title)}"
 }

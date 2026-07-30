@@ -344,4 +344,14 @@ FlipIQ is an independent open-source project.
 
 It is **not affiliated with or endorsed by** eBay, CeX, Amazon, PriceCharting, Vinted, Marktplaats or any other marketplace.
 
+---
+
+# 🚫 A note on Reway
+
+FlipIQ does **not** use Reway (reway.nl / rewayverkopen.nl) as a price source.
+
+An earlier prototype experimented with showing Reway's Dutch buy-in and retail prices, but Reway asked us not to use or scrape their data, and their policy does not permit it. We fully respect that decision, so all Reway integration has been removed and the app does not query, display, or link to their data in any way.
+
+If you are looking for reference data, please use official, openly-licensed databases that permit commercial use.
+
 All trademarks belong to their respective owners.

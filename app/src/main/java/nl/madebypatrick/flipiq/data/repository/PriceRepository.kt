@@ -10,17 +10,14 @@ import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.ShortcutOnlySource
 import nl.madebypatrick.flipiq.data.source.SourceResult
-import nl.madebypatrick.flipiq.data.source.reway.RewaySource
 import nl.madebypatrick.flipiq.domain.engine.FlipIQEngine
 import nl.madebypatrick.flipiq.domain.model.Completeness
 import nl.madebypatrick.flipiq.domain.model.Condition
 import nl.madebypatrick.flipiq.domain.model.EngineInput
-import nl.madebypatrick.flipiq.domain.model.ListingType
 import nl.madebypatrick.flipiq.domain.model.MarketListing
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProductInfo
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
-import nl.madebypatrick.flipiq.domain.model.RewayInsight
 import nl.madebypatrick.flipiq.domain.model.ScanAnalysis
 import nl.madebypatrick.flipiq.domain.model.SourceOutcome
 
@@ -133,31 +130,7 @@ class PriceRepository(
             sources = market.sources,
             condition = condition,
             completeness = completeness,
-            reway = rewayInsight(market, settings),
             allSourcesDisabled = market.allSourcesDisabled,
-        )
-    }
-
-    /**
-     * Reway's buy-in/retail figures for the result screen (§3/§8). Read straight off the fetched
-     * listings by source id — the buy-in is a [ListingType.TRADE_IN] point the engine never scored.
-     * When a Reway source is switched off it isn't fetched, so its listing is simply absent and the
-     * corresponding field stays null (the UI renders nothing — no "€0").
-     */
-    private fun rewayInsight(market: FetchedMarket, settings: ProfitSettings): RewayInsight {
-        val buyIn = market.listings.firstOrNull {
-            it.sourceId == RewaySource.BUY_IN_ID && it.type == ListingType.TRADE_IN
-        }?.price
-        val retail = market.listings.firstOrNull { it.sourceId == RewaySource.RETAIL_ID }?.price
-        if (buyIn == null && retail == null) return RewayInsight.EMPTY
-        fun urlOf(id: String) = market.sources.firstOrNull { it.sourceId == id }?.shortcutUrl
-        return RewayInsight(
-            buyIn = buyIn,
-            buyInUrl = urlOf(RewaySource.BUY_IN_ID),
-            retail = retail,
-            retailUrl = urlOf(RewaySource.RETAIL_ID),
-            // Can't-lose buy = buy-in minus your min profit, fees off (no marketplace cut).
-            guaranteedBuy = buyIn?.let { (it - settings.minProfit).coerceAtLeastZero() },
         )
     }
 
