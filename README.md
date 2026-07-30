@@ -3,12 +3,11 @@
 </p>
 
 <p align="center">
-  📦 Free, open-source barcode scanner &amp; buying assistant for resellers.<br>
-  Scan a game, console, DVD, LEGO set or book and instantly see what it's worth on the Dutch second-hand market — and whether it's worth buying.
+  📦 Gratis, open-source barcodescanner &amp; inkoopassistent voor resellers.<br>
+  Scan een game, console, dvd, LEGO-set of boek en zie meteen wat het waard is op de Nederlandse tweedehandsmarkt — en of het slim is om te kopen.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/platform-Android-brightgreen" alt="Platform">
   <img src="https://img.shields.io/badge/Kotlin-100%25-purple" alt="Kotlin">
   <img src="https://img.shields.io/badge/status-alpha-orange" alt="Status">
@@ -16,104 +15,94 @@
 
 ---
 
-## Why?
+## Waarom?
 
-There's no free Android app that gives fast, reseller-focused price estimates for second-hand items. FlipIQ is the open-source alternative to apps like the CeX scanner — but built for the **Dutch market**, and it answers the only question that matters:
+Er is geen gratis Android-app die snelle, betrouwbare prijsinschattingen geeft voor tweedehands spullen, gemaakt voor de reseller. FlipIQ is het open-source alternatief voor apps zoals de CeX-scanner — maar dan voor de **Nederlandse markt**. Het beantwoordt de enige vraag die telt:
 
-> **"Should I buy this?"**
+> **"Moet ik dit kopen?"**
 
-## How it works
+## Hoe het werkt
 
-1. **Scan** a barcode, snap the cover, or photograph a whole pile (haul mode).
-2. FlipIQ pulls live Dutch prices and the **FlipIQ Engine** scores the item.
-3. You get a **Deal Score**, a max buy price, and expected profit — in one glance.
+1. **Scan** een barcode, maak een foto van de voorkant, of fotografeer een hele stapel (haul-modus).
+2. FlipIQ haalt live Nederlandse prijzen op en de **FlipIQ Engine** beoordeelt het item.
+3. Je ziet in één oogopslag een **Dealscore**, een maximale inkoopprijs en de verwachte winst.
 
-## Features
+## Functies
 
 | | |
 |---|---|
-| 📷 **Scanning** | UPC/EAN/ISBN + QR via ML Kit, offline & fast. Cover-photo (AI) and OCR fallback. |
-| 🧺 **Haul mode** | One photo of a pile → every title priced and ranked. |
-| 🧠 **FlipIQ Engine** | Turns raw prices into a buy/skip verdict (see below). |
-| 🎯 **Deal Score** | 0–100 score + max buy price per item. |
-| ⚡ **Sell Speed** | How fast it typically sells. |
-| ⭐ **Profit Mode** | Every recommendation adapts to your margin/ROI rules. |
-| 📚 **Collection** | Inventory, profit tracker, purchase history, favorites, wishlist, manual add, CSV export. |
-| 🔔 **Price alerts** | Get notified when a watched item drops to your target. |
-| 🌍 **EN / NL** | Full Dutch and English UI. |
+| 📷 **Scannen** | UPC/EAN/ISBN + QR via ML Kit, snel & offline. Foto van de voorkant (AI) en OCR als terugval. |
+| 🧺 **Haul-modus** | Eén foto van een stapel → elke titel geprijsd en gerangschikt. |
+| 🧠 **FlipIQ Engine** | Zet ruwe prijzen om in een koop-/niet-kopen-oordeel (zie onder). |
+| 🎯 **Dealscore** | Score 0–100 + maximale inkoopprijs per item. |
+| ⚡ **Verkoopsnelheid** | Hoe snel iets doorgaans verkoopt. |
+| ⭐ **Winstmodus** | Elke aanbeveling past zich aan jouw marge-/ROI-regels aan. |
+| 📚 **Collectie** | Voorraad, winsttracker, inkoophistorie, favorieten, verlanglijst, handmatig toevoegen, CSV-export. |
+| 🔔 **Prijsmeldingen** | Krijg bericht als een item zakt naar jouw streefprijs. |
+| 🌍 **NL / EN** | Volledig Nederlandse en Engelse interface. |
 
-## Data sources
+## Prijsbronnen
 
-FlipIQ is focused on the **Dutch second-hand market**, so every price is an NL/EUR figure:
+FlipIQ richt zich op de **Nederlandse tweedehandsmarkt**, dus elke prijs is een NL/EUR-bedrag:
 
-- **eBay.nl** — active listings (official Browse API) + sold comps.
-- **Marktplaats** — active Dutch asking prices.
+- **eBay.nl** — actieve advertenties (officiële Browse API) + verkochte prijzen.
+- **Marktplaats** — actuele Nederlandse vraagprijzen.
 
-Prices are aggregated server-side by the [FlipIQ Engine](#the-flipiq-engine) (a Cloudflare Worker) and cached to keep request volume low. One-tap "open on marketplace" shortcuts are provided for eBay and Marktplaats.
+Prijzen worden serverkant samengevoegd door de FlipIQ Engine (een Cloudflare Worker) en gecachet om het aantal verzoeken laag te houden. Er zijn "open op marktplaats"-snelkoppelingen voor eBay en Marktplaats.
 
-## The FlipIQ Engine
+## De FlipIQ Engine
 
-The engine doesn't just show prices — it analyses the market and decides whether an item is worth buying.
+De engine toont niet alleen prijzen — hij analyseert de markt en bepaalt of een item de moeite waard is om te kopen.
 
-**Looks at:** sold average/median, number of recent sales, sales velocity, market trend, marketplace fees, shipping, your profit goals & ROI, item condition, complete-vs-loose, and market confidence.
+**Kijkt naar:** gemiddelde/mediaan verkoopprijs, aantal recente verkopen, verkoopsnelheid, markttrend, marktplaatskosten, verzendkosten, jouw winstdoelen & ROI, staat van het item, compleet-vs-los, en marktvertrouwen.
 
-**Returns:** recommended buy price · estimated resale · expected profit · ROI · confidence · Deal Score · Sell Speed.
+**Geeft terug:** aanbevolen inkoopprijs · geschatte verkoop · verwachte winst · ROI · vertrouwen · Dealscore · Verkoopsnelheid.
 
-### Deal Score
+### Dealscore & verkoopsnelheid
 
-| Score | Verdict | | Sell Speed | Typical time |
+| Score | Oordeel | | Snelheid | Doorlooptijd |
 |------:|---------|---|---|---|
-| 🟢 90–100 | Buy Immediately | | ⚡ Very Fast | within days |
-| 🟢 75–89 | Great Deal | | 🚀 Fast | 1–2 weeks |
-| 🟡 50–74 | Fair Price | | ⏳ Medium | 2–8 weeks |
-| 🟠 25–49 | Low Profit | | 🐢 Slow | months |
-| 🔴 0–24 | Skip | | | |
+| 🟢 90–100 | Direct kopen | | ⚡ Heel snel | binnen enkele dagen |
+| 🟢 75–89 | Topdeal | | 🚀 Snel | 1–2 weken |
+| 🟡 50–74 | Redelijke prijs | | ⏳ Gemiddeld | 2–8 weken |
+| 🟠 25–49 | Weinig winst | | 🐢 Langzaam | maanden |
+| 🔴 0–24 | Overslaan | | | |
 
-### Profit Mode
+### Winstmodus
 
-Configure it once (min profit, min ROI, price floor, ignore incomplete/damaged, min sales, prefer fast sellers, include fees & shipping) and the engine recalculates the max buy price, expected profit, ROI, Deal Score and Sell Speed on every scan.
+Stel het één keer in (minimale winst, minimale ROI, prijsdrempel, incompleet/beschadigd negeren, minimaal aantal verkopen, snelle verkopers voortrekken, kosten & verzending meerekenen) en de engine herberekent bij elke scan de maximale inkoopprijs, verwachte winst, ROI, Dealscore en verkoopsnelheid.
 
-## Example
+## Voorbeeld
 
 ```text
 🎮 LEGO Jurassic World (PS4)
 
-Median sold      €11.50        🟢 Deal Score  91/100
-Est. resale      €11.95        Confidence     92%
-                               Sell Speed     🚀 Fast
-Buy ladder
-  🟢 Excellent   ≤ €5.00       Expected profit  €5.45
-  🟢 Good        ≤ €7.00       Estimated ROI    46%
-  🟡 Fair        ≤ €9.00
-  🔴 Skip        > €10.00      Open: [eBay.nl] [Marktplaats]
+Mediaan verkocht  €11,50        🟢 Dealscore   91/100
+Gesch. verkoop    €11,95        Vertrouwen     92%
+                                Verkoopsnelheid 🚀 Snel
+Inkoopladder
+  🟢 Uitstekend   ≤ €5,00       Verwachte winst  €5,45
+  🟢 Goed         ≤ €7,00       Geschatte ROI    46%
+  🟡 Redelijk     ≤ €9,00
+  🔴 Overslaan    > €10,00      Open: [eBay.nl] [Marktplaats]
 ```
 
-## Categories
+## Categorieën
 
-Video games · consoles · controllers & accessories · LEGO · books · DVDs · Blu-rays · electronics · toys · collectibles · trading cards.
+Games · consoles · controllers & accessoires · LEGO · boeken · dvd's · Blu-rays · elektronica · speelgoed · verzamelobjecten · verzamelkaarten.
 
-## Roadmap
+## Over Reway
 
-- **Shipped** — barcode/cover/OCR scanning, haul mode, FlipIQ Engine, Deal Score, Sell Speed, Profit Mode, collection & profit tracker, price alerts, stats, dark mode, CSV export, EN/NL.
-- **Planned** — local database cache, richer statistics, more open/official data sources.
-- **Ideas** — cloud sync, shared collections, Wear OS, desktop companion, browser extension.
+FlipIQ maakt **geen** gebruik van Reway (reway.nl / rewayverkopen.nl). Een eerdere versie experimenteerde met het tonen van Reway's inkoop- en verkoopprijzen, maar Reway heeft ons gevraagd hun data niet te gebruiken of te scrapen, en hun beleid staat dat niet toe. Wij respecteren die keuze volledig: alle Reway-integratie is verwijderd en de app vraagt, toont of linkt op geen enkele manier naar hun data.
 
-## Tech stack
+## Techniek
 
 Kotlin · Jetpack Compose · Material 3 · ML Kit · Room · Retrofit · Coroutines · Hilt · Coil · Cloudflare Workers (engine).
 
-## Contributing
+## Bijdragen
 
-Ideas, bug reports and pull requests are very welcome — open an issue or a PR.
-
-## License
-
-MIT.
+Ideeën, bugmeldingen en pull requests zijn welkom — open een issue of PR.
 
 ---
 
-### Disclaimer
-
-FlipIQ is an independent open-source project, **not affiliated with or endorsed by** eBay, Marktplaats or any other marketplace. All trademarks belong to their respective owners.
-
-**A note on Reway:** FlipIQ does **not** use Reway (reway.nl / rewayverkopen.nl). An earlier prototype experimented with their prices, but Reway asked us not to use or scrape their data and their policy doesn't permit it. We respect that — all Reway integration has been removed. For reference data, use official, openly-licensed databases that permit commercial use.
+FlipIQ is een onafhankelijk open-source project en is **niet gelieerd aan of goedgekeurd door** eBay, Marktplaats of enige andere marktplaats. Alle merknamen zijn eigendom van hun respectievelijke eigenaren.
