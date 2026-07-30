@@ -74,7 +74,7 @@
     <string name="result_condition_section">Item condition</string>
     <string name="result_condition_label">Condition</string>
     <string name="result_completeness_label">Completeness</string>
-    <string name="result_sold_prices">Sell it yourself · market (%1$d sold)</string>
+    <string name="result_sold_prices">Sold prices (%1$d sold)</string>
     <string name="result_avg_sold">Average sold</string>
     <string name="result_median_sold">Median sold</string>
     <string name="result_lowest">Lowest</string>
@@ -90,13 +90,6 @@
     <string name="result_notes_section">Why</string>
     <string name="result_marketplace_section">Open on marketplace</string>
 
-    <!-- Reway (buy-in / retail) block -->
-    <string name="result_reway_section">Reway (NL)</string>
-    <string name="result_reway_pays">Reway pays up to</string>
-    <string name="result_reway_sells">Reway sells at</string>
-    <string name="result_reway_guaranteed_buy">Can\'t-lose buy</string>
-    <string name="result_reway_guaranteed_hint">Fees off — Reway buys it back, so there\'s no marketplace cut.</string>
-    <string name="result_reway_payout_hint">A guaranteed, zero-effort exit — a payout, not a market value.</string>
 
     <!-- All sources switched off -->
     <string name="result_sources_off_title">All sources are off</string>
@@ -204,8 +197,6 @@
     <string name="settings_ean_label">EAN-Search token</string>
     <string name="settings_section_sources">Sources</string>
     <string name="settings_sources_all_off">All sources are off — turn at least one on, or scans won\'t show any prices.</string>
-    <string name="source_sub_reway_buyin">Guaranteed buy-in price · NL</string>
-    <string name="source_sub_reway_retail">Retail asking price · NL</string>
     <string name="source_sub_pricecharting">Market value · USD, converted</string>
     <string name="source_sub_ebay">Sold listings · international</string>
     <string name="source_sub_marktplaats">Link only, no prices</string>

@@ -73,7 +73,7 @@
     <string name="result_condition_section">Staat van het item</string>
     <string name="result_condition_label">Conditie</string>
     <string name="result_completeness_label">Compleetheid</string>
-    <string name="result_sold_prices">Zelf verkopen · markt (%1$d verkopen)</string>
+    <string name="result_sold_prices">Verkoopprijzen (%1$d verkocht)</string>
     <string name="result_avg_sold">Gemiddeld verkocht</string>
     <string name="result_median_sold">Mediaan verkocht</string>
     <string name="result_lowest">Laagste</string>
@@ -89,13 +89,6 @@
     <string name="result_notes_section">Waarom</string>
     <string name="result_marketplace_section">Openen op marktplaats</string>
 
-    <!-- Reway (inkoop / retail) blok -->
-    <string name="result_reway_section">Reway (NL)</string>
-    <string name="result_reway_pays">Reway betaalt max</string>
-    <string name="result_reway_sells">Reway verkoopt voor</string>
-    <string name="result_reway_guaranteed_buy">Zeker-weten-inkoop</string>
-    <string name="result_reway_guaranteed_hint">Zonder kosten — Reway koopt \'m terug, dus geen marktplaatsmarge.</string>
-    <string name="result_reway_payout_hint">Een gegarandeerde, moeiteloze exit — een uitbetaling, geen marktwaarde.</string>
 
     <!-- Alle bronnen uitgeschakeld -->
     <string name="result_sources_off_title">Alle bronnen staan uit</string>
@@ -203,8 +196,6 @@
     <string name="settings_ean_label">EAN-Search-token</string>
     <string name="settings_section_sources">Bronnen</string>
     <string name="settings_sources_all_off">Alle bronnen staan uit — zet er minstens één aan, anders tonen scans geen prijzen.</string>
-    <string name="source_sub_reway_buyin">Gegarandeerde inkoopprijs · NL</string>
-    <string name="source_sub_reway_retail">Winkel-vraagprijs · NL</string>
     <string name="source_sub_pricecharting">Marktwaarde · USD, omgerekend</string>
     <string name="source_sub_ebay">Verkochte advertenties · internationaal</string>
     <string name="source_sub_marktplaats">Alleen link, geen prijzen</string>

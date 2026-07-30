@@ -35,10 +35,6 @@ import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
 import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingSource as LivePriceChartingSource
-import nl.madebypatrick.flipiq.data.source.reway.RewayApi
-import nl.madebypatrick.flipiq.data.source.reway.RewaySource
-import nl.madebypatrick.flipiq.data.source.reway.RewayThrottle
-import nl.madebypatrick.flipiq.domain.model.ListingType
 import nl.madebypatrick.flipiq.domain.CurrencyConverter
 import nl.madebypatrick.flipiq.domain.StaticCurrencyConverter
 import nl.madebypatrick.flipiq.domain.engine.EngineConfig
@@ -60,19 +56,17 @@ object AppModule {
     /**
      * The active set of marketplace sources.
      *
-     * **Real price data** comes from the FlipIQ Engine (Marktplaats + eBay, aggregated server-side)
-     * and, when a token is set, PriceCharting. Everything else is a shortcut-only "open search" link
-     * (CeX/Vinted/Tweakers, and eBay/Marktplaats links to complement the engine data).
+     * **Real price data** comes from the FlipIQ Engine (Marktplaats + eBay-sold, aggregated
+     * server-side). The rest are shortcut-only "open search" links (eBay/Marktplaats) that complement
+     * the engine data with a one-tap way to browse the live listings.
      *
-     * In demo mode (unused by default) eBay/PriceCharting fall back to mock data.
+     * In demo mode (unused by default) the engine falls back to mock eBay-sold data.
      */
     @Provides
     @Singleton
     fun provideSources(
         priceChartingApi: PriceChartingApi,
         engineApi: EngineApi,
-        rewayApi: RewayApi,
-        rewayThrottle: RewayThrottle,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,
     ): List<@JvmSuppressWildcards MarketplaceSource> {
@@ -88,35 +82,8 @@ object AppModule {
                 null
             }
 
-        // Reway's two Shopify stores — a Dutch buy-in floor and retail ceiling (§6). No token gate;
-        // toggled off in Settings if their theme ever breaks the endpoints. Buy-in is TRADE_IN so it
-        // stays out of the resale median (§3); retail is ACTIVE and skips bulk Haul scans (§6).
-        val rewayBuyIn: MarketplaceSource = RewaySource(
-            api = rewayApi,
-            throttle = rewayThrottle,
-            id = RewaySource.BUY_IN_ID,
-            displayName = "Reway (inkoop)",
-            host = RewaySource.BUY_IN_HOST,
-            listingType = ListingType.TRADE_IN,
-            searchUrl = MarketplaceUrls::rewayBuyIn,
-        )
-        val rewayRetail: MarketplaceSource = RewaySource(
-            api = rewayApi,
-            throttle = rewayThrottle,
-            id = RewaySource.RETAIL_ID,
-            displayName = "Reway",
-            host = RewaySource.RETAIL_HOST,
-            listingType = ListingType.ACTIVE,
-            searchUrl = MarketplaceUrls::rewayRetail,
-            skipDuringHaul = true,
-        )
-
-        // Reway first (the primary NL price), then the market data (engine = eBay-sold + Marktplaats),
-        // then the two "open in browser" links. PriceCharting (USD guide) and CeX/Vinted/Tweakers were
-        // dropped as price sources — Reway is the NL reference now.
+        // The engine's aggregated market data first, then the two "open in browser" links.
         return listOfNotNull(
-            rewayBuyIn,
-            rewayRetail,
             engine,
             ShortcutOnlySource("ebay", "eBay", MarketplaceUrls::ebaySold),
             ShortcutOnlySource("marktplaats", "Marktplaats", MarketplaceUrls::marktplaats),
