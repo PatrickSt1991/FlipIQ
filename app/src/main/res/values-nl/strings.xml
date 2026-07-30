@@ -74,6 +74,11 @@
     <string name="result_condition_label">Conditie</string>
     <string name="result_completeness_label">Compleetheid</string>
     <string name="result_sold_prices">Verkoopprijzen (%1$d verkocht)</string>
+    <string name="result_by_source_section">Prijzen per bron</string>
+    <string name="result_by_source_sold">verkocht</string>
+    <string name="result_by_source_asking">vraagprijs</string>
+    <string name="result_by_source_meta">%1$s · %2$d stuks</string>
+    <string name="result_by_source_range">%1$s – %2$s</string>
     <string name="result_avg_sold">Gemiddeld verkocht</string>
     <string name="result_median_sold">Mediaan verkocht</string>
     <string name="result_lowest">Laagste</string>
