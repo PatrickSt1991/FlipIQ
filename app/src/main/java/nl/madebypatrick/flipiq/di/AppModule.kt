@@ -32,9 +32,6 @@ import nl.madebypatrick.flipiq.data.source.engine.NoopHaulService
 import nl.madebypatrick.flipiq.data.source.engine.NoopTopGamesService
 import nl.madebypatrick.flipiq.data.source.engine.TopGamesService
 import nl.madebypatrick.flipiq.data.source.mock.EbaySoldSource
-import nl.madebypatrick.flipiq.data.source.mock.PriceChartingSource
-import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
-import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingSource as LivePriceChartingSource
 import nl.madebypatrick.flipiq.domain.CurrencyConverter
 import nl.madebypatrick.flipiq.domain.StaticCurrencyConverter
 import nl.madebypatrick.flipiq.domain.engine.EngineConfig
@@ -65,7 +62,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSources(
-        priceChartingApi: PriceChartingApi,
         engineApi: EngineApi,
         currencyConverter: CurrencyConverter,
         settingsRepository: SettingsRepository,

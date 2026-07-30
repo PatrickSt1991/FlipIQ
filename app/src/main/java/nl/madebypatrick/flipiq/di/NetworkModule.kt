@@ -11,20 +11,16 @@ import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
 import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
 import nl.madebypatrick.flipiq.data.source.engine.EngineApi
-import nl.madebypatrick.flipiq.data.source.pricecharting.PriceChartingApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    const val PRICECHARTING_TOKEN = "pricechartingToken"
 
     @Provides
     @Singleton
@@ -36,7 +32,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()
-        // The engine's /haul (Gemini lists titles + a PriceCharting scrape per item) and eBay-sold
+        // The engine's /haul (Gemini lists titles + a marketplace lookup per item) and eBay-sold
         // lookups can legitimately take 20–40s; OkHttp's 10s default read timeout killed them
         // mid-flight, so haul "hung" then returned nothing. Give slow marketplace calls room.
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -49,19 +45,6 @@ object NetworkModule {
             },
         )
         .build()
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit = Retrofit.Builder()
-        .baseUrl("https://www.pricecharting.com/")
-        .client(client)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-
-    @Provides
-    @Singleton
-    fun providePriceChartingApi(retrofit: Retrofit): PriceChartingApi =
-        retrofit.create(PriceChartingApi::class.java)
 
     @Provides
     @Singleton
@@ -99,8 +82,4 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(EngineApi::class.java)
-
-    @Provides
-    @Named(PRICECHARTING_TOKEN)
-    fun providePriceChartingToken(): String = BuildConfig.PRICECHARTING_TOKEN
 }

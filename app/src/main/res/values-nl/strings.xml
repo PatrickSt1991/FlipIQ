@@ -66,7 +66,7 @@
     <string name="result_nodata_unknown">We konden deze barcode niet herkennen. Scan de voorkant van het item of probeer de marktplaatsen hieronder.</string>
     <string name="result_nodata_no_prices">We konden geen prijzen vinden voor “%1$s”. Bekijk de marktplaatsen hieronder — misschien staat het daar.</string>
     <string name="result_scan_front_instead">📸  Scan liever de voorkant</string>
-    <string name="result_nodata_tip">Tip: een PriceCharting- of EAN-Search-token toevoegen in Instellingen verbetert de dekking.</string>
+    <string name="result_nodata_tip">Tip: scan de voorkant van de hoes of typ de exacte titel voor een betere match.</string>
     <string name="result_deal_score">Dealscore %1$d/100</string>
     <string name="result_confidence">👍 %1$d%% zeker</string>
     <string name="result_not_viable">Let op — voldoet niet aan je Winstmodus-doelen</string>
@@ -190,13 +190,10 @@
     <string name="settings_ignore_damaged">Beschadigde items negeren</string>
     <string name="settings_prefer_fast">Voorkeur voor snelle verkopers</string>
     <string name="settings_section_data_sources">Databronnen</string>
-    <string name="settings_pc_desc">PriceCharting API-token — schakelt live PriceCharting-prijzen in. Laat leeg om over te slaan.</string>
-    <string name="settings_pc_label">PriceCharting-token</string>
     <string name="settings_ean_desc">EAN-Search API-token — verbetert het koppelen van barcode→product (vooral EU/NL-items).</string>
     <string name="settings_ean_label">EAN-Search-token</string>
     <string name="settings_section_sources">Bronnen</string>
     <string name="settings_sources_all_off">Alle bronnen staan uit — zet er minstens één aan, anders tonen scans geen prijzen.</string>
-    <string name="source_sub_pricecharting">Marktwaarde · USD, omgerekend</string>
     <string name="source_sub_ebay">Verkochte advertenties · internationaal</string>
     <string name="source_sub_marktplaats">Alleen link, geen prijzen</string>
     <string name="source_sub_vinted">Alleen link, geen prijzen</string>

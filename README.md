@@ -44,7 +44,6 @@ Compare prices from multiple sources simultaneously.
 
 - eBay Sold Listings
 - CeX
-- PriceCharting
 - Vinted
 - Marktplaats
 - Amazon (optional)
@@ -263,7 +262,6 @@ Open any marketplace with a single tap.
 - Vinted
 - Marktplaats
 - CeX
-- PriceCharting
 
 ---
 
@@ -273,7 +271,6 @@ Open any marketplace with a single tap.
 
 - Barcode Scanner
 - eBay Sold Lookup
-- PriceCharting Lookup
 - Marketplace Shortcuts
 - FlipIQ Engine
 - Deal Score
@@ -342,7 +339,7 @@ MIT
 
 FlipIQ is an independent open-source project.
 
-It is **not affiliated with or endorsed by** eBay, CeX, Amazon, PriceCharting, Vinted, Marktplaats or any other marketplace.
+It is **not affiliated with or endorsed by** eBay, CeX, Amazon, Vinted, Marktplaats or any other marketplace.
 
 ---
 

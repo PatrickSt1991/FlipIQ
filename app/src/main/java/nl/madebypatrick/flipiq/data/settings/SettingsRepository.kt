@@ -33,19 +33,12 @@ class SettingsRepository(
         val INCLUDE_FEES = booleanPreferencesKey("include_fees")
         val MARKETPLACE_FEE = doublePreferencesKey("marketplace_fee")
         val SHIPPING_CENTS = longPreferencesKey("shipping_cents")
-        val PRICECHARTING_TOKEN = stringPreferencesKey("pricecharting_token")
         val EAN_SEARCH_TOKEN = stringPreferencesKey("ean_search_token")
         val DISABLED_SOURCES = stringSetPreferencesKey("disabled_source_ids")
     }
 
     val settings: Flow<ProfitSettings> = dataStore.data.map { it.toSettings() }
 
-    /** User-entered PriceCharting API token (empty when unset). */
-    val priceChartingToken: Flow<String> = dataStore.data.map { it[Keys.PRICECHARTING_TOKEN] ?: "" }
-
-    suspend fun setPriceChartingToken(token: String) {
-        dataStore.edit { it[Keys.PRICECHARTING_TOKEN] = token.trim() }
-    }
 
     /** User-entered EAN-Search API token (empty when unset). */
     val eanSearchToken: Flow<String> = dataStore.data.map { it[Keys.EAN_SEARCH_TOKEN] ?: "" }

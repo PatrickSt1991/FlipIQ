@@ -28,7 +28,7 @@ data class SourceResult(
 )
 
 /**
- * A source of price data for one marketplace (eBay, CeX, PriceCharting, Vinted, Marktplaats, …).
+ * A source of price data for one marketplace (eBay, Marktplaats, …).
  *
  * This is the seam the whole app is built around: today every implementation is backed by mock
  * fixture data, but each can be swapped for a real API/scraper independently — the repository,

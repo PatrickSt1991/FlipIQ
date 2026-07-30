@@ -25,16 +25,13 @@ android {
         applicationId = "nl.madebypatrick.flipiq"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.6.3"
+        versionCode = 17
+        versionName = "0.6.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        // Build-time PriceCharting token (optional). Users can also set one at runtime in Settings.
-        buildConfigField("String", "PRICECHARTING_TOKEN", "\"${secret("pricecharting.token", "PRICECHARTING_TOKEN")}\"")
-
-        // Demo mode fills the engine with realistic mock data (eBay/PriceCharting) for exploration.
+        // Demo mode fills the engine with realistic mock data (eBay) for exploration.
         // Off by default (honest: only real sources feed the engine); the debug build turns it on.
         buildConfigField("boolean", "DEMO_MODE", "false")
 

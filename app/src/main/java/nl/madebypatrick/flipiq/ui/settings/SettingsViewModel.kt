@@ -47,8 +47,6 @@ class SettingsViewModel @Inject constructor(
     val theme = themeRepository.preferences
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemePreferences.DEFAULT)
 
-    val priceChartingToken = settingsRepository.priceChartingToken
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     val eanSearchToken = settingsRepository.eanSearchToken
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
@@ -57,9 +55,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { runCatching { settingsRepository.update(settings) } }
     }
 
-    fun setPriceChartingToken(token: String) {
-        viewModelScope.launch { runCatching { settingsRepository.setPriceChartingToken(token) } }
-    }
 
     fun setEanSearchToken(token: String) {
         viewModelScope.launch { runCatching { settingsRepository.setEanSearchToken(token) } }

@@ -28,9 +28,6 @@ object MarketplaceUrls {
     fun cex(title: String) =
         "https://uk.webuy.com/search?stext=${q(title)}"
 
-    fun priceCharting(title: String) =
-        "https://www.pricecharting.com/search-products?q=${q(title)}&type=prices"
-
     fun tweakers(title: String) =
         "https://tweakers.net/pricewatch/zoeken/?keyword=${q(title)}"
 }
