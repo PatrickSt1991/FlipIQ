@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  📦 Free and open-source barcode scanner and buying assistant for resellers.<br>
-  Instantly estimate the value of games, consoles, DVDs, Blu-rays, LEGO, books, collectibles and electronics by comparing multiple marketplaces.
+  📦 Free, open-source barcode scanner &amp; buying assistant for resellers.<br>
+  Scan a game, console, DVD, LEGO set or book and instantly see what it's worth on the Dutch second-hand market — and whether it's worth buying.
 </p>
 
 <p align="center">
@@ -16,339 +16,104 @@
 
 ---
 
-# Why?
+## Why?
 
-There is currently no free Android application that provides fast, reliable and reseller-focused price estimates for second-hand items.
-
-FlipIQ aims to become the open-source alternative to apps like CeX Scanner by combining multiple marketplaces into a single, lightning-fast interface.
-
-Instead of only showing prices, FlipIQ helps users answer the only question that really matters:
+There's no free Android app that gives fast, reseller-focused price estimates for second-hand items. FlipIQ is the open-source alternative to apps like the CeX scanner — but built for the **Dutch market**, and it answers the only question that matters:
 
 > **"Should I buy this?"**
 
----
+## How it works
 
-# Features
+1. **Scan** a barcode, snap the cover, or photograph a whole pile (haul mode).
+2. FlipIQ pulls live Dutch prices and the **FlipIQ Engine** scores the item.
+3. You get a **Deal Score**, a max buy price, and expected profit — in one glance.
 
-## 📷 Barcode Scanning
+## Features
 
-- UPC / EAN / ISBN support
-- QR Code support
-- Google ML Kit
-- Extremely fast scanning
-- Offline barcode recognition
+| | |
+|---|---|
+| 📷 **Scanning** | UPC/EAN/ISBN + QR via ML Kit, offline & fast. Cover-photo (AI) and OCR fallback. |
+| 🧺 **Haul mode** | One photo of a pile → every title priced and ranked. |
+| 🧠 **FlipIQ Engine** | Turns raw prices into a buy/skip verdict (see below). |
+| 🎯 **Deal Score** | 0–100 score + max buy price per item. |
+| ⚡ **Sell Speed** | How fast it typically sells. |
+| ⭐ **Profit Mode** | Every recommendation adapts to your margin/ROI rules. |
+| 📚 **Collection** | Inventory, profit tracker, purchase history, favorites, wishlist, manual add, CSV export. |
+| 🔔 **Price alerts** | Get notified when a watched item drops to your target. |
+| 🌍 **EN / NL** | Full Dutch and English UI. |
 
-## 💰 Price Comparison
+## Data sources
 
-Compare prices from multiple sources simultaneously.
+FlipIQ is focused on the **Dutch second-hand market**, so every price is an NL/EUR figure:
 
-- eBay Sold Listings
-- CeX
-- Vinted
-- Marktplaats
-- Amazon (optional)
-- More sources coming soon
+- **eBay.nl** — active listings (official Browse API) + sold comps.
+- **Marktplaats** — active Dutch asking prices.
 
-## 📊 Smart Pricing
+Prices are aggregated server-side by the [FlipIQ Engine](#the-flipiq-engine) (a Cloudflare Worker) and cached to keep request volume low. One-tap "open on marketplace" shortcuts are provided for eBay and Marktplaats.
 
-Powered by the **FlipIQ Engine**.
+## The FlipIQ Engine
 
-The FlipIQ Engine automatically calculates:
+The engine doesn't just show prices — it analyses the market and decides whether an item is worth buying.
 
-- Average sold price
-- Median sold price
-- Lowest sale
-- Highest sale
-- Estimated resale value
-- Maximum buying price
-- Expected profit
-- ROI %
+**Looks at:** sold average/median, number of recent sales, sales velocity, market trend, marketplace fees, shipping, your profit goals & ROI, item condition, complete-vs-loose, and market confidence.
 
----
+**Returns:** recommended buy price · estimated resale · expected profit · ROI · confidence · Deal Score · Sell Speed.
 
-# 💡 Buy Assistant
+### Deal Score
 
-FlipIQ isn't just a price checker.
+| Score | Verdict | | Sell Speed | Typical time |
+|------:|---------|---|---|---|
+| 🟢 90–100 | Buy Immediately | | ⚡ Very Fast | within days |
+| 🟢 75–89 | Great Deal | | 🚀 Fast | 1–2 weeks |
+| 🟡 50–74 | Fair Price | | ⏳ Medium | 2–8 weeks |
+| 🟠 25–49 | Low Profit | | 🐢 Slow | months |
+| 🔴 0–24 | Skip | | | |
 
-It's your personal buying assistant.
+### Profit Mode
 
-Every scan instantly tells you whether an item is worth buying.
+Configure it once (min profit, min ROI, price floor, ignore incomplete/damaged, min sales, prefer fast sellers, include fees & shipping) and the engine recalculates the max buy price, expected profit, ROI, Deal Score and Sell Speed on every scan.
 
----
-
-# 🧠 FlipIQ Engine
-
-The **FlipIQ Engine** is the intelligent pricing engine behind every recommendation.
-
-Unlike traditional price checkers, it doesn't simply show prices.
-
-It analyses market data and tells you whether an item is actually worth buying.
-
-### The FlipIQ Engine analyses
-
-- Average sold price
-- Median sold price
-- Number of recent sales
-- Sales velocity
-- Current market trend
-- Marketplace fees
-- Shipping costs
-- User-defined profit goals
-- Desired ROI
-- Item condition
-- Complete vs Loose
-- Market confidence
-
-Then calculates:
-
-- ✅ Recommended Buy Price
-- ✅ Estimated Resale Price
-- ✅ Expected Profit
-- ✅ ROI
-- ✅ Confidence Score
-- ✅ Deal Score
-- ✅ Sell Speed
-
----
-
-# 🎯 Deal Score
-
-Every item receives a **Deal Score (0–100)**.
-
-| Score | Recommendation |
-|-------:|----------------|
-| 🟢 90–100 | Buy Immediately |
-| 🟢 75–89 | Great Deal |
-| 🟡 50–74 | Fair Price |
-| 🟠 25–49 | Low Profit |
-| 🔴 0–24 | Skip |
-
----
-
-# ⚡ Sell Speed
-
-Knowing **how fast** something sells is just as important as knowing **how much** it sells for.
-
-Every item receives a Sell Speed prediction.
-
-| Speed | Meaning |
-|--------|---------|
-| ⚡ Very Fast | Usually sells within days |
-| 🚀 Fast | Usually sells within 1–2 weeks |
-| ⏳ Medium | Usually sells within 2–8 weeks |
-| 🐢 Slow | May take several months |
-
----
-
-# ⭐ Profit Mode
-
-Configure FlipIQ once.
-
-The app adapts every recommendation to your personal flipping strategy.
-
-Example settings:
-
-- Minimum Profit: **€5**
-- Minimum ROI: **30%**
-- Ignore items below **€10**
-- Ignore incomplete items
-- Ignore damaged items
-- Ignore items with fewer than 5 sales
-- Prefer fast-selling items
-- Include shipping costs
-- Include marketplace fees
-
-The FlipIQ Engine automatically recalculates:
-
-- Maximum buying price
-- Expected profit
-- ROI
-- Deal Score
-- Sell Speed
-
-No manual calculations required.
-
----
-
-# Example
+## Example
 
 ```text
 🎮 LEGO Jurassic World (PS4)
 
-Average Sold
-€11.95
-
-Median Sold
-€11.50
-
-CeX Buy
-€7.00
-
-────────────────────────
-
-🟢 Deal Score
-91 / 100
-
-Confidence
-92%
-
-Sell Speed
-🚀 Fast
-
-────────────────────────
-
-🟢 Excellent Deal
-Buy below €5.00
-
-🟢 Good Deal
-Buy below €7.00
-
-🟡 Fair Deal
-Buy below €9.00
-
-🔴 Skip
-Above €10.00
-
-────────────────────────
-
-Expected Profit
-€5.45
-
-Estimated ROI
-46%
-
-Open:
-[eBay Sold]
-[Vinted]
-[Marktplaats]
-[CeX]
+Median sold      €11.50        🟢 Deal Score  91/100
+Est. resale      €11.95        Confidence     92%
+                               Sell Speed     🚀 Fast
+Buy ladder
+  🟢 Excellent   ≤ €5.00       Expected profit  €5.45
+  🟢 Good        ≤ €7.00       Estimated ROI    46%
+  🟡 Fair        ≤ €9.00
+  🔴 Skip        > €10.00      Open: [eBay.nl] [Marktplaats]
 ```
 
----
+## Categories
 
-# 📦 Categories
+Video games · consoles · controllers & accessories · LEGO · books · DVDs · Blu-rays · electronics · toys · collectibles · trading cards.
 
-- Video Games
-- Consoles
-- Controllers
-- Gaming Accessories
-- LEGO
-- Books
-- DVDs
-- Blu-rays
-- Electronics
-- Toys
-- Collectibles
-- Trading Cards
+## Roadmap
 
----
+- **Shipped** — barcode/cover/OCR scanning, haul mode, FlipIQ Engine, Deal Score, Sell Speed, Profit Mode, collection & profit tracker, price alerts, stats, dark mode, CSV export, EN/NL.
+- **Planned** — local database cache, richer statistics, more open/official data sources.
+- **Ideas** — cloud sync, shared collections, Wear OS, desktop companion, browser extension.
 
-# 📚 Collection
+## Tech stack
 
-- Scan History
-- Purchase History
-- Inventory
-- Profit Tracker
-- Favorites
-- Wishlist
+Kotlin · Jetpack Compose · Material 3 · ML Kit · Room · Retrofit · Coroutines · Hilt · Coil · Cloudflare Workers (engine).
+
+## Contributing
+
+Ideas, bug reports and pull requests are very welcome — open an issue or a PR.
+
+## License
+
+MIT.
 
 ---
 
-# 🔗 Marketplace Shortcuts
+### Disclaimer
 
-Open any marketplace with a single tap.
+FlipIQ is an independent open-source project, **not affiliated with or endorsed by** eBay, Marktplaats or any other marketplace. All trademarks belong to their respective owners.
 
-- eBay Sold
-- Vinted
-- Marktplaats
-- CeX
-
----
-
-# 🚀 Roadmap
-
-## MVP
-
-- Barcode Scanner
-- eBay Sold Lookup
-- Marketplace Shortcuts
-- FlipIQ Engine
-- Deal Score
-
-## Version 1.0
-
-- Profit Mode
-- Sell Speed
-- Purchase History
-- Inventory
-- Dark Mode
-- Export CSV
-
-## Version 2.0
-
-- OCR Support
-- AI Image Recognition
-- Price Alerts
-- Statistics Dashboard
-- Wishlist
-- Local Database Cache
-
-## Future Ideas
-
-- Cloud Sync
-- Shared Collections
-- Android Auto
-- Wear OS
-- Desktop Companion
-- Browser Extension
-- AI-powered Price Prediction
-
----
-
-# 🛠 Tech Stack
-
-- Kotlin
-- Jetpack Compose
-- Material 3
-- Google ML Kit
-- Room
-- Retrofit
-- Coroutines
-- Hilt
-- Coil
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome!
-
-Ideas, bug reports, feature requests and pull requests are greatly appreciated.
-
-If you have an idea that can improve FlipIQ or the FlipIQ Engine, feel free to open an issue or submit a PR.
-
----
-
-# 📄 License
-
-MIT
-
----
-
-# ⚠ Disclaimer
-
-FlipIQ is an independent open-source project.
-
-It is **not affiliated with or endorsed by** eBay, CeX, Amazon, Vinted, Marktplaats or any other marketplace.
-
----
-
-# 🚫 A note on Reway
-
-FlipIQ does **not** use Reway (reway.nl / rewayverkopen.nl) as a price source.
-
-An earlier prototype experimented with showing Reway's Dutch buy-in and retail prices, but Reway asked us not to use or scrape their data, and their policy does not permit it. We fully respect that decision, so all Reway integration has been removed and the app does not query, display, or link to their data in any way.
-
-If you are looking for reference data, please use official, openly-licensed databases that permit commercial use.
-
-All trademarks belong to their respective owners.
+**A note on Reway:** FlipIQ does **not** use Reway (reway.nl / rewayverkopen.nl). An earlier prototype experimented with their prices, but Reway asked us not to use or scrape their data and their policy doesn't permit it. We respect that — all Reway integration has been removed. For reference data, use official, openly-licensed databases that permit commercial use.
