@@ -87,6 +87,7 @@ data class IdentifyRequest(
 @Serializable
 data class IdentifyResponse(
     @SerialName("title") val title: String? = null,   // null when nothing identifiable
+    @SerialName("kind") val kind: String? = null,      // game|music|movie|book|lego|other (routing hint)
 )
 
 @Serializable

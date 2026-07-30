@@ -22,13 +22,13 @@
     <string name="scan_try_sample">Try a sample:</string>
 
     <!-- AI (front) scan pane -->
-    <string name="ai_identifying">Identifying the game…</string>
-    <string name="ai_aim">Aim at the game cover, then identify.</string>
+    <string name="ai_identifying">Identifying the item…</string>
+    <string name="ai_aim">Aim at the cover, then identify.</string>
     <string name="ai_not_identified">Couldn\'t identify it — type the title below or try Barcode.</string>
     <string name="ai_camera_error">Camera error, please try again.</string>
-    <string name="ai_identify_game">"  Identify game"</string>
-    <string name="ai_type_name">Or type the game name.</string>
-    <string name="ai_game_name_label">Game name</string>
+    <string name="ai_identify_game">"  Identify item"</string>
+    <string name="ai_type_name">Or type the title.</string>
+    <string name="ai_game_name_label">Title</string>
 
     <!-- Text (OCR) scan screen -->
     <string name="textscan_title">Scan the front</string>

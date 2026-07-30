@@ -25,8 +25,8 @@ android {
         applicationId = "nl.madebypatrick.flipiq"
         minSdk = 24
         targetSdk = 35
-        versionCode = 18
-        versionName = "0.6.5"
+        versionCode = 19
+        versionName = "0.6.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }

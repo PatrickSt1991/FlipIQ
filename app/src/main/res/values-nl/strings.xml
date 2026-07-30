@@ -21,13 +21,13 @@
     <string name="scan_try_sample">Probeer een voorbeeld:</string>
 
     <!-- AI (front) scan pane -->
-    <string name="ai_identifying">Game herkennen…</string>
-    <string name="ai_aim">Richt op de gamehoes en herken \'m.</string>
+    <string name="ai_identifying">Item herkennen…</string>
+    <string name="ai_aim">Richt op de hoes en herken \'m.</string>
     <string name="ai_not_identified">Kon \'m niet herkennen — typ de titel hieronder of probeer Barcode.</string>
     <string name="ai_camera_error">Camerafout, probeer het opnieuw.</string>
-    <string name="ai_identify_game">"  Game herkennen"</string>
-    <string name="ai_type_name">Of typ de naam van de game.</string>
-    <string name="ai_game_name_label">Naam van de game</string>
+    <string name="ai_identify_game">"  Item herkennen"</string>
+    <string name="ai_type_name">Of typ de titel.</string>
+    <string name="ai_game_name_label">Titel</string>
 
     <!-- Text (OCR) scan screen -->
     <string name="textscan_title">Scan de voorkant</string>
