@@ -1,10 +1,12 @@
 package nl.madebypatrick.flipiq.data.repository
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
+import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.resolver.EandataResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
@@ -43,7 +45,8 @@ class PriceRepository(
     private val sources: List<MarketplaceSource>,
     private val engine: FlipIQEngine,
     private val settingsRepository: SettingsRepository,
-    private val eandataResolver: BarcodeResolver,
+    private val eandata: EandataResolver,
+    private val appScope: CoroutineScope,
 ) {
 
     /** Search by a free-text title (e.g. from OCR of the product's front) instead of a barcode. */
@@ -54,11 +57,20 @@ class PriceRepository(
         // Fast path: hand the barcode to the engine, which resolves it server-side (cached) via its
         // keyless sources (ean13/buycott/…) and returns prices in one round-trip.
         val fromEngine = fetchInternal(barcode, ProductQuery(barcode, title = null))
-        if (fromEngine.allSourcesDisabled || fromEngine.product.title != UNKNOWN_TITLE) return fromEngine
+        if (fromEngine.allSourcesDisabled) return fromEngine
+
+        if (fromEngine.product.title != UNKNOWN_TITLE) {
+            // Engine resolved it → give the title back to eandata if they lack it (fire-and-forget,
+            // earns lookup credits and helps their DB; their manual review guards against bad data).
+            if (barcode.isNotBlank()) {
+                appScope.launch { eandata.contributeIfMissing(barcode, fromEngine.product.title) }
+            }
+            return fromEngine
+        }
 
         // Engine couldn't resolve the barcode → last-resort on-device eandata (its IP blocks the
         // engine's Cloudflare egress, but the phone's IP is fine). A hit turns "unknown" into prices.
-        val title = runCatching { eandataResolver.resolveTitle(barcode) }.getOrNull()
+        val title = runCatching { eandata.resolveTitle(barcode) }.getOrNull()
         return if (!title.isNullOrBlank()) fetchInternal(barcode, ProductQuery(barcode, title = title)) else fromEngine
     }
 

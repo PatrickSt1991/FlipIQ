@@ -66,6 +66,7 @@ jobs:
           # disabled and the app shows no marketplace listings (issue #36).
           ENGINE_URL: ${{ secrets.ENGINE_URL }}
           ENGINE_KEY: ${{ secrets.ENGINE_KEY }}
+          EANDATA_KEY: ${{ secrets.EANDATA_KEY }}
         run: ./gradlew :app:assembleRelease :app:bundleRelease --no-daemon
 
       - name: Build unsigned release APK (no keystore secret)
@@ -73,6 +74,7 @@ jobs:
         env:
           ENGINE_URL: ${{ secrets.ENGINE_URL }}
           ENGINE_KEY: ${{ secrets.ENGINE_KEY }}
+          EANDATA_KEY: ${{ secrets.EANDATA_KEY }}
         run: ./gradlew :app:assembleRelease --no-daemon
 
       - name: Stage artifacts
