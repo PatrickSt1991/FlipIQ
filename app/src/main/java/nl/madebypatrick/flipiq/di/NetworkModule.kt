@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import nl.madebypatrick.flipiq.BuildConfig
+import nl.madebypatrick.flipiq.data.resolver.EandataApi
 import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
 import nl.madebypatrick.flipiq.data.resolver.OpenLibraryApi
 import nl.madebypatrick.flipiq.data.resolver.UpcItemDbApi
@@ -54,6 +55,15 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(UpcItemDbApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEandataApi(client: OkHttpClient, json: Json): EandataApi = Retrofit.Builder()
+        .baseUrl("https://eandata.com/")
+        .client(client)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+        .create(EandataApi::class.java)
 
     @Provides
     @Singleton

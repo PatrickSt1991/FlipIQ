@@ -25,8 +25,8 @@ android {
         applicationId = "nl.madebypatrick.flipiq"
         minSdk = 24
         targetSdk = 35
-        versionCode = 23
-        versionName = "0.7.0"
+        versionCode = 24
+        versionName = "0.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -39,6 +39,10 @@ android {
         // eBay creds now live in the engine Worker, not the app.
         buildConfigField("String", "ENGINE_URL", "\"${secret("engine.url", "ENGINE_URL")}\"")
         buildConfigField("String", "ENGINE_KEY", "\"${secret("engine.key", "ENGINE_KEY")}\"")
+
+        // eandata.com keycode — an on-device, last-resort barcode resolver (eandata blocks the
+        // Cloudflare engine's IP, so it runs from the phone). Blank → the resolver is skipped.
+        buildConfigField("String", "EANDATA_KEY", "\"${secret("eandata.key", "EANDATA_KEY")}\"")
     }
 
     // Release signing is configured only when a keystore is supplied (via local.properties or CI

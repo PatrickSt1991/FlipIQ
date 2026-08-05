@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
@@ -42,16 +43,24 @@ class PriceRepository(
     private val sources: List<MarketplaceSource>,
     private val engine: FlipIQEngine,
     private val settingsRepository: SettingsRepository,
+    private val eandataResolver: BarcodeResolver,
 ) {
 
     /** Search by a free-text title (e.g. from OCR of the product's front) instead of a barcode. */
     suspend fun fetchByTitle(title: String): FetchedMarket =
         fetchInternal(barcode = "", query = ProductQuery(barcode = "", title = title))
 
-    suspend fun fetch(barcode: String): FetchedMarket =
-        // No on-device pre-resolve: pass the barcode straight through. The engine resolves it
-        // server-side (cached) and returns the product title, so we skip 2–3 sequential HTTP hops.
-        fetchInternal(barcode, ProductQuery(barcode, title = null))
+    suspend fun fetch(barcode: String): FetchedMarket {
+        // Fast path: hand the barcode to the engine, which resolves it server-side (cached) via its
+        // keyless sources (ean13/buycott/…) and returns prices in one round-trip.
+        val fromEngine = fetchInternal(barcode, ProductQuery(barcode, title = null))
+        if (fromEngine.allSourcesDisabled || fromEngine.product.title != UNKNOWN_TITLE) return fromEngine
+
+        // Engine couldn't resolve the barcode → last-resort on-device eandata (its IP blocks the
+        // engine's Cloudflare egress, but the phone's IP is fine). A hit turns "unknown" into prices.
+        val title = runCatching { eandataResolver.resolveTitle(barcode) }.getOrNull()
+        return if (!title.isNullOrBlank()) fetchInternal(barcode, ProductQuery(barcode, title = title)) else fromEngine
+    }
 
     private suspend fun fetchInternal(barcode: String, query: ProductQuery): FetchedMarket = coroutineScope {
         // Resolve the active set here, not in DI: the graph is built once, so a Settings toggle would
@@ -63,7 +72,7 @@ class PriceRepository(
         // renders a generic "no data" screen (§7). Don't block the last toggle; just explain it.
         if (active.isEmpty()) {
             return@coroutineScope FetchedMarket(
-                product = ProductInfo(barcode = barcode, title = query.title ?: "Unknown item"),
+                product = ProductInfo(barcode = barcode, title = query.title ?: UNKNOWN_TITLE),
                 listings = emptyList(),
                 sources = emptyList(),
                 allSourcesDisabled = true,
@@ -79,7 +88,7 @@ class PriceRepository(
         val resolvedTitle = results.firstNotNullOfOrNull { it.productTitle } ?: query.title
         val product = ProductInfo(
             barcode = barcode,
-            title = resolvedTitle ?: "Unknown item",
+            title = resolvedTitle ?: UNKNOWN_TITLE,
             category = results.firstNotNullOfOrNull { it.category },
             imageUrl = results.firstNotNullOfOrNull { it.imageUrl },
         )
@@ -170,4 +179,9 @@ class PriceRepository(
         settings: ProfitSettings = ProfitSettings.DEFAULT,
         askingPrice: Money? = null,
     ): ScanAnalysis = evaluate(fetch(barcode), condition, completeness, settings, askingPrice)
+
+    private companion object {
+        /** Placeholder title used when nothing resolved the barcode — the eandata fallback trigger. */
+        const val UNKNOWN_TITLE = "Unknown item"
+    }
 }
