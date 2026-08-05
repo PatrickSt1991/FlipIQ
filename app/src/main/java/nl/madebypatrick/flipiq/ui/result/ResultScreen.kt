@@ -6,9 +6,12 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -51,8 +54,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -104,7 +109,11 @@ fun ResultScreen(
 
     var showAlertDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showBuyDialog by remember { mutableStateOf(false) }
     val hasTitle = state is ResultUiState.Success
+    // The scored result (if any), used to drive the docked "I bought this" bar + its dialog.
+    val successRec = (state as? ResultUiState.Success)?.analysis?.recommendation
+    val canBuy = successRec != null && (successRec.stats.hasData || successRec.bestBuyPrice != null)
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* Alert is stored regardless; notifications simply stay silent until granted. */ }
@@ -153,6 +162,7 @@ fun ResultScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = { if (canBuy) BottomBuyBar { showBuyDialog = true } },
     ) { padding ->
         Box(
             modifier = Modifier
@@ -167,7 +177,6 @@ fun ResultScreen(
                     analysis = s.analysis,
                     onConditionChange = viewModel::setCondition,
                     onCompletenessChange = viewModel::setCompleteness,
-                    onMarkBought = viewModel::markAsBought,
                     onScanFront = onScanFront,
                 )
             }
@@ -198,6 +207,20 @@ fun ResultScreen(
                 if (edited.isNotBlank() && edited != title) onEditSearch(edited)
             },
             onDismiss = { showEditDialog = false },
+        )
+    }
+
+    if (showBuyDialog && successRec != null) {
+        PriceInputDialog(
+            titleText = stringResource(R.string.result_add_inventory_title),
+            label = stringResource(R.string.result_buy_price_label),
+            confirmText = stringResource(R.string.result_add),
+            suggested = successRec.recommendedBuyPrice,
+            onConfirm = { price ->
+                showBuyDialog = false
+                viewModel.markAsBought(price)
+            },
+            onDismiss = { showBuyDialog = false },
         )
     }
 }
@@ -258,11 +281,9 @@ private fun AnalysisContent(
     analysis: ScanAnalysis,
     onConditionChange: (Condition) -> Unit,
     onCompletenessChange: (Completeness) -> Unit,
-    onMarkBought: (Money?) -> Unit,
     onScanFront: () -> Unit,
 ) {
     val rec = analysis.recommendation
-    var showBuyDialog by remember { mutableStateOf(false) }
     // No sold data and nothing currently for sale → we can't score it; guide to the links instead.
     val hasData = rec.stats.hasData || rec.bestBuyPrice != null
 
@@ -281,10 +302,6 @@ private fun AnalysisContent(
                 PriceSummaryCard(rec)
                 if (analysis.pricesBySource.isNotEmpty()) PricesBySourceCard(analysis.pricesBySource)
                 VerdictCard(rec)
-                Button(
-                    onClick = { showBuyDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.result_i_bought)) }
                 ConditionSelectors(analysis.condition, analysis.completeness, onConditionChange, onCompletenessChange)
                 EstimateCard(rec)
                 BuyLadderCard(rec)
@@ -295,19 +312,19 @@ private fun AnalysisContent(
         if (!analysis.allSourcesDisabled) MarketplaceShortcutsCard(analysis)
         Spacer(Modifier.height(8.dp))
     }
+}
 
-    if (showBuyDialog) {
-        PriceInputDialog(
-            titleText = stringResource(R.string.result_add_inventory_title),
-            label = stringResource(R.string.result_buy_price_label),
-            confirmText = stringResource(R.string.result_add),
-            suggested = rec.recommendedBuyPrice,
-            onConfirm = { price ->
-                showBuyDialog = false
-                onMarkBought(price)
-            },
-            onDismiss = { showBuyDialog = false },
-        )
+/** CLZ-style docked action bar: the primary "I bought this" button pinned to the bottom. */
+@Composable
+private fun BottomBuyBar(onClick: () -> Unit) {
+    Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .height(52.dp),
+        ) { Text(stringResource(R.string.result_i_bought), style = MaterialTheme.typography.titleMedium) }
     }
 }
 
@@ -504,10 +521,14 @@ private fun PricesBySourceCard(groups: List<SourcePriceGroup>) {
 @Composable
 private fun PriceSummaryCard(rec: FlipRecommendation) {
     SectionCard(stringResource(R.string.result_sold_prices, rec.stats.soldCount)) {
-        StatRow(stringResource(R.string.result_avg_sold), rec.stats.average.toString())
-        StatRow(stringResource(R.string.result_median_sold), rec.stats.median.toString())
-        StatRow(stringResource(R.string.result_lowest), rec.stats.lowest.toString())
-        StatRow(stringResource(R.string.result_highest), rec.stats.highest.toString())
+        PriceGrid(
+            listOf(
+                stringResource(R.string.result_stat_avg) to rec.stats.average.toString(),
+                stringResource(R.string.result_stat_median) to rec.stats.median.toString(),
+                stringResource(R.string.result_stat_low) to rec.stats.lowest.toString(),
+                stringResource(R.string.result_stat_high) to rec.stats.highest.toString(),
+            ),
+        )
     }
 }
 
@@ -603,17 +624,58 @@ private fun MarketplaceShortcutsCard(analysis: ScanAnalysis) {
 
 // --- Small building blocks ------------------------------------------------------------------
 
+/** Catalog-style card: a coloured brand header strip with the section title, then the content. */
 @Composable
 private fun SectionCard(title: String, content: @Composable () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            content()
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Column(Modifier.fillMaxWidth()) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+/** A bordered price grid (à la a catalog price table): equal cells, each a value over its label. */
+@Composable
+private fun PriceGrid(cells: List<Pair<String, String>>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)),
+    ) {
+        cells.forEachIndexed { i, (label, value) ->
+            if (i > 0) VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

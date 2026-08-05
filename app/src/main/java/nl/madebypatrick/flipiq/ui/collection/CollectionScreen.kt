@@ -1,7 +1,15 @@
 package nl.madebypatrick.flipiq.ui.collection
 
 import android.text.format.DateUtils
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -264,9 +272,37 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
     ) {
         items(items, key = { it.id }) { item ->
             Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.title, fontWeight = FontWeight.Bold)
-                    SummaryRow(stringResource(R.string.collection_bought_for), item.buyPrice.toString())
+                Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Catalog-style row: monogram tile (no cover art stored yet) + title + price badge.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                item.title.take(1).uppercase(),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(item.title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                        ) {
+                            Text(
+                                item.buyPrice.toString(),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
                     if (item.status == InventoryStatus.SOLD) {
                         SummaryRow(stringResource(R.string.collection_sold_for), item.soldPrice?.toString() ?: "—")
                         SummaryRow(stringResource(R.string.collection_profit), item.realizedProfit?.toString() ?: "—", emphasise = true)

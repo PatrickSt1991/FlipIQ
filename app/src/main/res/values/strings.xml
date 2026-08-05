@@ -75,6 +75,10 @@
     <string name="result_condition_label">Condition</string>
     <string name="result_completeness_label">Completeness</string>
     <string name="result_sold_prices">Sold prices (%1$d sold)</string>
+    <string name="result_stat_avg">Avg</string>
+    <string name="result_stat_median">Median</string>
+    <string name="result_stat_low">Low</string>
+    <string name="result_stat_high">High</string>
     <string name="result_by_source_section">Prices by source</string>
     <string name="result_by_source_sold">sold</string>
     <string name="result_by_source_asking">asking</string>
