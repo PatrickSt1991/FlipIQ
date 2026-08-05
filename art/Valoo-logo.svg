@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="520" height="200" viewBox="0 0 520 200" role="img"
+     aria-labelledby="title desc" version="1.1"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="title">Valoo logo</title>
+  <desc id="desc">A dark green scanner mark with white barcode bars and an amber rising arrow, followed by the Valoo wordmark.</desc>
+
+  <!-- Icon: barcode scanner + rising value signal -->
+  <g id="mark">
+    <rect x="20" y="20" width="160" height="160" rx="38" fill="#0F5132" />
+    <!-- Scanner corners -->
+    <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M74 50H59Q50 50 50 59V74" />
+      <path d="M126 50H141Q150 50 150 59V74" />
+      <path d="M50 126V141Q50 150 59 150H74" />
+      <path d="M126 150H141Q150 150 150 141V126" />
+    </g>
+    <!-- Barcode -->
+    <g fill="#FFFFFF">
+      <rect x="66" y="74" width="7" height="58" rx="1.5" />
+      <rect x="78" y="74" width="4" height="58" rx="1" />
+      <rect x="88" y="74" width="10" height="58" rx="1.5" />
+      <rect x="104" y="74" width="5" height="58" rx="1" />
+      <rect x="115" y="74" width="8" height="58" rx="1.5" />
+      <rect x="129" y="74" width="4" height="58" rx="1" />
+      <rect x="139" y="74" width="7" height="58" rx="1.5" />
+    </g>
+    <!-- Rising deal/value signal, outlined for clarity over the barcode -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M65 130L88 112L106 121L136 88M123 88H136V101" stroke="#0F5132" stroke-width="13" />
+      <path d="M65 130L88 112L106 121L136 88M123 88H136V101" stroke="#F9A825" stroke-width="6" />
+    </g>
+  </g>
+
+  <!-- Wordmark: "Val" in brand green, "oo" in amber (mirrors the two-tone icon). -->
+  <text x="205" y="130" font-family="Inter, 'Segoe UI', Arial, sans-serif"
+        font-size="96" font-weight="800" letter-spacing="-4">
+    <tspan fill="#0F5132">Val</tspan><tspan fill="#B8860B">oo</tspan>
+  </text>
+</svg>

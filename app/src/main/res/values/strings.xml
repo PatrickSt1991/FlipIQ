@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FlipIQ</string>
+    <string name="app_name">Valoo</string>
 
     <!-- Common / shared -->
     <string name="cd_back">Back</string>
@@ -84,7 +84,7 @@
     <string name="result_median_sold">Median sold</string>
     <string name="result_lowest">Lowest</string>
     <string name="result_highest">Highest</string>
-    <string name="result_estimate_section">FlipIQ estimate</string>
+    <string name="result_estimate_section">Valoo estimate</string>
     <string name="result_est_resale">Estimated resale</string>
     <string name="result_net_after">Net after fees &amp; shipping</string>
     <string name="result_recommended_max">Recommended max buy</string>
@@ -255,6 +255,6 @@
     <!-- Screenshot import & share target -->
     <string name="pick_screenshot">"  From a screenshot"</string>
     <string name="image_unreadable">Couldn\'t read that image — try another one.</string>
-    <string name="shared_title">Shared with FlipIQ</string>
+    <string name="shared_title">Shared with Valoo</string>
     <string name="shared_identifying">Working out what you shared…</string>
 </resources>

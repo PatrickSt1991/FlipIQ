@@ -97,7 +97,7 @@ fun ScanScreen(
                             modifier = Modifier.size(28.dp),
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("FlipIQ")
+                        Text("Valoo")
                     }
                 },
                 actions = {

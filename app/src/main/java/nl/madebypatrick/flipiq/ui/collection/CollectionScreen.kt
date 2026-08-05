@@ -100,14 +100,14 @@ fun CollectionScreen(
                             text = { Text(stringResource(R.string.collection_export_inventory)) },
                             onClick = {
                                 exportMenu = false
-                                shareCsv(context, "flipiq-inventory.csv", viewModel.inventoryCsv())
+                                shareCsv(context, "valoo-inventory.csv", viewModel.inventoryCsv())
                             },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.collection_export_history)) },
                             onClick = {
                                 exportMenu = false
-                                shareCsv(context, "flipiq-history.csv", viewModel.historyCsv())
+                                shareCsv(context, "valoo-history.csv", viewModel.historyCsv())
                             },
                         )
                     }
