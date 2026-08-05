@@ -20,6 +20,21 @@ interface EandataApi {
         @Query("mode") mode: String = "json",
         @Query("find") find: String,
     ): EandataResponse
+
+    /**
+     * Contribute a product name for a barcode. Earns lookup credits and helps eandata's DB. Updates
+     * go into eandata's manual-review queue (no auto-apply), so this can't damage their data. Retrofit
+     * URL-encodes the value (spaces/&/% escaped as their docs require).
+     */
+    @GET("feed/")
+    suspend fun update(
+        @Query("v") v: String = "3",
+        @Query("keycode") keycode: String,
+        @Query("mode") mode: String = "json",
+        @Query("update") ean: String,
+        @Query("field") field: String = "product",
+        @Query("value") value: String,
+    ): EandataResponse
 }
 
 @Serializable
@@ -57,5 +72,17 @@ class EandataResolver(
     override suspend fun resolveTitle(barcode: String): String? {
         if (keycode.isBlank()) return null
         return runCatching { api.lookup(keycode = keycode, find = barcode).productName() }.getOrNull()
+    }
+
+    /**
+     * Give back to eandata: if they don't already have this barcode but we resolved a title elsewhere
+     * (the engine's ean13/buycott), submit it. Best-effort and silent — meant to run fire-and-forget.
+     */
+    suspend fun contributeIfMissing(barcode: String, title: String) {
+        if (keycode.isBlank() || barcode.isBlank() || title.isBlank()) return
+        runCatching {
+            val alreadyHas = api.lookup(keycode = keycode, find = barcode).productName() != null
+            if (!alreadyHas) api.update(keycode = keycode, ean = barcode, value = title)
+        }
     }
 }

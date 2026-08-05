@@ -4,6 +4,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
@@ -155,16 +158,22 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    @Provides
+    @Singleton
     fun providePriceRepository(
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
         settingsRepository: SettingsRepository,
         eandataApi: EandataApi,
+        appScope: CoroutineScope,
     ): PriceRepository = PriceRepository(
         sources,
         engine,
         settingsRepository,
-        // On-device last-resort resolver (eandata blocks the engine's Cloudflare IP). Blank key → no-op.
-        eandataResolver = EandataResolver(eandataApi, BuildConfig.EANDATA_KEY),
+        // On-device last-resort resolver + give-back (eandata blocks the engine's Cloudflare IP).
+        eandata = EandataResolver(eandataApi, BuildConfig.EANDATA_KEY),
+        appScope = appScope,
     )
 }
