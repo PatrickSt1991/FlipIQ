@@ -156,7 +156,6 @@ object AppModule {
     fun providePriceRepository(
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
-        barcodeResolver: BarcodeResolver,
         settingsRepository: SettingsRepository,
-    ): PriceRepository = PriceRepository(sources, engine, barcodeResolver, settingsRepository)
+    ): PriceRepository = PriceRepository(sources, engine, settingsRepository)
 }
