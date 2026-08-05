@@ -9,6 +9,8 @@ import nl.madebypatrick.flipiq.BuildConfig
 import nl.madebypatrick.flipiq.data.repository.PriceRepository
 import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
 import nl.madebypatrick.flipiq.data.resolver.CompositeBarcodeResolver
+import nl.madebypatrick.flipiq.data.resolver.EandataApi
+import nl.madebypatrick.flipiq.data.resolver.EandataResolver
 import nl.madebypatrick.flipiq.data.resolver.EanSearchApi
 import nl.madebypatrick.flipiq.data.resolver.EanSearchResolver
 import nl.madebypatrick.flipiq.data.resolver.NoopBarcodeResolver
@@ -157,5 +159,12 @@ object AppModule {
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
         settingsRepository: SettingsRepository,
-    ): PriceRepository = PriceRepository(sources, engine, settingsRepository)
+        eandataApi: EandataApi,
+    ): PriceRepository = PriceRepository(
+        sources,
+        engine,
+        settingsRepository,
+        // On-device last-resort resolver (eandata blocks the engine's Cloudflare IP). Blank key → no-op.
+        eandataResolver = EandataResolver(eandataApi, BuildConfig.EANDATA_KEY),
+    )
 }
