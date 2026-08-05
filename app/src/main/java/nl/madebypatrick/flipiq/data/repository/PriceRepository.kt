@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
@@ -42,7 +41,6 @@ data class FetchedMarket(
 class PriceRepository(
     private val sources: List<MarketplaceSource>,
     private val engine: FlipIQEngine,
-    private val barcodeResolver: BarcodeResolver,
     private val settingsRepository: SettingsRepository,
 ) {
 
@@ -50,11 +48,10 @@ class PriceRepository(
     suspend fun fetchByTitle(title: String): FetchedMarket =
         fetchInternal(barcode = "", query = ProductQuery(barcode = "", title = title))
 
-    suspend fun fetch(barcode: String): FetchedMarket {
-        // Resolve a product name first so name-based sources (CeX, shortcuts) can match on it.
-        val lookedUpTitle = runCatching { barcodeResolver.resolveTitle(barcode) }.getOrNull()
-        return fetchInternal(barcode, ProductQuery(barcode, title = lookedUpTitle))
-    }
+    suspend fun fetch(barcode: String): FetchedMarket =
+        // No on-device pre-resolve: pass the barcode straight through. The engine resolves it
+        // server-side (cached) and returns the product title, so we skip 2–3 sequential HTTP hops.
+        fetchInternal(barcode, ProductQuery(barcode, title = null))
 
     private suspend fun fetchInternal(barcode: String, query: ProductQuery): FetchedMarket = coroutineScope {
         // Resolve the active set here, not in DI: the graph is built once, so a Settings toggle would

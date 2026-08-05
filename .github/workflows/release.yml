@@ -81,10 +81,10 @@ jobs:
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           mkdir -p dist
           for f in app/build/outputs/apk/release/*.apk; do
-            [ -e "$f" ] && cp "$f" "dist/flipiq-${TAG}.apk"
+            [ -e "$f" ] && cp "$f" "dist/valoo-${TAG}.apk"
           done
           for f in app/build/outputs/bundle/release/*.aab; do
-            [ -e "$f" ] && cp "$f" "dist/flipiq-${TAG}.aab"
+            [ -e "$f" ] && cp "$f" "dist/valoo-${TAG}.aab"
           done
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           ls -l dist
@@ -93,6 +93,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.stage.outputs.tag }}
-          name: FlipIQ ${{ steps.stage.outputs.tag }}
+          name: Valoo ${{ steps.stage.outputs.tag }}
           files: dist/*
           generate_release_notes: true

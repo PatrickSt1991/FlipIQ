@@ -24,10 +24,13 @@ class EngineSource(
     override val displayName = "eBay & Marktplaats"
 
     override suspend fun lookup(query: ProductQuery): SourceResult {
-        val term = query.title ?: query.barcode
-        if (term.isBlank()) return unavailable()
+        // Send the title if we have one (OCR/manual), else send the barcode as `ean` and let the
+        // engine resolve it server-side (one round-trip, cached) — no slow on-device pre-resolve.
+        val title = query.title?.takeIf { it.isNotBlank() }
+        val ean = query.barcode.takeIf { it.isNotBlank() }
+        if (title == null && ean == null) return unavailable()
         val endpoint = engineUrl.trimEnd('/') + "/prices"
-        return runCatching { api.prices(endpoint, appKey, term, query.barcode.ifBlank { null }, location()) }
+        return runCatching { api.prices(endpoint, appKey, title.orEmpty(), ean, location()) }
             .map { it.toSourceResult() }
             .getOrElse { unavailable() }
     }
@@ -52,6 +55,9 @@ fun EngineResponse.toSourceResult(): SourceResult {
     return SourceResult(
         sourceId = "engine",
         listings = mapped,
+        // Surface the engine's server-side barcode→title resolution so the app doesn't have to do its
+        // own (slow, sequential) lookup and the shortcut links get a real product name.
+        productTitle = resolvedTitle,
         available = mapped.isNotEmpty(),
         shortcutUrl = null,
         imageUrl = image,
