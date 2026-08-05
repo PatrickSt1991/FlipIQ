@@ -25,8 +25,8 @@ android {
         applicationId = "nl.madebypatrick.flipiq"
         minSdk = 24
         targetSdk = 35
-        versionCode = 20
-        versionName = "0.6.7"
+        versionCode = 21
+        versionName = "0.6.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -35,7 +35,7 @@ android {
         // Off by default (honest: only real sources feed the engine); the debug build turns it on.
         buildConfigField("boolean", "DEMO_MODE", "false")
 
-        // FlipIQ Engine (Cloudflare Worker) — real Marktplaats + eBay data. Blank → those link out.
+        // Valoo Engine (Cloudflare Worker) — real Marktplaats + eBay data. Blank → those link out.
         // eBay creds now live in the engine Worker, not the app.
         buildConfigField("String", "ENGINE_URL", "\"${secret("engine.url", "ENGINE_URL")}\"")
         buildConfigField("String", "ENGINE_KEY", "\"${secret("engine.key", "ENGINE_KEY")}\"")

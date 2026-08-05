@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="art/FlipIQ-logo.svg" alt="FlipIQ" width="380">
+  <img src="art/Valoo-logo.svg" alt="Valoo" width="380">
 </p>
 
 <p align="center">
@@ -17,14 +17,14 @@
 
 ## Waarom?
 
-Er is geen gratis Android-app die snelle, betrouwbare prijsinschattingen geeft voor tweedehands spullen, gemaakt voor de reseller. FlipIQ is het open-source alternatief voor apps zoals de CeX-scanner — maar dan voor de **Nederlandse markt**. Het beantwoordt de enige vraag die telt:
+Er is geen gratis Android-app die snelle, betrouwbare prijsinschattingen geeft voor tweedehands spullen, gemaakt voor de reseller. Valoo is het open-source alternatief voor apps zoals de CeX-scanner — maar dan voor de **Nederlandse markt**. Het beantwoordt de enige vraag die telt:
 
 > **"Moet ik dit kopen?"**
 
 ## Hoe het werkt
 
 1. **Scan** een barcode, maak een foto van de voorkant, of fotografeer een hele stapel (haul-modus).
-2. FlipIQ haalt live Nederlandse prijzen op en de **FlipIQ Engine** beoordeelt het item.
+2. Valoo haalt live Nederlandse prijzen op en de **Valoo Engine** beoordeelt het item.
 3. Je ziet in één oogopslag een **Dealscore**, een maximale inkoopprijs en de verwachte winst.
 
 ## Functies
@@ -33,7 +33,7 @@ Er is geen gratis Android-app die snelle, betrouwbare prijsinschattingen geeft v
 |---|---|
 | 📷 **Scannen** | UPC/EAN/ISBN + QR via ML Kit, snel & offline. Foto van de voorkant (AI) en OCR als terugval. |
 | 🧺 **Haul-modus** | Eén foto van een stapel → elke titel geprijsd en gerangschikt. |
-| 🧠 **FlipIQ Engine** | Zet ruwe prijzen om in een koop-/niet-kopen-oordeel (zie onder). |
+| 🧠 **Valoo Engine** | Zet ruwe prijzen om in een koop-/niet-kopen-oordeel (zie onder). |
 | 🎯 **Dealscore** | Score 0–100 + maximale inkoopprijs per item. |
 | ⚡ **Verkoopsnelheid** | Hoe snel iets doorgaans verkoopt. |
 | ⭐ **Winstmodus** | Elke aanbeveling past zich aan jouw marge-/ROI-regels aan. |
@@ -43,14 +43,14 @@ Er is geen gratis Android-app die snelle, betrouwbare prijsinschattingen geeft v
 
 ## Prijsbronnen
 
-FlipIQ richt zich op de **Nederlandse tweedehandsmarkt**, dus elke prijs is een NL/EUR-bedrag:
+Valoo richt zich op de **Nederlandse tweedehandsmarkt**, dus elke prijs is een NL/EUR-bedrag:
 
 - **eBay.nl** — actieve advertenties (officiële Browse API) + verkochte prijzen.
 - **Marktplaats** — actuele Nederlandse vraagprijzen.
 
-Prijzen worden serverkant samengevoegd door de FlipIQ Engine (een Cloudflare Worker) en gecachet om het aantal verzoeken laag te houden. Er zijn "open op marktplaats"-snelkoppelingen voor eBay en Marktplaats.
+Prijzen worden serverkant samengevoegd door de Valoo Engine (een Cloudflare Worker) en gecachet om het aantal verzoeken laag te houden. Er zijn "open op marktplaats"-snelkoppelingen voor eBay en Marktplaats.
 
-## De FlipIQ Engine
+## De Valoo Engine
 
 De engine toont niet alleen prijzen — hij analyseert de markt en bepaalt of een item de moeite waard is om te kopen.
 
@@ -93,7 +93,7 @@ Games · consoles · controllers & accessoires · LEGO · boeken · dvd's · Blu
 
 ## Over Reway
 
-FlipIQ maakt **geen** gebruik van Reway (reway.nl / rewayverkopen.nl). Een eerdere versie experimenteerde met het tonen van Reway's inkoop- en verkoopprijzen, maar Reway heeft ons gevraagd hun data niet te gebruiken of te scrapen, en hun beleid staat dat niet toe. Wij respecteren die keuze volledig: alle Reway-integratie is verwijderd en de app vraagt, toont of linkt op geen enkele manier naar hun data.
+Valoo maakt **geen** gebruik van Reway (reway.nl / rewayverkopen.nl). Een eerdere versie experimenteerde met het tonen van Reway's inkoop- en verkoopprijzen, maar Reway heeft ons gevraagd hun data niet te gebruiken of te scrapen, en hun beleid staat dat niet toe. Wij respecteren die keuze volledig: alle Reway-integratie is verwijderd en de app vraagt, toont of linkt op geen enkele manier naar hun data.
 
 ## Techniek
 
@@ -105,4 +105,4 @@ Ideeën, bugmeldingen en pull requests zijn welkom — open een issue of PR.
 
 ---
 
-FlipIQ is een onafhankelijk open-source project en is **niet gelieerd aan of goedgekeurd door** eBay, Marktplaats of enige andere marktplaats. Alle merknamen zijn eigendom van hun respectievelijke eigenaren.
+Valoo is een onafhankelijk open-source project en is **niet gelieerd aan of goedgekeurd door** eBay, Marktplaats of enige andere marktplaats. Alle merknamen zijn eigendom van hun respectievelijke eigenaren.

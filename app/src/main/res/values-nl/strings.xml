@@ -83,7 +83,7 @@
     <string name="result_median_sold">Mediaan verkocht</string>
     <string name="result_lowest">Laagste</string>
     <string name="result_highest">Hoogste</string>
-    <string name="result_estimate_section">FlipIQ-schatting</string>
+    <string name="result_estimate_section">Valoo-schatting</string>
     <string name="result_est_resale">Geschatte verkoop</string>
     <string name="result_net_after">Netto na kosten &amp; verzending</string>
     <string name="result_recommended_max">Aanbevolen max. inkoop</string>
@@ -254,6 +254,6 @@
     <!-- Screenshot import & share target -->
     <string name="pick_screenshot">"  Uit een screenshot"</string>
     <string name="image_unreadable">Kon die afbeelding niet lezen — probeer een andere.</string>
-    <string name="shared_title">Gedeeld met FlipIQ</string>
+    <string name="shared_title">Gedeeld met Valoo</string>
     <string name="shared_identifying">Uitzoeken wat je hebt gedeeld…</string>
 </resources>
