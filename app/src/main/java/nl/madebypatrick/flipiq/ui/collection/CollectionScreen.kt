@@ -1,6 +1,5 @@
 package nl.madebypatrick.flipiq.ui.collection
 
-import android.text.format.DateUtils
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,10 +29,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EuroSymbol
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
@@ -56,9 +55,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,13 +81,7 @@ import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.model.InventoryStatus
 import nl.madebypatrick.flipiq.domain.model.InventorySummary
 import nl.madebypatrick.flipiq.domain.model.Money
-import nl.madebypatrick.flipiq.domain.model.PriceAlert
-import nl.madebypatrick.flipiq.domain.model.SavedItem
-import nl.madebypatrick.flipiq.domain.model.SavedList
-import nl.madebypatrick.flipiq.domain.model.ScanRecord
 import nl.madebypatrick.flipiq.ui.components.ValooTopBar
-import nl.madebypatrick.flipiq.ui.result.color
-import nl.madebypatrick.flipiq.ui.result.label
 import nl.madebypatrick.flipiq.ui.util.shareCsv
 
 /** How the catalog lays out items. */
@@ -110,17 +102,13 @@ fun CollectionScreen(
     onOpenSettings: () -> Unit,
     viewModel: CollectionViewModel = hiltViewModel(),
 ) {
-    val history by viewModel.history.collectAsStateWithLifecycle()
     val inventory by viewModel.inventory.collectAsStateWithLifecycle()
     val summary by viewModel.summary.collectAsStateWithLifecycle()
-    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
-    val wishlist by viewModel.wishlist.collectAsStateWithLifecycle()
-    val alerts by viewModel.alerts.collectAsStateWithLifecycle()
 
-    var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
     var editTarget by remember { mutableStateOf<InventoryItem?>(null) }
     var showAddManual by remember { mutableStateOf(false) }
+    var showProfit by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
 
     // Catalog browse state (CLZ-style): a group folder we've drilled into, an item we've opened, and
@@ -156,13 +144,6 @@ fun CollectionScreen(
         }
     }
 
-    val tabs = listOf(
-        stringResource(R.string.collection_tab_inventory),
-        stringResource(R.string.collection_tab_favorites),
-        stringResource(R.string.collection_tab_wishlist),
-        stringResource(R.string.collection_tab_alerts),
-        stringResource(R.string.collection_tab_history),
-    )
     val context = LocalContext.current
 
     val goBack = { if (inDetail) detailItemId = null else openFolder = null }
@@ -223,10 +204,25 @@ fun CollectionScreen(
             )
         },
         floatingActionButton = {
-            // The + opens the scanner (the primary "add" path). Hidden on the detail page.
-            if (!inDetail) {
-                FloatingActionButton(onClick = onOpenScan) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.scan_title))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // Profit tracker tucked under a € button so the catalog stays front-and-centre.
+                if (!inDetail && !inFolder) {
+                    SmallFloatingActionButton(
+                        onClick = { showProfit = true },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ) {
+                        Icon(Icons.Default.EuroSymbol, contentDescription = stringResource(R.string.collection_profit_tracker))
+                    }
+                }
+                // The + opens the scanner (the primary "add" path). Hidden on the detail page.
+                if (!inDetail) {
+                    FloatingActionButton(onClick = onOpenScan) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.scan_title))
+                    }
                 }
             }
         },
@@ -254,36 +250,18 @@ fun CollectionScreen(
                     ItemsView(folderItems, view, onOpenItem = { detailItemId = it.id })
                 }
 
-                else -> {
-                    ProfitSummaryCard(summary)
-                    ScrollableTabRow(selectedTabIndex = tab, edgePadding = 0.dp) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(selected = tab == index, onClick = { tab = index }, text = { Text(title) })
-                        }
-                    }
-                    when (tab) {
-                        0 -> CatalogTab(
-                            items = inventory,
-                            group = group,
-                            onGroupChange = { group = it },
-                            view = view,
-                            onViewChange = { view = it },
-                            sort = sort,
-                            onSortChange = { sort = it },
-                            folderKey = folderKey,
-                            onOpenFolder = { openFolder = it },
-                            onOpenItem = { detailItemId = it.id },
-                        )
-                        1 -> SavedItemsList(favorites, stringResource(R.string.collection_empty_favorites)) {
-                            viewModel.removeSaved(it.barcode, SavedList.FAVORITE)
-                        }
-                        2 -> SavedItemsList(wishlist, stringResource(R.string.collection_empty_wishlist)) {
-                            viewModel.removeSaved(it.barcode, SavedList.WISHLIST)
-                        }
-                        3 -> AlertsList(alerts) { viewModel.removeAlert(it.id) }
-                        else -> HistoryList(history)
-                    }
-                }
+                else -> CatalogTab(
+                    items = inventory,
+                    group = group,
+                    onGroupChange = { group = it },
+                    view = view,
+                    onViewChange = { view = it },
+                    sort = sort,
+                    onSortChange = { sort = it },
+                    folderKey = folderKey,
+                    onOpenFolder = { openFolder = it },
+                    onOpenItem = { detailItemId = it.id },
+                )
             }
         }
     }
@@ -314,6 +292,10 @@ fun CollectionScreen(
             },
             onDismiss = { editTarget = null },
         )
+    }
+
+    if (showProfit) {
+        ProfitDialog(summary = summary, onDismiss = { showProfit = false })
     }
 
     if (showAddManual) {
@@ -843,19 +825,22 @@ private fun EditItemDialog(
 }
 
 @Composable
-private fun ProfitSummaryCard(summary: InventorySummary) {
-    Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(stringResource(R.string.collection_profit_tracker), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            SummaryRow(stringResource(R.string.collection_in_stock), stringResource(R.string.collection_in_stock_value, summary.itemsInStock, summary.capitalInStock.toString()))
-            SummaryRow(stringResource(R.string.collection_sold), stringResource(R.string.collection_sold_value, summary.itemsSold))
-            SummaryRow(stringResource(R.string.collection_realized_profit), summary.realizedProfit.toString(), emphasise = true)
-            SummaryRow(stringResource(R.string.collection_projected_profit), summary.projectedProfit.toString())
-        }
-    }
+private fun ProfitDialog(summary: InventorySummary, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.collection_profit_tracker)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SummaryRow(stringResource(R.string.collection_in_stock), stringResource(R.string.collection_in_stock_value, summary.itemsInStock, summary.capitalInStock.toString()))
+                SummaryRow(stringResource(R.string.collection_sold), stringResource(R.string.collection_sold_value, summary.itemsSold))
+                SummaryRow(stringResource(R.string.collection_realized_profit), summary.realizedProfit.toString(), emphasise = true)
+                SummaryRow(stringResource(R.string.collection_projected_profit), summary.projectedProfit.toString())
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_close)) }
+        },
+    )
 }
 
 @Composable
@@ -868,111 +853,6 @@ private fun SummaryRow(label: String, value: String, emphasise: Boolean = false)
             fontWeight = if (emphasise) FontWeight.Bold else FontWeight.Normal,
             color = if (emphasise) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
-    }
-}
-
-@Composable
-private fun SavedItemsList(
-    items: List<SavedItem>,
-    emptyMessage: String,
-    onRemove: (SavedItem) -> Unit,
-) {
-    if (items.isEmpty()) {
-        EmptyState(emptyMessage)
-        return
-    }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(items, key = { it.id }) { item ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(item.title, fontWeight = FontWeight.Medium, maxLines = 1)
-                    IconButton(onClick = { onRemove(item) }) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.collection_cd_remove))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AlertsList(alerts: List<PriceAlert>, onRemove: (PriceAlert) -> Unit) {
-    if (alerts.isEmpty()) {
-        EmptyState(stringResource(R.string.collection_empty_alerts))
-        return
-    }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(alerts, key = { it.id }) { alert ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                        Text(alert.title, fontWeight = FontWeight.Medium, maxLines = 1)
-                        Text(
-                            stringResource(R.string.collection_notify_at, alert.targetPrice.toString()),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                    IconButton(onClick = { onRemove(alert) }) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.collection_cd_remove_alert))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HistoryList(records: List<ScanRecord>) {
-    if (records.isEmpty()) {
-        EmptyState(stringResource(R.string.collection_empty_history))
-        return
-    }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(records, key = { it.id }) { record ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(modifier = Modifier.padding(end = 12.dp)) {
-                        Text(record.title, fontWeight = FontWeight.Bold, maxLines = 1)
-                        Text(
-                            DateUtils.getRelativeTimeSpanString(record.scannedAt).toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            "${record.dealScore}",
-                            fontWeight = FontWeight.Bold,
-                            color = record.tier.color,
-                        )
-                        Text(record.tier.label, style = MaterialTheme.typography.labelSmall, color = record.tier.color)
-                    }
-                }
-            }
-        }
     }
 }
 
