@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.data.settings.EbayLocation
 import nl.madebypatrick.flipiq.domain.model.Money
 import nl.madebypatrick.flipiq.domain.model.ProfitSettings
@@ -76,8 +77,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
+            ValooTopBar(
+                title = stringResource(R.string.settings_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
