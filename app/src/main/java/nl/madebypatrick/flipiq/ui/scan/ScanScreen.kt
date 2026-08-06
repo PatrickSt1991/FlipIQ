@@ -235,23 +235,9 @@ private fun ManualEntry(onSubmit: (String) -> Unit) {
                 enabled = text.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.scan_analyze)) }
-
-            Text(stringResource(R.string.scan_try_sample), style = MaterialTheme.typography.labelLarge)
-            SampleBarcodes.forEach { (label, code) ->
-                OutlinedButton(
-                    onClick = { onSubmit(code) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(label) }
-            }
         }
     }
 }
-
-private val SampleBarcodes = listOf(
-    "LEGO Jurassic World (PS4)" to "5051888223451",
-    "The Last of Us Part II (PS4)" to "0711719417972",
-    "LEGO Technic Bugatti Chiron" to "5702016367447",
-)
 
 @Composable
 private fun CameraScanner(
