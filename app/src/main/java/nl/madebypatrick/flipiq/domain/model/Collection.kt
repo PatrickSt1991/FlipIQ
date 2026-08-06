@@ -41,6 +41,7 @@ data class InventoryItem(
     val soldPrice: Money? = null,
     val soldAt: Long? = null,
     val imageUrl: String? = null,
+    val category: String? = null,
 ) {
     /** Profit already banked — only meaningful once the item is SOLD. */
     val realizedProfit: Money?

@@ -2,6 +2,7 @@ package nl.madebypatrick.flipiq.ui.collection
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -43,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -280,12 +285,76 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
         EmptyState(stringResource(R.string.collection_empty_inventory))
         return
     }
+    // CLZ-style catalog: bucket the inventory into folders by category, each collapsible with a
+    // count badge. Items without a category land in an "Overig" folder.
+    val otherLabel = stringResource(R.string.collection_folder_other)
+    val groups = items
+        .groupBy { it.category?.trim()?.takeIf(String::isNotEmpty) ?: otherLabel }
+        .toSortedMap(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
+    val expanded = remember { mutableStateMapOf<String, Boolean>() }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(items, key = { it.id }) { item ->
+        groups.forEach { (folder, folderItems) ->
+            val isOpen = expanded[folder] ?: true
+            item(key = "folder-$folder") {
+                FolderHeader(
+                    title = folder,
+                    count = folderItems.size,
+                    expanded = isOpen,
+                    onToggle = { expanded[folder] = !isOpen },
+                )
+            }
+            if (isOpen) {
+                items(folderItems, key = { it.id }) { item ->
+                    InventoryRow(item, onSellClick)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FolderHeader(title: String, count: Int, expanded: Boolean, onToggle: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable(onClick = onToggle),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+            )
+            Spacer(Modifier.width(4.dp))
+            Icon(Icons.Default.Folder, contentDescription = null)
+            Spacer(Modifier.width(10.dp))
+            Text(title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(50),
+            ) {
+                Text(
+                    "$count",
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InventoryRow(item: InventoryItem, onSellClick: (InventoryItem) -> Unit) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     // Catalog-style row: cover thumbnail (monogram when none) + title + price badge.
@@ -340,8 +409,6 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
                     }
                 }
             }
-        }
-    }
 }
 
 @Composable

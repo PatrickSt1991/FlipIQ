@@ -81,6 +81,7 @@ class CollectionRepository(
         buyPrice: Money,
         estimatedResale: Money,
         imageUrl: String? = null,
+        category: String? = null,
     ): Long = inventoryDao.insert(
         InventoryEntity(
             barcode = barcode,
@@ -92,6 +93,7 @@ class CollectionRepository(
             soldPriceCents = null,
             soldAt = null,
             imageUrl = imageUrl,
+            category = category,
         ),
     )
 
@@ -139,4 +141,5 @@ private fun InventoryEntity.toDomain() = InventoryItem(
     soldPrice = soldPriceCents?.let { Money(it) },
     soldAt = soldAt,
     imageUrl = imageUrl,
+    category = category,
 )

@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [ScanEntity::class, InventoryEntity::class, SavedItemEntity::class, PriceAlertEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class FlipIQDatabase : RoomDatabase() {
@@ -23,6 +23,13 @@ abstract class FlipIQDatabase : RoomDatabase() {
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE inventory ADD COLUMN imageUrl TEXT")
+            }
+        }
+
+        /** v5 adds inventory.category (used to group the catalog into folders) — nullable. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE inventory ADD COLUMN category TEXT")
             }
         }
     }
