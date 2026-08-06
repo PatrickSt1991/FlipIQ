@@ -276,4 +276,19 @@
     <string name="collection_category_pick">Kies een categorie</string>
     <string name="collection_delete">Verwijderen</string>
     <string name="collection_save">Opslaan</string>
+    <string name="catalog_group_category">Categorie</string>
+    <string name="catalog_group_status">Status</string>
+    <string name="catalog_group_none">Geen</string>
+    <string name="catalog_sort_newest">Nieuwste</string>
+    <string name="catalog_sort_title">Titel</string>
+    <string name="catalog_sort_value">Waarde</string>
+    <string name="catalog_sort_profit">Winst</string>
+    <string name="catalog_sort_cd">Sorteren</string>
+    <string name="catalog_view_grid">Rasterweergave</string>
+    <string name="catalog_view_list">Lijstweergave</string>
+    <string name="collection_status_in_stock">Op voorraad</string>
+    <string name="collection_status_listed">Te koop</string>
+    <string name="collection_status_sold">Verkocht</string>
+    <string name="collection_detail_buy">Ingekocht voor</string>
+    <string name="collection_edit">Bewerken</string>
 </resources>

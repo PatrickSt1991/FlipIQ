@@ -277,4 +277,19 @@
     <string name="collection_category_pick">Pick a category</string>
     <string name="collection_delete">Delete</string>
     <string name="collection_save">Save</string>
+    <string name="catalog_group_category">Category</string>
+    <string name="catalog_group_status">Status</string>
+    <string name="catalog_group_none">None</string>
+    <string name="catalog_sort_newest">Newest</string>
+    <string name="catalog_sort_title">Title</string>
+    <string name="catalog_sort_value">Value</string>
+    <string name="catalog_sort_profit">Profit</string>
+    <string name="catalog_sort_cd">Sort</string>
+    <string name="catalog_view_grid">Grid view</string>
+    <string name="catalog_view_list">List view</string>
+    <string name="collection_status_in_stock">In stock</string>
+    <string name="collection_status_listed">Listed</string>
+    <string name="collection_status_sold">Sold</string>
+    <string name="collection_detail_buy">Bought for</string>
+    <string name="collection_edit">Edit</string>
 </resources>
