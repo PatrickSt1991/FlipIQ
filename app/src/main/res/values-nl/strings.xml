@@ -250,7 +250,9 @@
     <string name="stats_top_flips">Beste flips</string>
 
     <!-- Discover screen -->
-    <string name="discover_title">Waar je op moet jagen</string>
+    <string name="discover_title">Ontdekken</string>
+    <string name="discover_headline">Meest waardevolle games</string>
+    <string name="discover_subtitle">Kies een console en zie welke games het meeste opleveren.</string>
     <string name="discover_load_error">Kon geen games laden voor %1$s.</string>
     <string name="cd_haul">Partij scannen</string>
     <string name="haul_title">Partij scannen</string>

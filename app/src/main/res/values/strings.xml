@@ -251,7 +251,9 @@
     <string name="stats_top_flips">Top flips</string>
 
     <!-- Discover screen -->
-    <string name="discover_title">What to hunt for</string>
+    <string name="discover_title">Discover</string>
+    <string name="discover_headline">Most valuable games</string>
+    <string name="discover_subtitle">Pick a console to see which games are worth the most.</string>
     <string name="discover_load_error">Couldn\'t load games for %1$s.</string>
     <string name="cd_haul">Haul scan</string>
     <string name="haul_title">Haul scan</string>
