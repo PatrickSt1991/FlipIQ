@@ -271,4 +271,9 @@
     <string name="image_unreadable">Kon die afbeelding niet lezen — probeer een andere.</string>
     <string name="shared_title">Gedeeld met Valoo</string>
     <string name="shared_identifying">Uitzoeken wat je hebt gedeeld…</string>
+    <string name="collection_edit_title">Item bewerken</string>
+    <string name="collection_category_label">Categorie</string>
+    <string name="collection_category_pick">Kies een categorie</string>
+    <string name="collection_delete">Verwijderen</string>
+    <string name="collection_save">Opslaan</string>
 </resources>

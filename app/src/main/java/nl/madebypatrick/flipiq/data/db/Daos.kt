@@ -67,4 +67,7 @@ interface InventoryDao {
 
     @Query("SELECT * FROM inventory WHERE id = :id")
     suspend fun byId(id: Long): InventoryEntity?
+
+    @Query("DELETE FROM inventory WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

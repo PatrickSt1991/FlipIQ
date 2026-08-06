@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TravelExplore
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -92,8 +94,11 @@ fun CollectionScreen(
 
     var tab by remember { mutableStateOf(0) }
     var sellTarget by remember { mutableStateOf<InventoryItem?>(null) }
+    var editTarget by remember { mutableStateOf<InventoryItem?>(null) }
     var showAddManual by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
+    // Categories already in the catalog — offered as suggestions when re-categorising an item.
+    val categories = inventory.mapNotNull { it.category?.trim()?.takeIf(String::isNotEmpty) }.distinct().sorted()
     val tabs = listOf(
         stringResource(R.string.collection_tab_inventory),
         stringResource(R.string.collection_tab_favorites),
@@ -159,7 +164,7 @@ fun CollectionScreen(
                 }
             }
             when (tab) {
-                0 -> InventoryList(inventory, onSellClick = { sellTarget = it })
+                0 -> InventoryList(inventory, onSellClick = { sellTarget = it }, onEditClick = { editTarget = it })
                 1 -> SavedItemsList(favorites, stringResource(R.string.collection_empty_favorites)) {
                     viewModel.removeSaved(it.barcode, SavedList.FAVORITE)
                 }
@@ -180,6 +185,22 @@ fun CollectionScreen(
                 sellTarget = null
             },
             onDismiss = { sellTarget = null },
+        )
+    }
+
+    editTarget?.let { item ->
+        EditItemDialog(
+            item = item,
+            categories = categories,
+            onConfirm = { title, category, buyPrice, resale ->
+                viewModel.updateItem(item.id, title, category, buyPrice, resale)
+                editTarget = null
+            },
+            onDelete = {
+                viewModel.deleteItem(item.id)
+                editTarget = null
+            },
+            onDismiss = { editTarget = null },
         )
     }
 
@@ -251,6 +272,99 @@ private fun AddManualDialog(
 }
 
 @Composable
+private fun EditItemDialog(
+    item: InventoryItem,
+    categories: List<String>,
+    onConfirm: (title: String, category: String?, buyPrice: Money, estimatedResale: Money) -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var title by remember { mutableStateOf(item.title) }
+    var category by remember { mutableStateOf(item.category.orEmpty()) }
+    var buyText by remember { mutableStateOf("%.2f".format(item.buyPrice.euros)) }
+    var resaleText by remember { mutableStateOf("%.2f".format(item.estimatedResale.euros)) }
+    var catMenu by remember { mutableStateOf(false) }
+
+    val buyEuros = buyText.replace(',', '.').toDoubleOrNull()
+    val resaleEuros = resaleText.replace(',', '.').toDoubleOrNull()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.collection_edit_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text(stringResource(R.string.collection_manual_title_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                // Category: free text, with the catalog's existing categories as quick-pick suggestions.
+                Box {
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text(stringResource(R.string.collection_category_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = if (categories.isEmpty()) null else {
+                            {
+                                IconButton(onClick = { catMenu = true }) {
+                                    Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.collection_category_pick))
+                                }
+                            }
+                        },
+                    )
+                    DropdownMenu(expanded = catMenu, onDismissRequest = { catMenu = false }) {
+                        categories.forEach { c ->
+                            DropdownMenuItem(
+                                text = { Text(c) },
+                                onClick = { category = c; catMenu = false },
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = buyText,
+                    onValueChange = { buyText = it },
+                    label = { Text(stringResource(R.string.collection_manual_buy_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = resaleText,
+                    onValueChange = { resaleText = it },
+                    label = { Text(stringResource(R.string.collection_manual_resale_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                TextButton(
+                    onClick = onDelete,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.collection_delete)) }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = title.isNotBlank() && buyEuros != null && resaleEuros != null,
+                onClick = {
+                    onConfirm(
+                        title.trim(),
+                        category.trim().takeIf { it.isNotEmpty() },
+                        Money.ofEuros(buyEuros ?: return@TextButton),
+                        Money.ofEuros(resaleEuros ?: return@TextButton),
+                    )
+                },
+            ) { Text(stringResource(R.string.collection_save)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+}
+
+@Composable
 private fun ProfitSummaryCard(summary: InventorySummary) {
     Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Column(
@@ -280,7 +394,11 @@ private fun SummaryRow(label: String, value: String, emphasise: Boolean = false)
 }
 
 @Composable
-private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryItem) -> Unit) {
+private fun InventoryList(
+    items: List<InventoryItem>,
+    onSellClick: (InventoryItem) -> Unit,
+    onEditClick: (InventoryItem) -> Unit,
+) {
     if (items.isEmpty()) {
         EmptyState(stringResource(R.string.collection_empty_inventory))
         return
@@ -310,7 +428,7 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
             }
             if (isOpen) {
                 items(folderItems, key = { it.id }) { item ->
-                    InventoryRow(item, onSellClick)
+                    InventoryRow(item, onSellClick, onEditClick)
                 }
             }
         }
@@ -354,8 +472,12 @@ private fun FolderHeader(title: String, count: Int, expanded: Boolean, onToggle:
 }
 
 @Composable
-private fun InventoryRow(item: InventoryItem, onSellClick: (InventoryItem) -> Unit) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+private fun InventoryRow(
+    item: InventoryItem,
+    onSellClick: (InventoryItem) -> Unit,
+    onEditClick: (InventoryItem) -> Unit,
+) {
+            Card(modifier = Modifier.fillMaxWidth().clickable { onEditClick(item) }) {
                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     // Catalog-style row: cover thumbnail (monogram when none) + title + price badge.
                     Row(verticalAlignment = Alignment.CenterVertically) {

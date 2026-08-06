@@ -272,4 +272,9 @@
     <string name="image_unreadable">Couldn\'t read that image — try another one.</string>
     <string name="shared_title">Shared with Valoo</string>
     <string name="shared_identifying">Working out what you shared…</string>
+    <string name="collection_edit_title">Edit item</string>
+    <string name="collection_category_label">Category</string>
+    <string name="collection_category_pick">Pick a category</string>
+    <string name="collection_delete">Delete</string>
+    <string name="collection_save">Save</string>
 </resources>
