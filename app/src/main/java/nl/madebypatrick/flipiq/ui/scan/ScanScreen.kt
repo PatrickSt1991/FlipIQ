@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -82,14 +81,13 @@ fun ScanScreen(
     onSearchTitle: (String) -> Unit,
     onOpenCollection: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenStats: () -> Unit,
     onOpenDiscover: () -> Unit = {},
     onOpenHaul: () -> Unit = {},
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
-    // Front (photograph the cover → AI identifies the game) is the default: barcodes rarely resolve
-    // without a complete EAN database, and the real sources (eBay, Marktplaats) search by title.
-    var mode by remember { mutableStateOf(ScanMode.FRONT) }
+    // Barcode is the default now that the engine resolves EANs well (ean13/buycott + on-device
+    // eandata). Front (photograph the cover → AI) is the fallback for items without a readable code.
+    var mode by remember { mutableStateOf(ScanMode.BARCODE) }
 
     Scaffold(
         topBar = {
@@ -101,9 +99,6 @@ fun ScanScreen(
                     }
                     IconButton(onClick = onOpenDiscover) {
                         Icon(Icons.Default.TravelExplore, contentDescription = stringResource(R.string.scan_cd_discover))
-                    }
-                    IconButton(onClick = onOpenStats) {
-                        Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.scan_cd_stats))
                     }
                     IconButton(onClick = onOpenCollection) {
                         Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.scan_cd_collection))
@@ -138,10 +133,10 @@ fun ScanScreen(
                             onBarcode = onBarcodeScanned,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(3f / 4f)
+                                .height(300.dp)
                                 .clip(RoundedCornerShape(16.dp)),
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(12.dp))
                         Text(
                             stringResource(R.string.scan_barcode_hint),
                             style = MaterialTheme.typography.bodyMedium,
