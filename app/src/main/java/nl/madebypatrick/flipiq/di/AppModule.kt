@@ -166,12 +166,16 @@ object AppModule {
         sources: List<@JvmSuppressWildcards MarketplaceSource>,
         engine: FlipIQEngine,
         settingsRepository: SettingsRepository,
+        barcodeResolver: BarcodeResolver,
         eandataApi: EandataApi,
         appScope: CoroutineScope,
     ): PriceRepository = PriceRepository(
         sources,
         engine,
         settingsRepository,
+        // On-device barcode→title (UPCitemdb/EAN-Search/OpenLibrary) for when the engine's shared
+        // Cloudflare IP is rate-limited; the phone's residential IP has its own fresh quota.
+        barcodeResolver = barcodeResolver,
         // On-device last-resort resolver + give-back (eandata blocks the engine's Cloudflare IP).
         eandata = EandataResolver(eandataApi, BuildConfig.EANDATA_KEY),
         appScope = appScope,
