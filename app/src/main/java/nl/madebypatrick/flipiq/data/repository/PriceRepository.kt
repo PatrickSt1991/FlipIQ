@@ -7,6 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.madebypatrick.flipiq.data.diagnostics.DiagnosticsLog
+import nl.madebypatrick.flipiq.data.resolver.BarcodeResolver
 import nl.madebypatrick.flipiq.data.resolver.EandataResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
@@ -46,6 +47,7 @@ class PriceRepository(
     private val sources: List<MarketplaceSource>,
     private val engine: FlipIQEngine,
     private val settingsRepository: SettingsRepository,
+    private val barcodeResolver: BarcodeResolver,
     private val eandata: EandataResolver,
     private val appScope: CoroutineScope,
 ) {
@@ -69,9 +71,20 @@ class PriceRepository(
             return fromEngine
         }
 
-        // Engine couldn't resolve the barcode → last-resort on-device eandata (its IP blocks the
-        // engine's Cloudflare egress, but the phone's IP is fine). A hit turns "unknown" into prices.
-        DiagnosticsLog.log("engine miss for $barcode → trying eandata (on-device)")
+        // Engine couldn't resolve the barcode. The engine runs from Cloudflare's shared egress IP,
+        // whose UPCitemdb trial quota is often exhausted (and eandata blocks it outright) — so retry
+        // the same keyless sources ON-DEVICE, where the phone's residential IP has its own fresh
+        // quota. This is what turns "unknown" back into a title (and prices) for e.g. PS4/PS5 games.
+        DiagnosticsLog.log("engine miss for $barcode → resolving on-device (UPCitemdb/EAN-Search)")
+        val onDeviceTitle = runCatching { barcodeResolver.resolveTitle(barcode) }.getOrNull()
+        if (!onDeviceTitle.isNullOrBlank()) {
+            DiagnosticsLog.log("on-device resolved $barcode → '$onDeviceTitle'")
+            appScope.launch { eandata.contributeIfMissing(barcode, onDeviceTitle) }
+            return fetchInternal(barcode, ProductQuery(barcode, title = onDeviceTitle))
+        }
+
+        // Still nothing → last-resort eandata (residential IP; can fill gaps UPCitemdb misses).
+        DiagnosticsLog.log("on-device miss for $barcode → trying eandata")
         val title = runCatching { eandata.resolveTitle(barcode) }.getOrNull()
         return if (!title.isNullOrBlank()) {
             DiagnosticsLog.log("eandata resolved $barcode → '$title'")
