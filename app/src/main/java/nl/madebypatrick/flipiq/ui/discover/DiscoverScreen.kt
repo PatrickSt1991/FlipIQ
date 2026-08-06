@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.data.source.engine.ConsoleGame
 
 /**
@@ -56,8 +57,8 @@ fun DiscoverScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(selected?.let { "${it.emoji} ${it.name}" } ?: stringResource(R.string.discover_title)) },
+            ValooTopBar(
+                title = selected?.let { "${it.emoji} ${it.name}" } ?: stringResource(R.string.discover_title),
                 navigationIcon = {
                     IconButton(onClick = { if (selected != null) viewModel.clearSelection() else onBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

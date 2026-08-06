@@ -59,6 +59,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.ui.scan.CameraPreview
 import nl.madebypatrick.flipiq.ui.scan.ScreenshotButton
 import nl.madebypatrick.flipiq.ui.util.rememberImagePicker
@@ -86,8 +87,8 @@ fun HaulScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.haul_title)) },
+            ValooTopBar(
+                title = stringResource(R.string.haul_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

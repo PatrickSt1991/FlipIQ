@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.data.diagnostics.DiagnosticsLog
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -44,8 +45,8 @@ fun DiagnosticsScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.diagnostics_title)) },
+            ValooTopBar(
+                title = stringResource(R.string.diagnostics_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.domain.model.DealTier
 import nl.madebypatrick.flipiq.domain.model.InventoryItem
 import nl.madebypatrick.flipiq.domain.stats.FlipStats
@@ -49,8 +50,8 @@ fun StatsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.stats_title)) },
+            ValooTopBar(
+                title = stringResource(R.string.stats_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import nl.madebypatrick.flipiq.ui.scan.ScanViewModel
 
 /**
@@ -75,8 +76,8 @@ fun SharedImageScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.shared_title)) },
+            ValooTopBar(
+                title = stringResource(R.string.shared_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

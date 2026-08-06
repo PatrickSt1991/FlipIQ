@@ -7,6 +7,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -52,12 +54,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.madebypatrick.flipiq.R
+import nl.madebypatrick.flipiq.ui.components.ValooTopBar
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -88,18 +93,8 @@ fun ScanScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(R.drawable.flipiq_mark),
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Valoo")
-                    }
-                },
+            ValooTopBar(
+                title = "VALOO",
                 actions = {
                     IconButton(onClick = onOpenHaul) {
                         Icon(Icons.Default.Collections, contentDescription = stringResource(R.string.cd_haul))
@@ -164,20 +159,45 @@ fun ScanScreen(
 
 private enum class ScanMode { FRONT, BARCODE }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** CLZ-style "Add by:" pill bar — a brand-coloured strip with white selected pills. */
 @Composable
 private fun ModeToggle(mode: ScanMode, onModeChange: (ScanMode) -> Unit) {
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        SegmentedButton(
-            selected = mode == ScanMode.FRONT,
-            onClick = { onModeChange(ScanMode.FRONT) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-        ) { Text(stringResource(R.string.scan_mode_front)) }
-        SegmentedButton(
-            selected = mode == ScanMode.BARCODE,
-            onClick = { onModeChange(ScanMode.BARCODE) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-        ) { Text(stringResource(R.string.scan_mode_barcode)) }
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.scan_add_by),
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.width(12.dp))
+            ModePill(stringResource(R.string.scan_mode_front), mode == ScanMode.FRONT) { onModeChange(ScanMode.FRONT) }
+            Spacer(Modifier.width(8.dp))
+            ModePill(stringResource(R.string.scan_mode_barcode), mode == ScanMode.BARCODE) { onModeChange(ScanMode.BARCODE) }
+        }
+    }
+}
+
+@Composable
+private fun ModePill(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        color = if (selected) MaterialTheme.colorScheme.onPrimary else Color.Transparent,
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick),
+    ) {
+        Text(
+            label,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary,
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
