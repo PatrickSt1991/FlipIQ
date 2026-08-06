@@ -96,6 +96,7 @@
     <string name="result_roi">ROI</string>
     <string name="result_roi_value">%1$d%%</string>
     <string name="result_buy_ladder">Buy ladder</string>
+    <string name="result_verdict_section">Verdict</string>
     <string name="result_notes_section">Why</string>
     <string name="result_marketplace_section">Open on marketplace</string>
 

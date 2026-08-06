@@ -95,6 +95,7 @@
     <string name="result_roi">ROI</string>
     <string name="result_roi_value">%1$d%%</string>
     <string name="result_buy_ladder">Inkoopladder</string>
+    <string name="result_verdict_section">Oordeel</string>
     <string name="result_notes_section">Waarom</string>
     <string name="result_marketplace_section">Openen op marktplaats</string>
 
