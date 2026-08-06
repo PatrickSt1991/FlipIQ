@@ -82,7 +82,10 @@ class EandataResolver(
         if (keycode.isBlank() || barcode.isBlank() || title.isBlank()) return
         runCatching {
             val alreadyHas = api.lookup(keycode = keycode, find = barcode).productName() != null
-            if (!alreadyHas) api.update(keycode = keycode, ean = barcode, value = title)
+            if (!alreadyHas) {
+                api.update(keycode = keycode, ean = barcode, value = title)
+                nl.madebypatrick.flipiq.data.diagnostics.DiagnosticsLog.log("gave '$title' back to eandata ($barcode)")
+            }
         }
     }
 }
