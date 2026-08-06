@@ -2,6 +2,7 @@ package nl.madebypatrick.flipiq.ui.collection
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
+import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -45,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -273,7 +275,7 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
         items(items, key = { it.id }) { item ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Catalog-style row: monogram tile (no cover art stored yet) + title + price badge.
+                    // Catalog-style row: cover thumbnail (monogram when none) + title + price badge.
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -282,12 +284,22 @@ private fun InventoryList(items: List<InventoryItem>, onSellClick: (InventoryIte
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                item.title.take(1).uppercase(),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium,
-                            )
+                            val img = item.imageUrl
+                            if (img != null) {
+                                AsyncImage(
+                                    model = img,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            } else {
+                                Text(
+                                    item.title.take(1).uppercase(),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                         }
                         Spacer(Modifier.width(12.dp))
                         Text(item.title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))

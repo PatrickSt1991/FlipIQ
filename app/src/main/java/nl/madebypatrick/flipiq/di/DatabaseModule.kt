@@ -24,6 +24,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): FlipIQDatabase =
         Room.databaseBuilder(context, FlipIQDatabase::class.java, FlipIQDatabase.NAME)
+            .addMigrations(FlipIQDatabase.MIGRATION_3_4)
             .fallbackToDestructiveMigration()
             .build()
 
