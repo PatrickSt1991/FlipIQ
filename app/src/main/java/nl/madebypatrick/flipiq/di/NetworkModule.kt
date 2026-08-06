@@ -39,6 +39,17 @@ object NetworkModule {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .callTimeout(90, TimeUnit.SECONDS)
+        // Identify ourselves: eandata (and others) block requests with a blank/default agent, so
+        // send a meaningful User-Agent that names the app and version on every call.
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header(
+                    "User-Agent",
+                    "Valoo/${BuildConfig.VERSION_NAME} (Android; +https://github.com/PatrickSt1991/Valoo)",
+                )
+                .build()
+            chain.proceed(request)
+        }
         .addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
