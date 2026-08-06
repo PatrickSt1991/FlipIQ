@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -294,10 +295,11 @@ private fun AnalysisContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        analysis.product.imageUrl?.let { ProductImage(it) }
         when {
             analysis.allSourcesDisabled -> SourcesOffCard()
             hasData -> {
+                // Catalog-style header: cover + title + deal-score badge (CLZ detail layout).
+                ResultHeaderCard(analysis, rec)
                 // The market view — eBay sold history + Marktplaats, aggregated by the engine.
                 PriceSummaryCard(rec)
                 if (analysis.pricesBySource.isNotEmpty()) PricesBySourceCard(analysis.pricesBySource)
@@ -401,50 +403,86 @@ private fun NoDataCard(title: String, onScanFront: () -> Unit) {
     }
 }
 
+/** CLZ-style detail header: cover art on the left, title + category + a deal-score badge on the right. */
+@Composable
+private fun ResultHeaderCard(analysis: ScanAnalysis, rec: FlipRecommendation) {
+    val tier = rec.dealScore.tier
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .width(96.dp)
+                    .height(128.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                val img = analysis.product.imageUrl
+                if (img != null) {
+                    AsyncImage(
+                        model = img,
+                        contentDescription = stringResource(R.string.result_cd_product_image),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Text(
+                        analysis.product.title.take(1).uppercase(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    analysis.product.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 3,
+                )
+                analysis.product.category?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.height(10.dp))
+                Surface(color = tier.color.copy(alpha = 0.15f), shape = RoundedCornerShape(8.dp)) {
+                    Text(
+                        "${tier.emoji} ${tier.headline}",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        color = tier.color,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.result_deal_score, rec.dealScore.value),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun VerdictCard(rec: FlipRecommendation) {
-    val tierColor = rec.dealScore.tier.color
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = tierColor.copy(alpha = 0.12f)),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    SectionCard(stringResource(R.string.result_verdict_section)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(rec.dealScore.tier.emoji, fontSize = 44.sp)
+            AssistChip(onClick = {}, label = { Text("${rec.sellSpeed.emoji} ${rec.sellSpeed.label}") })
+            AssistChip(onClick = {}, label = { Text(stringResource(R.string.result_confidence, rec.confidence)) })
+            AssistChip(onClick = {}, label = { Text(rec.trend.label) })
+        }
+        if (!rec.viable) {
             Text(
-                rec.dealScore.tier.headline,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = tierColor,
+                stringResource(R.string.result_not_viable),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
             )
-            Text(
-                stringResource(R.string.result_deal_score, rec.dealScore.value),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.height(12.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                AssistChip(onClick = {}, label = { Text("${rec.sellSpeed.emoji} ${rec.sellSpeed.label}") })
-                AssistChip(onClick = {}, label = { Text(stringResource(R.string.result_confidence, rec.confidence)) })
-                AssistChip(onClick = {}, label = { Text(rec.trend.label) })
-            }
-            if (!rec.viable) {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    stringResource(R.string.result_not_viable),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
         }
     }
 }
