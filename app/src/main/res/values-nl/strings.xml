@@ -160,6 +160,7 @@
     <string name="collection_empty_favorites">Nog geen favorieten.\nTik op het hartje bij een resultaat om er een te bewaren.</string>
     <string name="collection_empty_wishlist">Je verlanglijst is leeg.\nTik op de bladwijzer bij een resultaat om er een toe te voegen.</string>
     <string name="collection_empty_alerts">Nog geen prijsmeldingen.\nTik op het belletje bij een resultaat om een item te volgen.</string>
+    <string name="collection_folder_other">Overig</string>
     <string name="collection_empty_inventory">Nog niets in je voorraad.\nScan een item en tik op \"Deze heb ik gekocht\".</string>
     <string name="collection_empty_history">Nog geen scans.</string>
     <string name="collection_profit_tracker">Winsttracker</string>

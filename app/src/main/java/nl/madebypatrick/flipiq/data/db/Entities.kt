@@ -54,4 +54,5 @@ data class InventoryEntity(
     val soldPriceCents: Long?,
     val soldAt: Long?,
     val imageUrl: String? = null,
+    val category: String? = null,
 )

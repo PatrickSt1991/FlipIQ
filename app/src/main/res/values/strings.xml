@@ -161,6 +161,7 @@
     <string name="collection_empty_favorites">No favorites yet.\nTap the heart on a result to save one.</string>
     <string name="collection_empty_wishlist">Your wishlist is empty.\nTap the bookmark on a result to add one.</string>
     <string name="collection_empty_alerts">No price alerts yet.\nTap the bell on a result to watch an item.</string>
+    <string name="collection_folder_other">Other</string>
     <string name="collection_empty_inventory">Nothing in your inventory yet.\nScan an item and tap \"I bought this\".</string>
     <string name="collection_empty_history">No scans yet.</string>
     <string name="collection_profit_tracker">Profit tracker</string>

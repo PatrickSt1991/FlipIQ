@@ -137,6 +137,7 @@ class ResultViewModel @Inject constructor(
                     buyPrice = buyPrice ?: rec.recommendedBuyPrice,
                     estimatedResale = rec.estimatedResale,
                     imageUrl = analysis.product.imageUrl,
+                    category = analysis.product.category,
                 )
             }.onSuccess { _message.value = context.getString(R.string.result_msg_added_inventory) }
                 .onFailure { _message.value = context.getString(R.string.result_msg_add_inventory_failed) }
