@@ -40,6 +40,7 @@ data class InventoryItem(
     val status: InventoryStatus = InventoryStatus.IN_STOCK,
     val soldPrice: Money? = null,
     val soldAt: Long? = null,
+    val imageUrl: String? = null,
 ) {
     /** Profit already banked — only meaningful once the item is SOLD. */
     val realizedProfit: Money?
