@@ -42,6 +42,17 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch { runCatching { collection.markSold(id, soldPrice) } }
     }
 
+    /** Edit an existing item — title, category and both prices. */
+    fun updateItem(id: Long, title: String, category: String?, buyPrice: Money, estimatedResale: Money) {
+        viewModelScope.launch {
+            runCatching { collection.updateInventory(id, title, category, buyPrice, estimatedResale) }
+        }
+    }
+
+    fun deleteItem(id: Long) {
+        viewModelScope.launch { runCatching { collection.deleteInventory(id) } }
+    }
+
     /** Add an item to inventory by hand (no scan) — a title, what you paid, and expected resale. */
     fun addManual(title: String, buyPrice: Money, estimatedResale: Money) {
         viewModelScope.launch {

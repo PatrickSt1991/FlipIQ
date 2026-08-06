@@ -97,6 +97,27 @@ class CollectionRepository(
         ),
     )
 
+    /** Edit an existing inventory item: title, category, and the two prices. */
+    suspend fun updateInventory(
+        id: Long,
+        title: String,
+        category: String?,
+        buyPrice: Money,
+        estimatedResale: Money,
+    ) {
+        val existing = inventoryDao.byId(id) ?: return
+        inventoryDao.update(
+            existing.copy(
+                title = title,
+                category = category,
+                buyPriceCents = buyPrice.cents,
+                estimatedResaleCents = estimatedResale.cents,
+            ),
+        )
+    }
+
+    suspend fun deleteInventory(id: Long) = inventoryDao.deleteById(id)
+
     suspend fun markSold(id: Long, soldPrice: Money) {
         val existing = inventoryDao.byId(id) ?: return
         inventoryDao.update(
