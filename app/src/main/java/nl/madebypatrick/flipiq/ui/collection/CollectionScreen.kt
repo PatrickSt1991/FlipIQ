@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -60,10 +62,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -229,12 +234,23 @@ fun CollectionScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             when {
-                inDetail -> ItemDetailPane(
-                    item = detailItem!!,
-                    onEdit = { editTarget = detailItem },
-                    onSell = { sellTarget = detailItem },
-                    onDelete = { viewModel.deleteItem(detailItem.id); detailItemId = null },
-                )
+                inDetail -> {
+                    // Swipe left/right through the items of the list this one was opened from
+                    // (the current folder, or the flat list), respecting the active sort.
+                    val contextItems = if (openFolder != null) {
+                        sortItems(inventory.filter { folderKey(it) == openFolder }, sort)
+                    } else {
+                        sortItems(inventory, sort)
+                    }
+                    ItemDetailPager(
+                        items = contextItems,
+                        currentId = detailItem!!.id,
+                        onPageChange = { detailItemId = it.id },
+                        onEdit = { editTarget = it },
+                        onSell = { sellTarget = it },
+                        onDelete = { viewModel.deleteItem(it.id); detailItemId = null },
+                    )
+                }
 
                 inFolder -> {
                     val folderItems = sortItems(inventory.filter { folderKey(it) == openFolder }, sort)
@@ -589,6 +605,39 @@ private fun Cover(item: InventoryItem, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.titleLarge,
             )
         }
+    }
+}
+
+/** A horizontal pager over the current list so the detail page can be swiped left/right. */
+@Composable
+private fun ItemDetailPager(
+    items: List<InventoryItem>,
+    currentId: Long,
+    onPageChange: (InventoryItem) -> Unit,
+    onEdit: (InventoryItem) -> Unit,
+    onSell: (InventoryItem) -> Unit,
+    onDelete: (InventoryItem) -> Unit,
+) {
+    if (items.isEmpty()) return
+    val itemsState = rememberUpdatedState(items)
+    val startIndex = items.indexOfFirst { it.id == currentId }.coerceAtLeast(0)
+    val pagerState = rememberPagerState(initialPage = startIndex) { itemsState.value.size }
+
+    // Report the settled page up so the app-bar title and back target track the visible item.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            itemsState.value.getOrNull(page)?.let(onPageChange)
+        }
+    }
+
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+        val item = itemsState.value.getOrElse(page) { itemsState.value.last() }
+        ItemDetailPane(
+            item = item,
+            onEdit = { onEdit(item) },
+            onSell = { onSell(item) },
+            onDelete = { onDelete(item) },
+        )
     }
 }
 
