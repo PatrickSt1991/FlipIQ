@@ -292,4 +292,5 @@
     <string name="collection_detail_buy">Ingekocht voor</string>
     <string name="collection_edit">Bewerken</string>
     <string name="dialog_close">Sluiten</string>
+    <string name="nav_catalog">Catalogus</string>
 </resources>

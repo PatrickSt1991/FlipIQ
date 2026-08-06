@@ -102,9 +102,8 @@ private enum class CatalogGroup { CATEGORY, STATUS, NONE }
 @Composable
 fun CollectionScreen(
     onOpenScan: () -> Unit,
-    onOpenDiscover: () -> Unit,
-    onOpenHaul: () -> Unit,
     onOpenSettings: () -> Unit,
+    onDrilledChange: (Boolean) -> Unit = {},
     viewModel: CollectionViewModel = hiltViewModel(),
 ) {
     val inventory by viewModel.inventory.collectAsStateWithLifecycle()
@@ -153,6 +152,9 @@ fun CollectionScreen(
 
     val goBack = { if (inDetail) detailItemId = null else openFolder = null }
     BackHandler(enabled = inDetail || inFolder) { goBack() }
+    // Tell the host pager whether we're drilled in, so it can suspend its own left/right swipe while
+    // the folder/detail view (and the detail's own pager) owns horizontal gestures.
+    LaunchedEffect(inDetail, inFolder) { onDrilledChange(inDetail || inFolder) }
 
     Scaffold(
         topBar = {
@@ -170,14 +172,9 @@ fun CollectionScreen(
                     }
                 },
                 actions = {
-                    // The home destinations/overflow only belong on the catalog home, not the drill-ins.
+                    // The settings/overflow only belong on the catalog home, not the drill-ins.
+                    // (Ontdekken/Partij now live in the bottom navigation.)
                     if (!inDetail && !inFolder) {
-                        IconButton(onClick = onOpenHaul) {
-                            Icon(Icons.Default.Collections, contentDescription = stringResource(R.string.cd_haul))
-                        }
-                        IconButton(onClick = onOpenDiscover) {
-                            Icon(Icons.Default.TravelExplore, contentDescription = stringResource(R.string.scan_cd_discover))
-                        }
                         IconButton(onClick = onOpenSettings) {
                             Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.scan_cd_settings))
                         }
