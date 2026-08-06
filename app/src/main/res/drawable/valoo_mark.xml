@@ -1,0 +1,36 @@
+<!-- Valoo app mark: dark-green rounded tile with the "V" — white left arm, amber right
+     arm rising into an up-arrow ("value up"). Self-contained, so it reads on any background. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <path
+        android:fillColor="#0F5132"
+        android:pathData="M58,20 L142,20 A38,38 0 0 1 180,58 L180,142 A38,38 0 0 1 142,180 L58,180 A38,38 0 0 1 20,142 L20,58 A38,38 0 0 1 58,20 Z" />
+
+    <!-- Left arm of the V (white). -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="22"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M62,60 L100,140" />
+
+    <!-- Right arm (amber), rising past the left arm. -->
+    <path
+        android:strokeColor="#F9A825"
+        android:strokeWidth="22"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M100,140 L150,48" />
+
+    <!-- Arrowhead at the top of the right arm, pointing up-right. -->
+    <path
+        android:strokeColor="#F9A825"
+        android:strokeWidth="15"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M123,52 L150,48 L146,78" />
+</vector>

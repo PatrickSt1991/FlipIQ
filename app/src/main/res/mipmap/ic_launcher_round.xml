@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Legacy fallback (API 24–25, pre-adaptive-icon): the full self-contained mark. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/flipiq_mark" />
+    <item android:drawable="@drawable/valoo_mark" />
 </layer-list>
