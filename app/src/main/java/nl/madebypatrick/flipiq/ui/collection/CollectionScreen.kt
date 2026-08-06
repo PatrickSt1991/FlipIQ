@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.TravelExplore
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -70,7 +72,10 @@ import nl.madebypatrick.flipiq.ui.result.label
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(
-    onBack: () -> Unit,
+    onOpenScan: () -> Unit,
+    onOpenDiscover: () -> Unit,
+    onOpenHaul: () -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: CollectionViewModel = hiltViewModel(),
 ) {
     val history by viewModel.history.collectAsStateWithLifecycle()
@@ -95,18 +100,27 @@ fun CollectionScreen(
 
     Scaffold(
         topBar = {
+            // Home/catalog bar: no back (it's the start), a few destinations, and an overflow menu.
             ValooTopBar(
-                title = stringResource(R.string.collection_title),
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
-                    }
-                },
+                title = "VALOO",
                 actions = {
+                    IconButton(onClick = onOpenHaul) {
+                        Icon(Icons.Default.Collections, contentDescription = stringResource(R.string.cd_haul))
+                    }
+                    IconButton(onClick = onOpenDiscover) {
+                        Icon(Icons.Default.TravelExplore, contentDescription = stringResource(R.string.scan_cd_discover))
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.scan_cd_settings))
+                    }
                     IconButton(onClick = { exportMenu = true }) {
-                        Icon(Icons.Default.IosShare, contentDescription = stringResource(R.string.collection_cd_export))
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.collection_cd_export))
                     }
                     DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.collection_add_manual)) },
+                            onClick = { exportMenu = false; showAddManual = true },
+                        )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.collection_export_inventory)) },
                             onClick = {
@@ -126,11 +140,9 @@ fun CollectionScreen(
             )
         },
         floatingActionButton = {
-            // Manual add — put something in inventory without scanning it.
-            if (tab == 0) {
-                FloatingActionButton(onClick = { showAddManual = true }) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.collection_add_manual))
-                }
+            // The + opens the scanner (the primary "add" path), CLZ-style.
+            FloatingActionButton(onClick = onOpenScan) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.scan_title))
             }
         },
     ) { padding ->

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -77,12 +78,9 @@ import com.google.accompanist.permissions.rememberPermissionState
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
+    onBack: () -> Unit,
     onBarcodeScanned: (String) -> Unit,
     onSearchTitle: (String) -> Unit,
-    onOpenCollection: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onOpenDiscover: () -> Unit = {},
-    onOpenHaul: () -> Unit = {},
 ) {
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     // Barcode is the default now that the engine resolves EANs well (ean13/buycott + on-device
@@ -92,19 +90,10 @@ fun ScanScreen(
     Scaffold(
         topBar = {
             ValooTopBar(
-                title = "VALOO",
-                actions = {
-                    IconButton(onClick = onOpenHaul) {
-                        Icon(Icons.Default.Collections, contentDescription = stringResource(R.string.cd_haul))
-                    }
-                    IconButton(onClick = onOpenDiscover) {
-                        Icon(Icons.Default.TravelExplore, contentDescription = stringResource(R.string.scan_cd_discover))
-                    }
-                    IconButton(onClick = onOpenCollection) {
-                        Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.scan_cd_collection))
-                    }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.scan_cd_settings))
+                title = stringResource(R.string.scan_title),
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )

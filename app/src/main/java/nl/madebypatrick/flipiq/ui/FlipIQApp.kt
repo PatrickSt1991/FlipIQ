@@ -67,19 +67,22 @@ fun FlipIQApp(shared: SharedItem? = null) {
         }
     }
 
-    NavHost(navController = navController, startDestination = Routes.SCAN) {
-        composable(Routes.SCAN) {
-            ScanScreen(
-                onBarcodeScanned = { barcode -> navController.navigate(Routes.result(barcode)) },
-                onSearchTitle = { title -> navController.navigate(Routes.search(title)) },
-                onOpenCollection = { navController.navigate(Routes.COLLECTION) },
-                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+    // The catalog (collection) is home; the scanner opens from its + button (CLZ-style).
+    NavHost(navController = navController, startDestination = Routes.COLLECTION) {
+        composable(Routes.COLLECTION) {
+            CollectionScreen(
+                onOpenScan = { navController.navigate(Routes.SCAN) },
                 onOpenDiscover = { navController.navigate(Routes.DISCOVER) },
                 onOpenHaul = { navController.navigate(Routes.HAUL) },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
-        composable(Routes.COLLECTION) {
-            CollectionScreen(onBack = { navController.popBackStack() })
+        composable(Routes.SCAN) {
+            ScanScreen(
+                onBack = { navController.popBackStack() },
+                onBarcodeScanned = { barcode -> navController.navigate(Routes.result(barcode)) },
+                onSearchTitle = { title -> navController.navigate(Routes.search(title)) },
+            )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
