@@ -11,6 +11,7 @@
     <string name="scan_cd_stats">Statistieken</string>
     <string name="scan_cd_collection">Collectie</string>
     <string name="scan_cd_settings">Winstmodus-instellingen</string>
+    <string name="scan_title">Scannen</string>
     <string name="scan_barcode_hint">Richt op een barcode en wij rekenen het uit ✨</string>
     <string name="scan_add_by">Scan via:</string>
     <string name="scan_mode_front">📸 Voorkant</string>

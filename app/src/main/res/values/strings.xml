@@ -12,6 +12,7 @@
     <string name="scan_cd_stats">Statistics</string>
     <string name="scan_cd_collection">Collection</string>
     <string name="scan_cd_settings">Profit Mode settings</string>
+    <string name="scan_title">Scan</string>
     <string name="scan_barcode_hint">Point at a barcode and we\'ll do the math ✨</string>
     <string name="scan_add_by">Scan via:</string>
     <string name="scan_mode_front">📸 Front</string>
