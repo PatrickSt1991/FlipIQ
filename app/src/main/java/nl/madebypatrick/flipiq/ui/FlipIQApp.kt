@@ -23,7 +23,6 @@ import nl.madebypatrick.flipiq.ui.scan.TextScanScreen
 import nl.madebypatrick.flipiq.ui.settings.SettingsScreen
 import nl.madebypatrick.flipiq.ui.share.SharedImageScreen
 import nl.madebypatrick.flipiq.ui.share.SharedItem
-import nl.madebypatrick.flipiq.ui.stats.StatsScreen
 
 object Routes {
     const val SCAN = "scan"
@@ -33,7 +32,6 @@ object Routes {
     const val COLLECTION = "collection"
     const val SETTINGS = "settings"
     const val DIAGNOSTICS = "diagnostics"
-    const val STATS = "stats"
     const val DISCOVER = "discover"
     const val HAUL = "haul"
     const val SHARED_IMAGE = "shared-image"
@@ -76,7 +74,6 @@ fun FlipIQApp(shared: SharedItem? = null) {
                 onSearchTitle = { title -> navController.navigate(Routes.search(title)) },
                 onOpenCollection = { navController.navigate(Routes.COLLECTION) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
-                onOpenStats = { navController.navigate(Routes.STATS) },
                 onOpenDiscover = { navController.navigate(Routes.DISCOVER) },
                 onOpenHaul = { navController.navigate(Routes.HAUL) },
             )
@@ -92,9 +89,6 @@ fun FlipIQApp(shared: SharedItem? = null) {
         }
         composable(Routes.DIAGNOSTICS) {
             DiagnosticsScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.STATS) {
-            StatsScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.DISCOVER) {
             DiscoverScreen(
