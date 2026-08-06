@@ -23,6 +23,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -59,6 +60,7 @@ import nl.madebypatrick.flipiq.domain.model.ThemeMode
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onOpenDiagnostics: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val saved by viewModel.settings.collectAsStateWithLifecycle()
@@ -149,6 +151,11 @@ fun SettingsScreen(
                 ThemeModeSelector(theme.mode, viewModel::setThemeMode)
                 ToggleRow(stringResource(R.string.settings_material_you), theme.dynamicColor, viewModel::setDynamicColor)
             }
+
+            OutlinedButton(
+                onClick = onOpenDiagnostics,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.settings_diagnostics)) }
 
             Button(
                 onClick = {

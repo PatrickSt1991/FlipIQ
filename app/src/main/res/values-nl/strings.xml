@@ -226,6 +226,11 @@
     <string name="settings_theme_light">Licht</string>
     <string name="settings_theme_dark">Donker</string>
     <string name="settings_save">Opslaan</string>
+    <string name="settings_diagnostics">Diagnostiek / scan-log</string>
+    <string name="diagnostics_title">Diagnostiek</string>
+    <string name="diagnostics_empty">Nog geen log — scan iets en het verschijnt hier.</string>
+    <string name="diagnostics_share">Log delen</string>
+    <string name="diagnostics_clear">Log wissen</string>
     <string name="settings_saved">Opgeslagen</string>
     <string name="settings_money_label">%1$s (€)</string>
     <string name="settings_percent_label">%1$s (%%)</string>

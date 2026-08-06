@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import nl.madebypatrick.flipiq.ui.collection.CollectionScreen
+import nl.madebypatrick.flipiq.ui.diagnostics.DiagnosticsScreen
 import nl.madebypatrick.flipiq.ui.discover.DiscoverScreen
 import nl.madebypatrick.flipiq.ui.haul.HaulScreen
 import nl.madebypatrick.flipiq.ui.result.ResultScreen
@@ -31,6 +32,7 @@ object Routes {
     const val TEXT_SCAN = "textscan"
     const val COLLECTION = "collection"
     const val SETTINGS = "settings"
+    const val DIAGNOSTICS = "diagnostics"
     const val STATS = "stats"
     const val DISCOVER = "discover"
     const val HAUL = "haul"
@@ -83,7 +85,13 @@ fun FlipIQApp(shared: SharedItem? = null) {
             CollectionScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) },
+            )
+        }
+        composable(Routes.DIAGNOSTICS) {
+            DiagnosticsScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.STATS) {
             StatsScreen(onBack = { navController.popBackStack() })

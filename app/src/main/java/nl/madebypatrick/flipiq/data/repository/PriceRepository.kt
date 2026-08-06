@@ -6,6 +6,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import nl.madebypatrick.flipiq.data.diagnostics.DiagnosticsLog
 import nl.madebypatrick.flipiq.data.resolver.EandataResolver
 import nl.madebypatrick.flipiq.data.settings.SettingsRepository
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
@@ -70,8 +71,15 @@ class PriceRepository(
 
         // Engine couldn't resolve the barcode → last-resort on-device eandata (its IP blocks the
         // engine's Cloudflare egress, but the phone's IP is fine). A hit turns "unknown" into prices.
+        DiagnosticsLog.log("engine miss for $barcode → trying eandata (on-device)")
         val title = runCatching { eandata.resolveTitle(barcode) }.getOrNull()
-        return if (!title.isNullOrBlank()) fetchInternal(barcode, ProductQuery(barcode, title = title)) else fromEngine
+        return if (!title.isNullOrBlank()) {
+            DiagnosticsLog.log("eandata resolved $barcode → '$title'")
+            fetchInternal(barcode, ProductQuery(barcode, title = title))
+        } else {
+            DiagnosticsLog.log("eandata also missed $barcode → unknown item")
+            fromEngine
+        }
     }
 
     private suspend fun fetchInternal(barcode: String, query: ProductQuery): FetchedMarket = coroutineScope {

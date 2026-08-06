@@ -227,6 +227,11 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_save">Save</string>
+    <string name="settings_diagnostics">Diagnostics / scan log</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="diagnostics_empty">No log yet — scan something and it shows up here.</string>
+    <string name="diagnostics_share">Share log</string>
+    <string name="diagnostics_clear">Clear log</string>
     <string name="settings_saved">Saved</string>
     <string name="settings_money_label">%1$s (€)</string>
     <string name="settings_percent_label">%1$s (%%)</string>

@@ -1,5 +1,6 @@
 package nl.madebypatrick.flipiq.data.source.engine
 
+import nl.madebypatrick.flipiq.data.diagnostics.DiagnosticsLog
 import nl.madebypatrick.flipiq.data.source.MarketplaceSource
 import nl.madebypatrick.flipiq.data.source.ProductQuery
 import nl.madebypatrick.flipiq.data.source.SourceResult
@@ -31,8 +32,17 @@ class EngineSource(
         if (title == null && ean == null) return unavailable()
         val endpoint = engineUrl.trimEnd('/') + "/prices"
         return runCatching { api.prices(endpoint, appKey, title.orEmpty(), ean, location()) }
-            .map { it.toSourceResult() }
-            .getOrElse { unavailable() }
+            .map { resp ->
+                if (ean != null) {
+                    val outcome = resp.resolvedTitle?.let { "'$it' via ${resp.resolvedBy ?: "?"}" } ?: "NO title"
+                    DiagnosticsLog.log("engine ean=$ean → $outcome · ${resp.listings.size} listings")
+                }
+                resp.toSourceResult()
+            }
+            .getOrElse {
+                DiagnosticsLog.log("engine ERROR for ${ean ?: title}: ${it.message}")
+                unavailable()
+            }
     }
 
     private fun unavailable() =
