@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -320,11 +321,13 @@ private fun AnalysisContent(
 /** CLZ-style docked action bar: the primary "I bought this" button pinned to the bottom. */
 @Composable
 private fun BottomBuyBar(onClick: () -> Unit) {
+    // navigationBarsPadding keeps the button clear of the system gesture bar (it was sitting too low).
     Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
         Button(
             onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(16.dp)
                 .height(52.dp),
         ) { Text(stringResource(R.string.result_i_bought), style = MaterialTheme.typography.titleMedium) }
