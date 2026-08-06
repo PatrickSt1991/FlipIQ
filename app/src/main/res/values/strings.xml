@@ -293,4 +293,5 @@
     <string name="collection_detail_buy">Bought for</string>
     <string name="collection_edit">Edit</string>
     <string name="dialog_close">Close</string>
+    <string name="nav_catalog">Catalog</string>
 </resources>
